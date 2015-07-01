@@ -65,8 +65,9 @@ public class DpiRescaleStyleVisitorTest {
         Stroke clone = ((LineSymbolizer) visitor.getCopy()).getStroke();
 
         assertEquals(4.0d, clone.getWidth().evaluate(null, Double.class), 0d);
-        assertEquals(10.0f, clone.getDashArray()[0], 0f);
-        assertEquals(20.0f, clone.getDashArray()[1], 0f);
+
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0f);
+        assertEquals(20.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0f);
     }
     
     @Test
@@ -78,8 +79,9 @@ public class DpiRescaleStyleVisitorTest {
         Stroke clone = ((LineSymbolizer) visitor.getCopy()).getStroke();
 
         assertEquals(2d, clone.getWidth().evaluate(null, Double.class), 0d);
-        assertEquals(5f, clone.getDashArray()[0], 0f);
-        assertEquals(10f, clone.getDashArray()[1], 0f);
+
+        assertEquals(5.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0f);
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0f);
     }
     
     @Test
@@ -91,8 +93,9 @@ public class DpiRescaleStyleVisitorTest {
         Stroke clone = ((LineSymbolizer) visitor.getCopy()).getStroke();
 
         assertEquals(2d, clone.getWidth().evaluate(null, Double.class), 0d);
-        assertEquals(5f, clone.getDashArray()[0], 0f);
-        assertEquals(10f, clone.getDashArray()[1], 0f);
+
+        assertEquals(5.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0f);
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0f);
     }
     
     @Test
@@ -107,8 +110,8 @@ public class DpiRescaleStyleVisitorTest {
         // this one has been rescaled
         assertEquals(4d, clone.getWidth().evaluate(null, Double.class), 0d);
         // the dash array did not, it's supposed to be meters
-        assertEquals(5f, clone.getDashArray()[0], 0f);
-        assertEquals(10f, clone.getDashArray()[1], 0f);
+        assertEquals(5.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0f);
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0f);
     }
     
     @Test
@@ -122,8 +125,8 @@ public class DpiRescaleStyleVisitorTest {
         // this one has not been rescaled
         assertEquals("2m", clone.getWidth().evaluate(null, String.class));
         // the dash array did , it's supposed to be pixels
-        assertEquals(10f, clone.getDashArray()[0], 0f);
-        assertEquals(20f, clone.getDashArray()[1], 0f);
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0f);
+        assertEquals(20.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0f);
     }
 
 

@@ -423,7 +423,7 @@ public interface StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     Stroke stroke(
@@ -433,7 +433,7 @@ public interface StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     Stroke stroke(
@@ -443,7 +443,7 @@ public interface StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     /**

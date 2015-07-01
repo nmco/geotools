@@ -375,21 +375,10 @@ public class SLDTransformer extends TransformerBase {
             encodeCssParam("stroke-width", stroke.getWidth(), 1.0);
             encodeCssParam("stroke-dashoffset", stroke.getDashOffset(), 0.0);
 
-            float[] dash = stroke.getDashArray();
-
-            if (dash != null) {
-                StringBuffer sb = new StringBuffer();
-    
-                for (int i = 0; i < dash.length; i++) {
-                    sb.append(dash[i]);
-                    if(i < dash.length - 1) {
-                        sb.append(" ");
-                    }
-                }
-    
-                encodeCssParam("stroke-dasharray", ff.literal(sb.toString()));
-    
+            if (!(stroke.getDashArray() == null || stroke.getDashArray().equals(Stroke.DEFAULT.getDashArray()))) {
+                encodeCssParam("stroke-dasharray", stroke.getDashArray(), null);
             }
+
             end("Stroke");
         }
 

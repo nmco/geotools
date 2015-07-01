@@ -18,6 +18,7 @@ package org.geotools.styling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -151,7 +152,7 @@ public class StyleFactoryImplTest extends TestCase {
                 filterFactory.literal(0.5),
                 filterFactory.literal("bevel"),
                 filterFactory.literal("square"),
-                new float[] { 1.1f, 2.1f, 6f, 2.1f, 1.1f, 5f },
+                filterFactory.literal(new float[] { 1.1f, 2.1f, 6f, 2.1f, 1.1f, 5f }),
                 filterFactory.literal(3), null, null);
 
         assertNotNull("Failed to build stroke ", s);
@@ -166,7 +167,8 @@ public class StyleFactoryImplTest extends TestCase {
             s.getLineJoin().evaluate(feature).toString());
         assertEquals("Wrong linejoin ", "square",
             s.getLineCap().evaluate(feature).toString());
-        assertEquals("Broken dash array", 2.1f, s.getDashArray()[1], 0.001f);
+        assertTrue("Broken dash array",
+                Arrays.equals(new float[]{1.1f, 2.1f, 6f, 2.1f, 1.1f, 5f}, s.getDashArray().evaluate(null, float[].class)));
         assertEquals("Wrong dash offset ", "3",
             s.getDashOffset().evaluate(feature).toString());
     }

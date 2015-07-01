@@ -41,7 +41,7 @@ import org.opengis.util.Cloneable;
 public class StrokeImpl implements Stroke, Cloneable {
     private FilterFactory filterFactory;
     private Expression color;
-    private float[] dashArray;
+    private Expression dashArray;
     private Expression dashOffset;
     private GraphicImpl fillGraphic;
     private GraphicImpl strokeGraphic;
@@ -133,22 +133,11 @@ public class StrokeImpl implements Stroke, Cloneable {
      * @return The dash pattern as an array of float values in the form
      *         "dashlength gaplength ..."
      */
-    public float[] getDashArray() {
-        float[] ret = null;
-
-        if (dashArray != null) {
-            ret = new float[dashArray.length];
-            System.arraycopy(dashArray, 0, ret, 0, dashArray.length);
-        } else {
-        	final float[] defaultDashArray = Stroke.DEFAULT.getDashArray();
-        	if(defaultDashArray == null)
-        	    return null;
-        	
-        	ret = new float[defaultDashArray.length];
-        	System.arraycopy(defaultDashArray, 0, ret, 0, defaultDashArray.length);
+    public Expression getDashArray() {
+        if (dashArray == null) {
+            return Stroke.DEFAULT.getDashArray();
         }
-
-        return ret;
+        return dashArray;
     }
 
     /**
@@ -167,7 +156,7 @@ public class StrokeImpl implements Stroke, Cloneable {
      * @param dashPattern The dash pattern as an array of float values in the
      *        form "dashlength gaplength ..."
      */
-    public void setDashArray(float[] dashPattern) {
+    public void setDashArray(Expression dashPattern) {
         dashArray = dashPattern;
     }
 
@@ -417,12 +406,6 @@ public class StrokeImpl implements Stroke, Cloneable {
         try {
             StrokeImpl clone = (StrokeImpl) super.clone();
 
-            if (dashArray != null) {
-                clone.dashArray = new float[dashArray.length];
-                System.arraycopy(dashArray, 0, clone.dashArray, 0,
-                    dashArray.length);
-            }
-
             if (fillGraphic != null && fillGraphic instanceof Cloneable) {
                 clone.fillGraphic = (GraphicImpl) ((Cloneable) fillGraphic).clone();
             }
@@ -476,26 +459,7 @@ public class StrokeImpl implements Stroke, Cloneable {
         }
 
         if (dashArray != null) {
-            result = (PRIME * result) + hashCodeDashArray(dashArray);
-        }
-
-        return result;
-    }
-
-    /*
-     * Helper method to compute the hashCode of float arrays.
-     */
-    private int hashCodeDashArray(float[] a) {
-        final int PRIME = 1000003;
-
-        if (a == null) {
-            return 0;
-        }
-
-        int result = 0;
-
-        for (int i = 0; i < a.length; i++) {
-            result = (PRIME * result) + Float.floatToIntBits(a[i]);
+            result = (PRIME * result) + dashArray.hashCode();
         }
 
         return result;
@@ -553,7 +517,7 @@ public class StrokeImpl implements Stroke, Cloneable {
             return false;
         }
 
-        if (!Arrays.equals(getDashArray(), other.getDashArray())) {
+        if( !Utilities.equals( getDashArray(), other.getDashArray() )) {
             return false;
         }
 
@@ -570,12 +534,7 @@ public class StrokeImpl implements Stroke, Cloneable {
         else {
             StrokeImpl copy = new StrokeImpl();
             copy.setColor( stroke.getColor());
-            if( stroke.getDashArray() != null ){
-                float dashArray[] = stroke.getDashArray();
-                float ret[] = new float[ dashArray.length ];
-                System.arraycopy(dashArray, 0, ret, 0, dashArray.length );                
-                copy.setDashArray( ret );
-            }
+            copy.setDashArray(stroke.getDashArray());
             copy.setDashOffset(stroke.getDashOffset());
             copy.setGraphicFill( GraphicImpl.cast(stroke.getGraphicFill()));
             copy.setGraphicStroke( GraphicImpl.cast(stroke.getGraphicStroke()));

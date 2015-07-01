@@ -38,7 +38,7 @@ public class StrokeBuilder extends AbstractStyleBuilder<Stroke> {
 
     Expression lineJoin;
 
-    float[] dashArray = null;
+    Expression dashArray;
 
     Expression dashOffset;
 
@@ -182,8 +182,14 @@ public class StrokeBuilder extends AbstractStyleBuilder<Stroke> {
         return lineJoin(literal(join));
     }
 
-    public StrokeBuilder dashArray(float... dashArray) {
+    public StrokeBuilder dashArray(Expression dashArray) {
         this.dashArray = dashArray;
+        unset = false;
+        return this;
+    }
+
+    public StrokeBuilder dashArray(float... dashArray) {
+        this.dashArray = literal(dashArray);
         unset = false;
         return this;
     }

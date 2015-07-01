@@ -145,7 +145,7 @@ public class SLD {
                         Expression opacity = copy(stroke.getOpacity());
                         Expression lineJoin = copy(stroke.getLineJoin());
                         Expression lineCap = copy(stroke.getLineCap());
-                        float[] dashArray = copy(stroke.getDashArray());
+                        Expression dashArray = copy(stroke.getDashArray());
                         Expression dashOffset = copy(stroke.getDashOffset());
                         Graphic graphicStroke = copy(stroke.getGraphicStroke());
                         Graphic graphicFill = copy(stroke.getGraphicFill());
@@ -356,9 +356,9 @@ public class SLD {
      *
      * @param symbolizer Line symbolizer information.
      *
-     * @return float[] of the line dashes array, or null if unavailable.
+     * @return String of the line dashes array, or null if unavailable.
      */
-    public static float[] lineDash(LineSymbolizer symbolizer) {
+    public static String lineDash(LineSymbolizer symbolizer) {
         if (symbolizer == null) {
             return null;
         }
@@ -369,9 +369,7 @@ public class SLD {
             return null;
         }
 
-        float[] linedash = stroke.getDashArray();
-
-        return linedash;
+        return stroke.getDashArray().toString();
     }
 
     /**

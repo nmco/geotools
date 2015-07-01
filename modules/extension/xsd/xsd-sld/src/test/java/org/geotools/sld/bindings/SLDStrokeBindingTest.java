@@ -20,6 +20,8 @@ import org.geotools.filter.Filters;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Stroke;
 
+import java.util.Arrays;
+
 
 /**
  * 
@@ -45,10 +47,7 @@ public class SLDStrokeBindingTest extends SLDTestSupport {
         assertEquals("butt", Filters.asString(stroke.getLineCap()));
         assertEquals("mitre", Filters.asString(stroke.getLineJoin()));
 
-        assertEquals(1.1d, stroke.getDashArray()[0], 0.000001);
-        assertEquals(2.2d, stroke.getDashArray()[1], 0.000001);
-        assertEquals(3.3d, stroke.getDashArray()[2], 0.000001);
-        assertEquals(4.4d, stroke.getDashArray()[3], 0.000001);
+        assertTrue(Arrays.equals(new float[]{1.1f, 2.2f, 3.3f, 4.4f}, stroke.getDashArray().evaluate(null, float[].class)));
 
         assertEquals(1.0, Filters.asDouble(stroke.getOpacity()), 0d);
     }

@@ -1017,7 +1017,7 @@ public class SLDStyleFactory {
 		}
 
 		// get the other properties needed for the stroke
-		float[] dashes = stroke.getDashArray();
+        float[] dashes = (stroke.getDashArray() == null) ? null : stroke.getDashArray().evaluate(feature, float[].class);
 		float width = evalToFloat(stroke.getWidth(), feature, 1);
 		float dashOffset = evalToFloat(stroke.getDashOffset(), feature, 0);
 

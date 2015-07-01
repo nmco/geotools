@@ -207,7 +207,7 @@ public class SLDStyleTest extends TestCase {
         assertEquals(1, symbolizers.size());
         
         LineSymbolizer ls = (LineSymbolizer) symbolizers.get(0);
-        assertTrue(Arrays.equals(new float[] {2.0f, 1.0f, 4.0f, 1.0f}, ls.getStroke().getDashArray()));
+        assertTrue(Arrays.equals(new float[] {2.0f, 1.0f, 4.0f, 1.0f}, ls.getStroke().getDashArray().evaluate(null, float[].class)));
     }
 
     public void testSLDParserWithWhitespaceIsTrimmed() throws Exception {

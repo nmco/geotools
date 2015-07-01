@@ -124,7 +124,7 @@ public class RescaleStyleVisitor extends DuplicatingStyleVisitor {
     public void visit(org.geotools.styling.Stroke stroke) {
         Stroke copy = sf.getDefaultStroke();
         copy.setColor( copy(stroke.getColor()));
-        copy.setDashArray( rescale(stroke.getDashArray()));
+        copy.setDashArray( rescaleDashArray(stroke.getDashArray()));
         copy.setDashOffset( rescale(stroke.getDashOffset()));
         copy.setGraphicFill( copy(stroke.getGraphicFill()));
         copy.setGraphicStroke( copy( stroke.getGraphicStroke()));
@@ -133,24 +133,29 @@ public class RescaleStyleVisitor extends DuplicatingStyleVisitor {
         copy.setOpacity( copy(stroke.getOpacity()));
         copy.setWidth( rescale(stroke.getWidth()));
         pages.push(copy);
-    }   
-    
-    float[] rescale(float[] original) {
-        if(original == null) {
+    }
+
+    // FIXME This method could be avoid by implementing the support for array add/div/sub/mult operations.
+    // FIXME This method is only valid if the dash-array expression and the scale expression are literals.
+    protected Expression rescaleDashArray(Expression dashArrayExpression) {
+        if (dashArrayExpression == null) {
             return null;
         }
-        
-        // rescale the dash array if possible
-        float[] rescaled = new float[original.length];
-        float scaleFactor = 1;
-        if( scale instanceof Literal){
-            scaleFactor = scale.evaluate(null, Float.class);
+        if (dashArrayExpression == Expression.NIL) {
+            return Expression.NIL;
         }
-        for (int i = 0; i < rescaled.length; i++) {
-            rescaled[i] = scaleFactor * original[i];
+        if (dashArrayExpression instanceof Literal && scale instanceof Literal) {
+            float[] dashArray = dashArrayExpression.evaluate(null, float[].class);
+            if(dashArray == null) {
+                return null;
+            }
+            float scaleFactor = scale.evaluate(null, Float.class);
+            for (int i = 0; i < dashArray.length; i++) {
+                dashArray[i] = scaleFactor * dashArray[i];
+            }
+            return ff.literal(dashArray);
         }
-        
-        return rescaled;
+        return dashArrayExpression;
     }
 
     /** Make graphics (such as used with PointSymbolizer) bigger */

@@ -254,6 +254,7 @@ public class DuplicatorStyleVisitorTest extends TestCase {
 
         rule.accept(visitor);
         Rule clone = (Rule) visitor.getCopy();
+
         assertCopy(rule, clone);
         assertEqualsContract(rule, clone);
         
@@ -599,7 +600,7 @@ public class DuplicatorStyleVisitorTest extends TestCase {
         // a stroke is a complex object with lots of properties,
         // need more extensive tests here.
         Stroke dashArray = sf.getDefaultStroke();
-        dashArray.setDashArray(new float[] { 1.0f, 2.0f, 3.0f });
+        dashArray.setDashArray(ff.literal(new float[] { 1.0f, 2.0f, 3.0f }));
 
         Stroke dashArray2 = (Stroke) ((Cloneable)dashArray).clone();
         assertEqualsContract(dashArray, dashArray2);

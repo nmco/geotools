@@ -191,17 +191,6 @@ public class SLDStrokeBinding extends AbstractComplexBinding {
             }
         }
 
-        float[] dash = null;
-
-        if (dashArray != null) {
-            String[] string = Filters.asString(dashArray).split(" +");
-            dash = new float[string.length];
-
-            for (int i = 0; i < string.length; i++) {
-                dash[i] = Float.parseFloat(string[i]);
-            }
-        }
-
         //&lt;xsd:choice minOccurs="0"&gt;
         //   &lt;xsd:element ref="sld:GraphicFill"/&gt;
         //   &lt;xsd:element ref="sld:GraphicStroke"/&gt;
@@ -209,7 +198,7 @@ public class SLDStrokeBinding extends AbstractComplexBinding {
         Graphic graphicFill = (Graphic) node.getChildValue("GraphicFill");
         Graphic graphicStroke = (Graphic) node.getChildValue("GraphicStroke");
 
-        return styleFactory.createStroke(color, width, opacity, lineJoin, lineCap, dash,
+        return styleFactory.createStroke(color, width, opacity, lineJoin, lineCap, dashArray,
             dashOffset, graphicFill, graphicStroke);
     }
 }

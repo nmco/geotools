@@ -86,7 +86,7 @@ public class CookbookLineTest extends AbstractStyleTest {
         LineSymbolizer ls = (LineSymbolizer) collector.symbolizers.get(0);
         assertEquals(3, (int) ls.getStroke().getWidth().evaluate(null, Integer.class));
         assertEquals(Color.BLUE, ls.getStroke().getColor().evaluate(null, Color.class));
-        assertTrue(Arrays.equals(new float[] { 5, 2 }, ls.getStroke().getDashArray()));
+        assertTrue(Arrays.equals(new float[] { 5, 2 }, ls.getStroke().getDashArray().evaluate(null, float[].class)));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class CookbookLineTest extends AbstractStyleTest {
 
         // check the dots
         LineSymbolizer ls = (LineSymbolizer) collector.symbolizers.get(0);
-        assertTrue(Arrays.equals(new float[] { 4, 6 }, ls.getStroke().getDashArray()));
+        assertTrue(Arrays.equals(new float[] { 4, 6 }, ls.getStroke().getDashArray().evaluate(null, float[].class)));
         Graphic graphic = ls.getStroke().getGraphicStroke();
         List<GraphicalSymbol> symbols = graphic.graphicalSymbols();
         assertEquals(1, symbols.size());
@@ -168,11 +168,11 @@ public class CookbookLineTest extends AbstractStyleTest {
         LineSymbolizer ls = (LineSymbolizer) collector.symbolizers.get(0);
         assertEquals(1, (int) ls.getStroke().getWidth().evaluate(null, Integer.class));
         assertEquals(Color.BLUE, ls.getStroke().getColor().evaluate(null, Color.class));
-        assertTrue(Arrays.equals(new float[] { 10, 10 }, ls.getStroke().getDashArray()));
+        assertTrue(Arrays.equals(new float[] { 10, 10 }, ls.getStroke().getDashArray().evaluate(null, float[].class)));
 
         // check the dots
         ls = (LineSymbolizer) collector.symbolizers.get(1);
-        assertTrue(Arrays.equals(new float[] { 5, 15 }, ls.getStroke().getDashArray()));
+        assertTrue(Arrays.equals(new float[] { 5, 15 }, ls.getStroke().getDashArray().evaluate(null, float[].class)));
         assertEquals(7.5, ls.getStroke().getDashOffset().evaluate(null, Double.class), 0.0);
         Graphic graphic = ls.getStroke().getGraphicStroke();
         List<GraphicalSymbol> symbols = graphic.graphicalSymbols();

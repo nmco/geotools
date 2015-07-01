@@ -210,7 +210,7 @@ public class StyleBuilder {
      */
     public Stroke createStroke(Color color, double width, float[] dashArray) {
         Stroke stroke = createStroke(color, width);
-        stroke.setDashArray(dashArray);
+        stroke.setDashArray(literalExpression(dashArray));
 
         return stroke;
     }

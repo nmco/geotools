@@ -213,7 +213,7 @@ public interface StyleFactory extends Factory, org.opengis.style.StyleFactory {
      * @see org.geotools.stroke
      */
     public Stroke createStroke(Expression color, Expression width, Expression opacity,
-        Expression lineJoin, Expression lineCap, float[] dashArray, Expression dashOffset,
+        Expression lineJoin, Expression lineCap, Expression dashArray, Expression dashOffset,
         Graphic graphicFill, Graphic graphicStroke);
 
     public Rule createRule();
@@ -667,7 +667,7 @@ public interface StyleFactory extends Factory, org.opengis.style.StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     Stroke stroke(
@@ -677,7 +677,7 @@ public interface StyleFactory extends Factory, org.opengis.style.StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     Stroke stroke(
@@ -687,7 +687,7 @@ public interface StyleFactory extends Factory, org.opengis.style.StyleFactory {
             Expression width,
             Expression join,
             Expression cap,
-            float[] dashes,
+            Expression dashes,
             Expression offset);
 
     /**

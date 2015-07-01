@@ -87,6 +87,7 @@ public interface Stroke extends org.opengis.style.Stroke {
      * </p>
      */
     static final Stroke DEFAULT = new ConstantStroke() {
+
             public Expression getColor() {
                 return ConstantExpression.BLACK;
             }
@@ -111,9 +112,7 @@ public interface Stroke extends org.opengis.style.Stroke {
                 return ConstantExpression.constant("butt");
             }
 
-            public float[] getDashArray() {
-                return null;
-            }
+            public Expression getDashArray() { return  null; }
 
             public Expression getDashOffset() {
                 return ConstantExpression.ZERO;
@@ -164,8 +163,8 @@ public interface Stroke extends org.opengis.style.Stroke {
                 return ConstantExpression.NULL;
             }
 
-            public float[] getDashArray() {
-                return new float[] {  };
+            public Expression getDashArray() {
+                return ConstantExpression.NULL;
             }
 
             public Expression getDashOffset() {
@@ -256,7 +255,7 @@ public interface Stroke extends org.opengis.style.Stroke {
      * <code>--&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;
      * --&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;--</code>
      */
-    float[] getDashArray();
+    Expression getDashArray();
 
     /**
      * This parameter encodes the dash pattern as a seqeuence of floats.<br>
@@ -269,7 +268,7 @@ public interface Stroke extends org.opengis.style.Stroke {
      * <code>--&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;
      * --&nbsp;---&nbsp;&nbsp;--&nbsp;---&nbsp;&nbsp;--</code>
      */
-    void setDashArray(float[] dashArray);
+    void setDashArray(Expression dashArray);
 
     /**
      * A dash array need not start from the beginning.  This method allows for
@@ -357,7 +356,7 @@ abstract class ConstantStroke implements Stroke {
         cannotModifyConstant();
     }
 
-    public void setDashArray(float[] dashArray) {
+    public void setDashArray(Expression dashArray) {
         cannotModifyConstant();
     }
 

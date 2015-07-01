@@ -37,6 +37,7 @@ import org.geotools.styling.Stroke;
 import org.geotools.styling.TextSymbolizer;
 import org.geotools.styling.TextSymbolizer2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.Literal;
 import org.opengis.style.GraphicalSymbol;
 
 /**
@@ -110,26 +111,26 @@ public class UomRescaleStyleVisitor extends DuplicatingStyleVisitor {
         return RescalingMode.RealWorld.rescaleToString(mapScale, v);
     }
 
-    /**
-     * Used to rescale the provided dash array.
-     * 
-     * @param dashArray the unscaled dash array. If null, the method returns null.
-     * @param mapScale the mapScale in pixels per meter.
-     * @param uom the unit of measure that will be used to scale.
-     * @return the rescaled dash array
-     */
-    protected float[] rescale(float[] dashArray, Unit<Length> unitOfMeasure) {
-        if (dashArray == null)
+    // FIXME This method could be avoid by implementing the support for array add/div/sub/mult operations.
+    // FIXME This method is only valid if the dash-array expression and the scale expression are literals.
+    protected Expression rescaleDashArray(Expression dashArrayExpression, Unit<Length> unitOfMeasure) {
+        if (dashArrayExpression == null) {
             return null;
-        if (unitOfMeasure == null || unitOfMeasure.equals(NonSI.PIXEL))
-            return dashArray;
-
-        float[] rescaledDashArray = new float[dashArray.length];
-
-        for (int i = 0; i < rescaledDashArray.length; i++) {
-            rescaledDashArray[i] = Float.parseFloat(rescale(String.valueOf(dashArray[i]), unitOfMeasure));
         }
-        return rescaledDashArray;
+        if (dashArrayExpression == Expression.NIL) {
+            return Expression.NIL;
+        }
+        if (dashArrayExpression instanceof Literal) {
+            float[] dashArray = dashArrayExpression.evaluate(null, float[].class);
+            if(dashArray == null) {
+                return Expression.NIL;
+            }
+            for (int i = 0; i < dashArray.length; i++) {
+                dashArray[i] = Float.parseFloat(rescale(String.valueOf(dashArray[i]), unitOfMeasure));
+            }
+            return ff.literal(dashArray);
+        }
+        return dashArrayExpression;
     }
 
     /**
@@ -142,7 +143,7 @@ public class UomRescaleStyleVisitor extends DuplicatingStyleVisitor {
     protected void rescaleStroke(Stroke stroke, Unit<Length> uom) {
         if (stroke != null) {
             stroke.setWidth(rescale(stroke.getWidth(), uom));
-            stroke.setDashArray(rescale(stroke.getDashArray(), uom));
+            stroke.setDashArray(rescaleDashArray(stroke.getDashArray(), uom));
             stroke.setDashOffset(rescale(stroke.getDashOffset(), uom));
             rescale(stroke.getGraphicFill(), uom);
             rescale(stroke.getGraphicStroke(), uom);

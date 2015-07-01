@@ -170,7 +170,7 @@ public abstract class AbstractStyleFactory implements StyleFactory {
      */
     public abstract Stroke createStroke(Expression color, Expression width,
         Expression opacity, Expression lineJoin, Expression lineCap,
-        float[] dashArray, Expression dashOffset, Graphic graphicFill,
+        Expression dashArray, Expression dashOffset, Graphic graphicFill,
         Graphic graphicStroke);
 
     public abstract Rule createRule();

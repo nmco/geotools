@@ -326,7 +326,7 @@ public class StyleObjectTest extends TestCase {
         // a stroke is a complex object with lots of properties,
         // need more extensive tests here.
         Stroke dashArray = styleFactory.getDefaultStroke();
-        dashArray.setDashArray(new float[] { 1.0f, 2.0f, 3.0f });
+        dashArray.setDashArray(filterFactory.literal(new float[] { 1.0f, 2.0f, 3.0f }));
 
         dashArray.accept( duplicate );
         Stroke dashArray2 = (Stroke) duplicate.getCopy();

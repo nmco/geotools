@@ -137,8 +137,9 @@ public class RescaleStyleVisitorTest {
         Stroke clone = (Stroke) visitor.getCopy();
         
         assertEquals(4.0d, clone.getWidth().evaluate(null, Double.class), 0d);
-        assertEquals(10.0f, clone.getDashArray()[0], 0d);
-        assertEquals(20.0f, clone.getDashArray()[1], 0d);
+
+        assertEquals(10.0f, clone.getDashArray().evaluate(null, float[].class)[0], 0d);
+        assertEquals(20.0f, clone.getDashArray().evaluate(null, float[].class)[1], 0d);
     }
     
     @Test

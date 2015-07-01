@@ -489,7 +489,7 @@ public class StyleFactoryImpl2 implements org.opengis.style.StyleFactory {
     }
 
     public StrokeImpl stroke(Expression color, Expression opacity, Expression width,
-            Expression join, Expression cap, float[] dashes, Expression offset) {
+            Expression join, Expression cap, Expression dashes, Expression offset) {
         StrokeImpl stroke = new StrokeImpl( filterFactory );
         stroke.setColor(color);
         stroke.setOpacity(opacity);
@@ -502,7 +502,7 @@ public class StyleFactoryImpl2 implements org.opengis.style.StyleFactory {
     }
     
     public StrokeImpl stroke(GraphicFill fill, Expression color, Expression opacity,
-            Expression width, Expression join, Expression cap, float[] dashes, Expression offset) {
+            Expression width, Expression join, Expression cap, Expression dashes, Expression offset) {
         StrokeImpl stroke = new StrokeImpl( filterFactory );
         stroke.setGraphicFill( fill );
         stroke.setColor(color);
@@ -516,7 +516,7 @@ public class StyleFactoryImpl2 implements org.opengis.style.StyleFactory {
     }
     
     public StrokeImpl stroke(GraphicStroke stroke, Expression color,
-            Expression opacity, Expression width, Expression join, Expression cap, float[] dashes,
+            Expression opacity, Expression width, Expression join, Expression cap, Expression dashes,
             Expression offset) {
         StrokeImpl s = new StrokeImpl(filterFactory);
         s.setColor(color);

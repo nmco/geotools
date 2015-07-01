@@ -282,7 +282,7 @@ public class StyleFactoryImpl extends AbstractStyleFactory
      */
     public Stroke createStroke(Expression color, Expression width,
         Expression opacity, Expression lineJoin, Expression lineCap,
-        float[] dashArray, Expression dashOffset, Graphic graphicFill,
+        Expression dashArray, Expression dashOffset, Graphic graphicFill,
         Graphic graphicStroke) {
         Stroke stroke = new StrokeImpl(filterFactory);
 
@@ -310,6 +310,10 @@ public class StyleFactoryImpl extends AbstractStyleFactory
 
         if (lineCap == null) {
         	lineCap = Stroke.DEFAULT.getLineCap();
+        }
+
+        if(dashArray == null) {
+            dashArray = Stroke.DEFAULT.getDashArray();
         }
 
         stroke.setLineCap(lineCap);
@@ -957,17 +961,17 @@ public class StyleFactoryImpl extends AbstractStyleFactory
     }
 
     public Stroke stroke(Expression color, Expression opacity, Expression width,
-            Expression join, Expression cap, float[] dashes, Expression offset) {
+            Expression join, Expression cap, Expression dashes, Expression offset) {
         return delegate.stroke(color, opacity, width, join, cap, dashes, offset);
     }
     
     public Stroke stroke(GraphicFill fill, Expression color, Expression opacity,
-            Expression width, Expression join, Expression cap, float[] dashes, Expression offset) {
+            Expression width, Expression join, Expression cap, Expression dashes, Expression offset) {
         return delegate.stroke(fill, color, opacity, width, join, cap, dashes, offset);
     }
     
     public Stroke stroke(GraphicStroke stroke, Expression color,
-            Expression opacity, Expression width, Expression join, Expression cap, float[] dashes,
+            Expression opacity, Expression width, Expression join, Expression cap, Expression dashes,
             Expression offset) {
         return delegate.stroke(stroke, color, opacity, width, join, cap, dashes, offset);
     }

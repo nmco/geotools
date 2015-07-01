@@ -1971,29 +1971,7 @@ public class SLDParser {
                     stroke.setLineJoin(parseCssParameter(child));
                 } else if (res.equalsIgnoreCase("dasharray")
                         || res.equalsIgnoreCase("stroke-dasharray")) {
-                    String dashString = null;
-                    if( child.getChildNodes().getLength() == 1 && child.getFirstChild().getNodeType() == Node.TEXT_NODE ){
-                        dashString = getFirstChildValue(child);                        
-                    } else {
-                        Expression definition = parseCssParameter(child);
-                        if( definition instanceof Literal){
-                            dashString = ((Literal)definition).getValue().toString();
-                        }
-                        else {
-                            LOGGER.warning("Only literal stroke-dasharray supported at this time:"+definition);
-                        }                        
-                    }
-                    if( dashString != null){
-                        StringTokenizer stok = new StringTokenizer(dashString.trim(), " ");
-                        float[] dashes = new float[stok.countTokens()];
-                        for (int l = 0; l < dashes.length; l++) {
-                            dashes[l] = Float.parseFloat(stok.nextToken());
-                        }                    
-                        stroke.setDashArray(dashes);
-                    }
-                    else {
-                        LOGGER.fine("Unable to parse stroke-dasharray");
-                    }                
+                    stroke.setDashArray(parseCssParameter(child));
                 } else if (res.equalsIgnoreCase("dashoffset")
                         || res.equalsIgnoreCase("stroke-dashoffset")) {
                     stroke.setDashOffset(parseCssParameter(child));
