@@ -18,16 +18,13 @@ package org.geotools.jdbc;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.geotools.data.DefaultQuery;
 import org.geotools.data.Query;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.visitor.MaxVisitor;
-import org.geotools.feature.visitor.MinVisitor;
-import org.geotools.feature.visitor.NearestVisitor;
-import org.geotools.feature.visitor.SumVisitor;
-import org.geotools.feature.visitor.UniqueVisitor;
+import org.geotools.feature.visitor.*;
 import org.geotools.filter.IllegalFilterException;
 import org.geotools.filter.SortByImpl;
 import org.geotools.filter.SortOrder;
@@ -54,7 +51,7 @@ public abstract class JDBCAggregateFunctionOnlineTest extends JDBCTestSupport {
         super.setUpInternal();
         visited = false;
     }
-    
+
     class MySumVisitor extends SumVisitor {
 
         public MySumVisitor(Expression expr) throws IllegalFilterException {

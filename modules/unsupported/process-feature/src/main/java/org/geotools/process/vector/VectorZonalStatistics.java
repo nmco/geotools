@@ -184,7 +184,7 @@ public class VectorZonalStatistics implements VectorProcess {
                 Filter areaFilter = ff.within(ff.property(dataGeomName), ff.literal(zoneGeom));
                 SimpleFeatureCollection zoneCollection = data.subCollection(areaFilter);
                 Results stats = new AggregateProcess().execute(zoneCollection, dataAttribute,
-                        FUNCTIONS, true, null);
+                        FUNCTIONS, true, null, null);
 
                 // build the resulting feature
                 builder.addAll(zone.getAttributes());

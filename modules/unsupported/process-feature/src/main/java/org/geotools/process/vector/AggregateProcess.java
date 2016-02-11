@@ -17,24 +17,9 @@
  */
 package org.geotools.process.vector;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Set;
-
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.visitor.AbstractCalcResult;
-import org.geotools.feature.visitor.AverageVisitor;
-import org.geotools.feature.visitor.CalcResult;
-import org.geotools.feature.visitor.CountVisitor;
-import org.geotools.feature.visitor.FeatureCalc;
-import org.geotools.feature.visitor.MaxVisitor;
-import org.geotools.feature.visitor.MedianVisitor;
-import org.geotools.feature.visitor.MinVisitor;
-import org.geotools.feature.visitor.StandardDeviationVisitor;
-import org.geotools.feature.visitor.SumVisitor;
+import org.geotools.feature.visitor.*;
 import org.geotools.process.ProcessException;
 import org.geotools.process.factory.DescribeParameter;
 import org.geotools.process.factory.DescribeProcess;
@@ -44,11 +29,14 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.util.ProgressListener;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * Computes various attribute statistics over vector data sets.
- * 
- * @author Andrea Aime
  *
+ * @author Andrea Aime
  * @source $URL$
  */
 @DescribeProcess(title = "Aggregate", description = "Computes one or more aggregation functions on a feature attribute. Functions include Count, Average, Max, Median, Min, StdDev, and Sum.")
@@ -57,27 +45,46 @@ public class AggregateProcess implements VectorProcess {
     public enum AggregationFunction {
         Count, Average, Max, Median, Min, StdDev, Sum;
     }
+
     /**
      * Computes various attribute statistics over vector data sets
-     * @param features FeatureCollection to aggregate
-     * @param aggAttribute target attribute
+     *
+     * @param features         FeatureCollection to aggregate
+     * @param aggAttribute     target attribute
      * @param functions
      * @param singlePass
      * @param progressListener
      * @return aggregate Results
      */
-    public static Results process(SimpleFeatureCollection features, String aggAttribute, Set<AggregationFunction> functions, Boolean singlePass, ProgressListener progressListener) throws ProcessException, IOException {
-        AggregateProcess process = new AggregateProcess();
-        return process.execute(features, aggAttribute, functions, singlePass, progressListener);
+    public static Results process(SimpleFeatureCollection features, String aggAttribute, Set<AggregationFunction> functions,
+                                  Boolean singlePass, ProgressListener progressListener) throws ProcessException, IOException {
+        return process(features, aggAttribute, functions, null, singlePass, progressListener);
     }
-    
-    @DescribeResult(name = "result", description = "Aggregation results (one value for each function computed)")
+
+    public static Results process(SimpleFeatureCollection features, String aggAttribute, Set<AggregationFunction> functions,
+                                  List<String> groupByAttributes, Boolean singlePass, ProgressListener progressListener) throws ProcessException, IOException {
+        AggregateProcess process = new AggregateProcess();
+        return process.execute(features, aggAttribute, functions, singlePass, groupByAttributes, progressListener);
+    }
+
+    public Results execute(SimpleFeatureCollection features,String aggAttribute,Set<AggregationFunction> functions,
+                           boolean singlePass, ProgressListener progressListener) throws ProcessException, IOException {
+        return execute(features, aggAttribute, functions, singlePass, null, progressListener);
+    }
+
+    @DescribeResult(name = "result", description = "Aggregation results (one value for each function computed or per group by attribute)")
     public Results execute(
             @DescribeParameter(name = "features", description = "Input feature collection") SimpleFeatureCollection features,
             @DescribeParameter(name = "aggregationAttribute", min = 0, description = "Attribute on which to perform aggregation") String aggAttribute,
             @DescribeParameter(name = "function", description = "An aggregate function to compute. Functions include Count, Average, Max, Median, Min, StdDev, and Sum.", collectionType = AggregationFunction.class) Set<AggregationFunction> functions,
             @DescribeParameter(name = "singlePass", description = "If True computes all aggregation values in a single pass (this will defeat DBMS-specific optimizations)", defaultValue = "false") boolean singlePass,
+            @DescribeParameter(name = "groupByAttributes", description = "List of group by attributes", collectionType = String.class) List<String> groupByAttributes,
             ProgressListener progressListener) throws ProcessException, IOException {
+
+        if (groupByAttributes != null && !groupByAttributes.isEmpty()) {
+            // this request as group by attributes which need special care
+            return handleGroupByVisitor(features, aggAttribute, functions, groupByAttributes, progressListener);
+        }
 
         int attIndex = -1;
         List<AttributeDescriptor> atts = features.getSchema().getAttributeDescriptors();
@@ -90,10 +97,10 @@ public class AggregateProcess implements VectorProcess {
 
         if (attIndex == -1) {
             throw new ProcessException("Could not find attribute " +
-            		"[" + aggAttribute + "] "
+                    "[" + aggAttribute + "] "
                     + " the valid values are " + attNames(atts));
         }
-        if (functions == null ){
+        if (functions == null) {
             throw new NullPointerException("Aggregate function to call is required");
         }
         List<AggregationFunction> functionList = new ArrayList<AggregationFunction>(functions);
@@ -128,7 +135,7 @@ public class AggregateProcess implements VectorProcess {
             List<CalcResult> resultList = (List<CalcResult>) calc.getResult().getValue();
             for (int i = 0; i < functionList.size(); i++) {
                 CalcResult result = resultList.get(i);
-                if(result != null) {
+                if (result != null) {
                     results.put(functionList.get(i), (Number) result.getValue());
                 }
             }
@@ -140,7 +147,56 @@ public class AggregateProcess implements VectorProcess {
             }
         }
 
-        return new Results(results);
+        return new Results(aggAttribute, functions, results);
+    }
+
+    /**
+     * Helper method that handle requests that have group by attributes by wrapping the functions in group by visitors.
+     */
+    private Results handleGroupByVisitor(SimpleFeatureCollection features, String aggAttribute, Set<AggregationFunction> functions,
+                                         List<String> rawGroupByAttributes, ProgressListener progressListener) throws IOException {
+        // building a group by visitor for every aggregate function
+        List<GroupByVisitor> groupByVisitors = functions.stream().map(function -> new GroupByVisitorBuilder()
+                .withAggregateAttribute(aggAttribute, features.getSchema())
+                .withAggregateVisitor(function.name())
+                .withGroupByAttributes(rawGroupByAttributes, features.getSchema())
+                .withProgressListener(progressListener)
+                .build()).collect(Collectors.toList());
+        // visiting the features collection with each visitor
+        for (GroupByVisitor visitor : groupByVisitors) {
+            features.accepts(visitor, progressListener);
+        }
+        // extracting the results from each group by visitor
+        List<Map<Object[], Object>> results = groupByVisitors.stream()
+                .map(visitor -> (Map<Object[], Object>)visitor.getResult().toMap())
+                .collect(Collectors.toList());
+        return new Results(aggAttribute, functions, rawGroupByAttributes, mergeResults(results, groupByVisitors.size()));
+    }
+
+    /**
+     * Helper method that merge all group by visitors results in a tabular format. Each line of the table is composed
+     * of the group by attributes values and the aggregation functions results.
+     */
+    private List<Object[]> mergeResults(List<Map<Object[], Object>> results, int groupByAttributesNumber) {
+        List<Object[]> mergedResults = new ArrayList<>();
+        if(results.isEmpty()) {
+            // no results so nothing to do
+            return mergedResults;
+        }
+        // the size of each line is the number of the group by attributes plus the number of aggregation functions
+        int resultSize = groupByAttributesNumber + results.size();
+        // the group by attributes values are equal for all the visitors so we use the first visitor result to grab all the group by values
+        for(Object[] groupByAttributes : results.get(0).keySet()) {
+            // we create the table line that will contains all the results
+            Object[] mergedResult = Arrays.copyOf(groupByAttributes, resultSize);
+            // we extract from each group by visitor result the aggregation function result and add it to out table line
+            for(int i = 0; i < results.size(); i++) {
+                mergedResult[groupByAttributesNumber + i] = results.get(i).get(groupByAttributes);
+            }
+            // we add the current line to the table
+            mergedResults.add(mergedResult);
+        }
+        return mergedResults;
     }
 
     private List<String> attNames(List<AttributeDescriptor> atts) {
@@ -153,7 +209,7 @@ public class AggregateProcess implements VectorProcess {
 
     /**
      * Runs various {@link FeatureCalc} in a single pass
-     * 
+     *
      * @author Andrea Aime - GeoSolutions
      */
     static class AggregateFeatureCalc implements FeatureCalc {
@@ -167,7 +223,7 @@ public class AggregateProcess implements VectorProcess {
         public CalcResult getResult() {
             final List<CalcResult> results = new ArrayList<CalcResult>();
             for (FeatureCalc delegate : delegates) {
-                    results.add(delegate.getResult());
+                results.add(delegate.getResult());
             }
 
             return new AbstractCalcResult() {
@@ -189,6 +245,7 @@ public class AggregateProcess implements VectorProcess {
      * The aggregate function results
      */
     public static final class Results {
+
         Double min;
         Double max;
         Double median;
@@ -196,8 +253,28 @@ public class AggregateProcess implements VectorProcess {
         Double standardDeviation;
         Double sum;
         Long count;
-        
-        public Results(EnumMap<AggregationFunction, Number> results) {
+
+        // this values are used by output formats that want to add more meta information (the JSON tabular output format for example)
+        String aggregateAttribute;
+        Set<AggregationFunction> functions;
+        List<String> groupByAttributes;
+        List<Object[]> groupByResult;
+        EnumMap<AggregationFunction, Number> results;
+
+
+        // this constructor is used to output group by results
+        public Results(String aggregateAttribute, Set<AggregationFunction> functions, List<String> groupByAttributes, List<Object[]> groupByResult) {
+            this.aggregateAttribute = aggregateAttribute;
+            this.functions = functions;
+            this.groupByAttributes = groupByAttributes;
+            this.groupByResult = groupByResult;
+        }
+
+        // this constructor is used to output normal aggregations results
+        public Results(String aggregateAttribute, Set<AggregationFunction> functions, EnumMap<AggregationFunction, Number> results) {
+            this.aggregateAttribute = aggregateAttribute;
+            this.functions = functions;
+            this.results = results;
             min = toDouble(results.get(AggregationFunction.Min));
             max = toDouble(results.get(AggregationFunction.Max));
             median = toDouble(results.get(AggregationFunction.Median));
@@ -205,34 +282,39 @@ public class AggregateProcess implements VectorProcess {
             standardDeviation = toDouble(results.get(AggregationFunction.StdDev));
             sum = toDouble(results.get(AggregationFunction.Sum));
             Number nc = results.get(AggregationFunction.Count);
-            if(nc != null) {
+            if (nc != null) {
                 count = nc.longValue();
             }
         }
-        
+
         Double toDouble(Number number) {
-            if(number == null) {
+            if (number == null) {
                 return null;
             } else {
                 return number.doubleValue();
             }
         }
-        
+
         public Double getMin() {
             return min;
         }
+
         public Double getMax() {
             return max;
         }
+
         public Double getMedian() {
             return median;
         }
+
         public Double getAverage() {
             return average;
         }
+
         public Double getStandardDeviation() {
             return standardDeviation;
         }
+
         public Double getSum() {
             return sum;
         }
@@ -241,6 +323,25 @@ public class AggregateProcess implements VectorProcess {
             return count;
         }
 
+        public String getAggregateAttribute() {
+            return aggregateAttribute;
+        }
+
+        public Set<AggregationFunction> getFunctions() {
+            return functions;
+        }
+
+        public List<String> getGroupByAttributes() {
+            return groupByAttributes;
+        }
+
+        public List<Object[]> getGroupByResult() {
+            return groupByResult;
+        }
+
+        public EnumMap<AggregationFunction, Number> getResults() {
+            return results;
+        }
     }
 
 }
