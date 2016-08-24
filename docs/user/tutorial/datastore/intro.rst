@@ -107,16 +107,16 @@ Time to create a new project making use of this library:
    .. literalinclude:: artifacts/pom.xml
       :language: xml
       :start-after: </properties>
-      :end-before: <repositories>
+      :end-before: <!-- please leave these here as the tutorial docs break if you delete them -->
 
 #. Available from these repositories:
 
    .. literalinclude:: artifacts/pom.xml
       :language: xml
-      :start-after: </dependencies>
+      :start-after: <!-- please leave these here as the tutorial docs break if you delete them -->
       :end-before: <build>
 
-#. Finally we get to switch to Java 7:
+#. Finally we get to switch to Java 8:
 
    .. literalinclude:: artifacts/pom.xml
       :language: xml

@@ -586,7 +586,7 @@ public class OracleDialect extends PreparedStatementSQLDialect {
 
         // Handle the null geometry case.
         // Surprisingly, using setNull(column, Types.OTHER) does not work...
-        if (g == null) {
+        if (g == null||g.isEmpty()) {
             ps.setNull(column, Types.STRUCT, "MDSYS.SDO_GEOMETRY");
             return;
         }
@@ -1119,8 +1119,9 @@ public class OracleDialect extends PreparedStatementSQLDialect {
                     String[] axisNames;
                     if(geom.getCoordinateReferenceSystem() != null) {
                         CoordinateSystem cs = geom.getCoordinateReferenceSystem().getCoordinateSystem();
-                        if(geom.getUserData().get(Hints.COORDINATE_DIMENSION) != null) {
-                            dims = ((Number) geom.getUserData().get(Hints.COORDINATE_DIMENSION)).intValue();
+                        Object userDims = geom.getUserData().get(Hints.COORDINATE_DIMENSION);
+                        if(userDims != null && ((Number) userDims).intValue()> 0) {
+                            dims = ((Number) userDims).intValue();
                         } else {
                             dims = cs.getDimension();
                         }
@@ -1498,5 +1499,8 @@ public class OracleDialect extends PreparedStatementSQLDialect {
         
         return new Envelope(minx,maxx,miny,maxy);
     }
-
+    
+    public int getDefaultVarcharSize(){
+        return 4000;
+    }
 }

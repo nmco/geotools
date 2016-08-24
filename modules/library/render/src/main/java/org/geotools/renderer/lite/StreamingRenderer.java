@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  * 
- *    (C) 2004-2015, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2004-2016, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -1909,6 +1909,9 @@ public class StreamingRenderer implements GTRenderer {
         // render groups by uniform transformation
         for (List<LiteFeatureTypeStyle> uniform : txClassified) {
             FeatureCollection features = getFeatures(layer, schema, uniform);
+            if(features == null) {
+                continue;
+            }
 
             // finally, perform rendering
             if (isOptimizedFTSRenderingEnabled() && lfts.size() > 1) {
@@ -2502,12 +2505,17 @@ public class StreamingRenderer implements GTRenderer {
                     // It is a grid coverage
                     // //
                     final Object grid = gridPropertyName.evaluate(drawMe.feature);
+                    // resolve color map entry cql expressions before getting into another thread
+                    ColorMapEntryResolver simplifier = new ColorMapEntryResolver();
+                    symbolizer.accept(simplifier);
+                    final RasterSymbolizer rs = (RasterSymbolizer) simplifier.getCopy();
+                    
                     if (grid instanceof GridCoverage2D) {
                         coverage = (GridCoverage2D) grid;
                         if (coverage != null) {
                             disposeCoverage = grid instanceof DisposableGridCoverage;
                             requests.put(new RenderRasterRequest(graphics, coverage,
-                                    disposeCoverage, (RasterSymbolizer) symbolizer, destinationCrs,
+                                    disposeCoverage, rs, destinationCrs,
                                     worldToScreenTransform));
                             paintCommands++;
                         }
@@ -2516,7 +2524,7 @@ public class StreamingRenderer implements GTRenderer {
                                 .evaluate(drawMe.feature);
                         GridCoverage2DReader reader = (GridCoverage2DReader) grid;
                         requests.put(new RenderCoverageReaderRequest(graphics, reader, params,
-                                (RasterSymbolizer) symbolizer, destinationCrs,
+                                rs, destinationCrs,
                                 worldToScreenTransform,
                                 getRenderingInterpolation(drawMe.layer)));
                     }
@@ -2561,13 +2569,14 @@ public class StreamingRenderer implements GTRenderer {
                     Geometry g = clipper.clipSafe(shape.getGeometry(), preserveTopology, 1);
                     
                     // handle perpendincular offset as needed
-                    if(style instanceof LineStyle2D && ((LineStyle2D) style).getPerpendicularOffset() != 0) {
+                    if(style instanceof LineStyle2D && ((LineStyle2D) style).getPerpendicularOffset() != 0
+                            && g != null && !g.isEmpty()) {
                         LineStyle2D ls = (LineStyle2D) style;
                         double offset = ls.getPerpendicularOffset();
                         // people applying an offset on a polygon really expect a buffer instead,
                         // do so... however buffering is damn expensive, so let's apply some heuristics
                         // to still run the offset curve builder for the simplest cases
-                        if(source instanceof Polygon || source instanceof MultiPolygon && abs(offset) > 3) {
+                        if((source instanceof Polygon || source instanceof MultiPolygon) && abs(offset) > 3) {
                             // buffering is expensive, we can be a bit off with the 
                             // result, do simplify the geometry first 
                             Geometry simplified = TopologyPreservingSimplifier.simplify(source, Math.max(abs(offset) / 10, 1));
