@@ -16,29 +16,6 @@
  */
 package org.geotools.imageio.netcdf;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.geotools.coverage.grid.io.FileSetManager;
@@ -47,16 +24,11 @@ import org.geotools.coverage.io.catalog.DataStoreConfiguration;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.feature.NameImpl;
 import org.geotools.gce.imagemosaic.Utils;
-import org.geotools.gce.imagemosaic.catalog.index.Indexer;
+import org.geotools.gce.imagemosaic.catalog.index.*;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Collectors;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Collectors.Collector;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Coverages;
 import org.geotools.gce.imagemosaic.catalog.index.Indexer.Coverages.Coverage;
-import org.geotools.gce.imagemosaic.catalog.index.IndexerUtils;
-import org.geotools.gce.imagemosaic.catalog.index.ObjectFactory;
-import org.geotools.gce.imagemosaic.catalog.index.ParametersType;
-import org.geotools.gce.imagemosaic.catalog.index.SchemaType;
-import org.geotools.gce.imagemosaic.catalog.index.SchemasType;
 import org.geotools.gce.imagemosaic.properties.DefaultPropertiesCollectorSPI;
 import org.geotools.gce.imagemosaic.properties.PropertiesCollector;
 import org.geotools.gce.imagemosaic.properties.PropertiesCollectorFinder;
@@ -68,6 +40,20 @@ import org.geotools.resources.coverage.CoverageUtilities;
 import org.geotools.util.Utilities;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.type.Name;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** 
  * A class used to store any auxiliary indexing information
@@ -172,6 +158,8 @@ public class AncillaryFileManager implements FileSetManager{
     private static final Set<PropertiesCollectorSPI> pcSPIs = PropertiesCollectorFinder.getPropertiesCollectorSPI();
 
     private static JAXBContext CONTEXT = null;
+
+    private final Map<String, MultipleBandsDimensionInfo> multipleBandsDimensionsInfo = new HashMap<>();
 
     static {
         try {
@@ -537,7 +525,7 @@ public class AncillaryFileManager implements FileSetManager{
             Unmarshaller unmarshaller = CONTEXT.createUnmarshaller();
             if (unmarshaller != null) {
                 indexer = (Indexer) unmarshaller.unmarshal(indexerFile);
-
+                initMultipleBandsDimensionsInfo(indexer);
                 // Parsing schemas
                 final SchemasType schemas = indexer.getSchemas();
                 Map<String, String> schemaMapping = new HashMap<String, String>();
@@ -854,5 +842,22 @@ public class AncillaryFileManager implements FileSetManager{
         ParametersType indexerParams = indexer != null ? indexer.getParameters() : null;
         String param = IndexerUtils.getParam(indexerParams, parameterKey);
         return Boolean.valueOf(param);
+    }
+
+    private void initMultipleBandsDimensionsInfo(Indexer indexer) {
+        if (indexer.getMultipleBandsDimensions() == null ||
+                indexer.getMultipleBandsDimensions().getMultipleBandsDimension() == null) {
+            return;
+        }
+        for (Indexer.MultipleBandsDimensions.MultipleBandsDimension multipleBandsDimension
+                : indexer.getMultipleBandsDimensions().getMultipleBandsDimension()) {
+            NetCDFUtilities.addIgnoredDimension(multipleBandsDimension.getName());
+            multipleBandsDimensionsInfo.put(multipleBandsDimension.getName(),
+                    new MultipleBandsDimensionInfo(multipleBandsDimension.getBandsNames()));
+        }
+    }
+
+    MultipleBandsDimensionInfo getMultipleBandsDimensionInfo(String dimensionName) {
+        return multipleBandsDimensionsInfo.get(dimensionName);
     }
 }

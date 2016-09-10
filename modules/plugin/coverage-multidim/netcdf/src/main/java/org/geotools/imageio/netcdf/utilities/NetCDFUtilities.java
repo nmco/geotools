@@ -19,6 +19,21 @@ package org.geotools.imageio.netcdf.utilities;
 import it.geosolutions.imageio.stream.AccessibleStream;
 import it.geosolutions.imageio.stream.input.URIImageInputStream;
 import it.geosolutions.imageio.utilities.ImageIOUtilities;
+import org.geotools.data.DataUtilities;
+import org.geotools.gce.imagemosaic.ImageMosaicFormat;
+import org.geotools.imageio.netcdf.cv.CoordinateHandlerFinder;
+import org.geotools.imageio.netcdf.cv.CoordinateHandlerSpi;
+import org.geotools.referencing.operation.projection.MapProjection;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import ucar.ma2.*;
+import ucar.nc2.*;
+import ucar.nc2.constants.AxisType;
+import ucar.nc2.dataset.CoordinateAxis1D;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDataset.Enhance;
+import ucar.nc2.dataset.VariableDS;
+import ucar.nc2.jni.netcdf.Nc4Iosp;
 
 import java.awt.image.DataBuffer;
 import java.io.File;
@@ -28,44 +43,9 @@ import java.text.DateFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.geotools.data.DataUtilities;
-import org.geotools.gce.imagemosaic.ImageMosaicFormat;
-import org.geotools.imageio.netcdf.cv.CoordinateHandlerFinder;
-import org.geotools.imageio.netcdf.cv.CoordinateHandlerSpi;
-import org.geotools.referencing.operation.projection.MapProjection;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import ucar.ma2.Array;
-import ucar.ma2.ArrayByte;
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.ArrayShort;
-import ucar.ma2.DataType;
-import ucar.nc2.Attribute;
-import ucar.nc2.Dimension;
-import ucar.nc2.Group;
-import ucar.nc2.Variable;
-import ucar.nc2.VariableIF;
-import ucar.nc2.constants.AxisType;
-import ucar.nc2.dataset.CoordinateAxis1D;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dataset.NetcdfDataset.Enhance;
-import ucar.nc2.dataset.VariableDS;
-import ucar.nc2.jni.netcdf.Nc4Iosp;
 
 /**
  * Set of NetCDF utility methods.
@@ -384,6 +364,7 @@ public class NetCDFUtilities {
         Set<CoordinateHandlerSpi> handlers = CoordinateHandlerFinder.getAvailableHandlers();
         Iterator<CoordinateHandlerSpi> iterator = handlers.iterator();
         Set<String> ignoredSet = new HashSet<String>();
+        ignoredSet.add("data");
         while (iterator.hasNext()) {
             CoordinateHandlerSpi handler = iterator.next();
             Set<String> ignored = handler.getIgnoreSet();
@@ -392,9 +373,9 @@ public class NetCDFUtilities {
             }
         }
         if (!ignoredSet.isEmpty()) {
-            return Collections.unmodifiableSet(ignoredSet);
+            return ignoredSet;
         }
-        return Collections.<String>emptySet();
+        return new HashSet<>();
     }
 
     public static boolean isValidDir(File file) {
@@ -528,6 +509,7 @@ public class NetCDFUtilities {
                 if (group == null) {
                     return false;
                 }
+
                 if (IGNORED_DIMENSIONS.contains(dimName)) {
                     continue;
                 }
@@ -884,12 +866,16 @@ public class NetCDFUtilities {
         return UNSUPPORTED_DIMENSIONS;
     }
 
+    public static void addIgnoredDimension(String dimensionName) {
+        IGNORED_DIMENSIONS.add(dimensionName);
+    }
+
     /** 
      * @return an unmodifiable Set of the Dimensions to be ignored by the 
      * Coordinate parsing machinery
      */
     public static Set<String> getIgnoredDimensions() {
-        return IGNORED_DIMENSIONS;
+        return Collections.unmodifiableSet(IGNORED_DIMENSIONS);
     }
 
     /**

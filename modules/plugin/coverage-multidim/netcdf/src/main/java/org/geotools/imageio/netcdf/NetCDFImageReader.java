@@ -671,7 +671,7 @@ public class NetCDFImageReader extends GeoSpatialImageReader implements FileSetM
          * that defines the exact data that need to be read 
          * for this image index and parameters 
          */
-        final Section section = new Section(ranges);
+        Section section = new Section(ranges);
 
         // Setting SampleModel and ColorModel.
         final SampleModel sampleModel = wrapper.getSampleModel().createCompatibleSampleModel(destWidth, destHeight);
@@ -686,13 +686,26 @@ public class NetCDFImageReader extends GeoSpatialImageReader implements FileSetM
         boolean flipYAxis = needFlipYAxis(axis);
         // Reads the requested sub-region only.
         processImageStarted(imageIndex);
-        final int numDstBands = 1;
+
+        // check if this variable supports multiple bands
+        MultipleBandsDimensionInfo multipleBands = ancillaryFileManager.getMultipleBandsDimensionInfo(variableName);
+
+        final int numDstBands = multipleBands == null ? 1 : multipleBands.getNumberOfBands();
         final float toPercent = 100f / numDstBands;
         final int type = raster.getSampleModel().getDataType();
         final int xmin = destRegion.x;
         final int ymin = destRegion.y;
         final int xmax = destRegion.width + xmin;
         final int ymax = destRegion.height + ymin;
+        /*section = new Section();
+        try {
+            section.appendRange(new Range(0, 7, 1));
+            section.appendRange(new Range(0, 11, 1));
+            section.appendRange(new Range(0, 15, 1));
+            section.appendRange(new Range(0, 29, 1));
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }*/
         for( int zi = 0; zi < numDstBands; zi++ ) {
             // final int srcBand = (srcBands == null) ? zi : srcBands[zi];
             final int dstBand = (dstBands == null) ? zi : dstBands[zi];

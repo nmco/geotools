@@ -1117,7 +1117,8 @@ public class GridSampleDimension implements SampleDimension, Serializable {
         }
         if (object instanceof GridSampleDimension) {
             final GridSampleDimension that = (GridSampleDimension) object;
-            return Utilities.equals(this.categories, that.categories);
+            return this.description.equals(that.description)
+                    && Utilities.equals(this.categories, that.categories);
             // Since everything is deduced from CategoryList, two sample dimensions
             // should be equal if they have the same list of categories.
         }
