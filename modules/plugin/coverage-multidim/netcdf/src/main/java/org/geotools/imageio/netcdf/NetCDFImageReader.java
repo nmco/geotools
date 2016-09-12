@@ -686,16 +686,36 @@ public class NetCDFImageReader extends GeoSpatialImageReader implements FileSetM
         boolean flipYAxis = needFlipYAxis(axis);
         // Reads the requested sub-region only.
         processImageStarted(imageIndex);
-        final int numDstBands = 1;
+
+        // computing the number of bands, according to COARDS convention ignored dimension are at the beginning
+        int numDstBands = 1;
+        String candidateDimension = wrapper.variableDS.getDimensions().get(0).getFullName();
+        MultipleBandsDimensionInfo multipleBands = ancillaryFileManager.getMultipleBandsDimensionInfo(candidateDimension);
+        if (multipleBands != null) {
+            // multiple bands are defined for the ignored dimension
+            numDstBands = multipleBands.getNumberOfBands();
+        }
+
         final float toPercent = 100f / numDstBands;
         final int type = raster.getSampleModel().getDataType();
         final int xmin = destRegion.x;
         final int ymin = destRegion.y;
         final int xmax = destRegion.width + xmin;
         final int ymax = destRegion.height + ymin;
+
         for( int zi = 0; zi < numDstBands; zi++ ) {
             // final int srcBand = (srcBands == null) ? zi : srcBands[zi];
             final int dstBand = (dstBands == null) ? zi : dstBands[zi];
+            if (multipleBands != null) {
+                try {
+                    // since the value dimension has multiple bands we need to update the first range
+                    Range range = new Range(zi, zi, 1);
+                    // reading the dimensions values corresponding to the current band
+                    section.setRange(0, range);
+                } catch (InvalidRangeException exception) {
+                    throw netcdfFailure(exception);
+                }
+            }
             final Array array = readSection(wrapper, section);
             if (flipYAxis) {
                 final IndexIterator it = array.getIndexIterator();
