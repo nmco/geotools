@@ -51,6 +51,7 @@ import org.geotools.test.TestData;
 import org.geotools.util.logging.Logging;
 
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 /**
  * Confirm functionality of letter level conflict detection.
@@ -177,6 +178,7 @@ public class LetterConflictTest extends TestCase {
         mc.dispose();
     }
 
+    @Ignore
     public void testLetterConflictEnabledCurvedLine() throws Exception {
 
         LabelCacheImpl.DISABLE_LETTER_LEVEL_CONFLICT = true;
