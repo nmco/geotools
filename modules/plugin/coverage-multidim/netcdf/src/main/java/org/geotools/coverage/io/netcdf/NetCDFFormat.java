@@ -76,7 +76,8 @@ public class NetCDFFormat extends AbstractGridFormat{
                 ELEVATION,
                 FILTER,
 //                SORT_BY,
-//                MERGE_BEHAVIOR
+//                MERGE_BEHAVIOR,
+                    BANDS
         }));
 
         // reading parameters

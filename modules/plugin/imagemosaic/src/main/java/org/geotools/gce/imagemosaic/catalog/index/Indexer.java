@@ -858,14 +858,6 @@ public class Indexer {
 
     }
 
-    public File getIndexerFile() {
-        return indexerFile;
-    }
-
-    public void setIndexerFile(File indexerFile) {
-        this.indexerFile = indexerFile;
-    }
-
     /**
      * <p>Java class for anonymous complex type.
      *
