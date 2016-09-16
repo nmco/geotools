@@ -960,28 +960,28 @@ public class RasterManager {
                 for (int i = 0; i < numOverviews; i++) {
                     overviews[i][0] = levels[i+1][0];
                     overviews[i][1] = levels[i+1][1];
-
-            if (configuration.getIndexer() != null) {
-            	Indexer indexer = configuration.getIndexer();
-	            // handling multiple bands dimension if needed
-	            if (indexer.getMultipleBandsDimensions() != null
-	                    && indexer.getMultipleBandsDimensions().getMultipleBandsDimension() != null
-	                    && !indexer.getMultipleBandsDimensions().getMultipleBandsDimension().isEmpty()) {
-	                // we have at least one dimension with multiple bands
-	                List<MultipleBandsDimension> multipleBandsDimensions = indexer.getMultipleBandsDimensions().getMultipleBandsDimension();
-	                if (multipleBandsDimensions.size() != 1) {
-	                    // currently we only support a single dimension with multiple bands
-	                    throw new IllegalStateException("Only a single dimension with multiple bands is supported.");
-	                }
-	                // well we only need to fill the provided bands names
-	                providedBandsNames = multipleBandsDimensions.get(0).getBandsNames().split("\\s*,\\s*");
-	            }
-            }
                 }
             }
             overviewsController = new OverviewsController(highRes,
                   numOverviews, overviews);
             imposedEnvelope = configuration.getEnvelope();
+
+            if (configuration.getIndexer() != null) {
+                Indexer indexer = configuration.getIndexer();
+                // handling multiple bands dimension if needed
+                if (indexer.getMultipleBandsDimensions() != null
+                        && indexer.getMultipleBandsDimensions().getMultipleBandsDimension() != null
+                        && !indexer.getMultipleBandsDimensions().getMultipleBandsDimension().isEmpty()) {
+                    // we have at least one dimension with multiple bands
+                    List<MultipleBandsDimension> multipleBandsDimensions = indexer.getMultipleBandsDimensions().getMultipleBandsDimension();
+                    if (multipleBandsDimensions.size() != 1) {
+                        // currently we only support a single dimension with multiple bands
+                        throw new IllegalStateException("Only a single dimension with multiple bands is supported.");
+                    }
+                    // well we only need to fill the provided bands names
+                    providedBandsNames = multipleBandsDimensions.get(0).getBandsNames().split("\\s*,\\s*");
+                }
+            }
         }
     }
 
