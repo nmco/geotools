@@ -80,6 +80,11 @@
             <artifactId>gt-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-app-schema</artifactId>
+          <version>${project.version}</version>
+        </dependency>
         <!--   Third-party dependencies   -->
         <!--   version number defined here as this is a community module -->
         <dependency>
@@ -101,6 +106,11 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-complex</artifactId>
+        <version>${project.version}</version>
+      </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
@@ -128,6 +138,17 @@
     </dependencies>
 
   <build>
+      <testResources>
+        <testResource>
+          <directory>src/test/resources</directory>
+          <includes>
+            <include>**/*.properties</include>
+            <include>**/*.xml</include>
+            <include>**/*.xsd</include>
+            <include>**/app-schema-cache/**</include>
+          </includes>
+        </testResource>
+      </testResources>
     <plugins>
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>

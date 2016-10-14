@@ -64,6 +64,7 @@ import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.jdbc.JDBCFeatureSource;
 import org.geotools.jdbc.JDBCFeatureStore;
+import org.geotools.referencing.CRS;
 import org.geotools.xml.resolver.SchemaCache;
 import org.geotools.xml.resolver.SchemaCatalog;
 import org.geotools.xml.resolver.SchemaResolver;
@@ -103,19 +104,19 @@ public class AppSchemaDataAccessConfigurator {
     public static String PROPERTY_JOINING = "app-schema.joining"; 
 
     /** DOCUMENT ME! */
-    private AppSchemaDataAccessDTO config;
+    protected AppSchemaDataAccessDTO config;
 
-    private AppSchemaFeatureTypeRegistry typeRegistry;
-    
-    private FilterFactory ff = new FilterFactoryImplReportInvalidProperty();
+    protected AppSchemaFeatureTypeRegistry typeRegistry;
+
+    protected FilterFactory ff = new FilterFactoryImplReportInvalidProperty();
 
     /**
      * Placeholder for the prefix:namespaceURI mappings declared in the Namespaces section of the
      * mapping file.
      */
-    private NamespaceSupport namespaces;
-    
-    private Map schemaURIs;
+    protected NamespaceSupport namespaces;
+
+    protected Map schemaURIs;
         
     /**
      * Convenience method for "joining" property.
@@ -137,7 +138,7 @@ public class AppSchemaDataAccessConfigurator {
      * @param config
      *            DOCUMENT ME!
      */
-    private AppSchemaDataAccessConfigurator(AppSchemaDataAccessDTO config) {
+    protected AppSchemaDataAccessConfigurator(AppSchemaDataAccessDTO config) {
         this.config = config;
         namespaces = new NamespaceSupport();
         Map nsMap = config.getNamespaces();
@@ -189,7 +190,7 @@ public class AppSchemaDataAccessConfigurator {
      * @throws IOException
      *             DOCUMENT ME!
      */
-    private Set<FeatureTypeMapping> buildMappings() throws IOException {
+    protected Set<FeatureTypeMapping> buildMappings() throws IOException {
         // -parse target xml schemas, let parsed types on <code>registry</code>
         try {
             parseGmlSchemas();
@@ -256,7 +257,7 @@ public class AppSchemaDataAccessConfigurator {
                 // get CRS from underlying feature source and pass it on
                 CoordinateReferenceSystem crs;
                 try {
-                    crs = featureSource.getSchema().getCoordinateReferenceSystem();
+                    crs = featureSource != null ? featureSource.getSchema().getCoordinateReferenceSystem() : CRS.decode("EPSG:4283");
                 } catch (UnsupportedOperationException e) {
                     // web service back end doesn't support getSchema
                     crs = null;
@@ -509,8 +510,9 @@ public class AppSchemaDataAccessConfigurator {
 
         DataAccess<FeatureType, Feature> sourceDataStore = sourceDataStores.get(dsId);
         if (sourceDataStore == null) {
-            throw new DataSourceException("datastore " + dsId + " not found for type mapping "
-                    + dto);
+            return null;
+            //throw new DataSourceException("datastore " + dsId + " not found for type mapping "
+            //        + dto);
         }
 
         AppSchemaDataAccessConfigurator.LOGGER.fine("asking datastore " + sourceDataStore
@@ -536,7 +538,7 @@ public class AppSchemaDataAccessConfigurator {
      * 
      * @throws IOException
      */
-    private void parseGmlSchemas() throws IOException {
+    protected void parseGmlSchemas() throws IOException {
         AppSchemaDataAccessConfigurator.LOGGER.finer("about to parse target schemas");
 
         final URL baseUrl = new URL(config.getBaseSchemasUrl());

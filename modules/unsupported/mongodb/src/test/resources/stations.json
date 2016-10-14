@@ -1,0 +1,26 @@
+{
+    "name": "station-1432",
+    "location": {
+        "coordinates": [
+            10.475206,
+            59.917694
+        ],
+        "type": "Point"
+    },
+    "measurements": [
+        {
+            "code": "TEMPERATURE",
+            "measurement": {
+                "value": 25.3,
+                "unit": "K"
+            }
+        },
+        {
+            "code": "PRESSURE",
+            "measurement": {
+                "value": 55.3,
+                "unit": "Pa"
+            }
+        }
+    ]
+}

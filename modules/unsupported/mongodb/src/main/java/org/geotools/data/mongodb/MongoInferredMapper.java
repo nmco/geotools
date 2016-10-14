@@ -112,7 +112,7 @@ public class MongoInferredMapper extends AbstractCollectionMapper {
         		}
         	}
         }
-        
+
         SimpleFeatureTypeBuilder ftBuilder = new SimpleFeatureTypeBuilder();
         ftBuilder.setName(name);
         

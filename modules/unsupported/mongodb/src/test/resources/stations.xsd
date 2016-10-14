@@ -1,0 +1,25 @@
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml/3.2">
+
+  <xs:import namespace="http://www.opengis.net/gml/3.2"
+    schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+
+  <xs:complexType name="MeasurementType">
+    <xs:sequence>
+      <xs:element name="code" type="xs:string"/>
+      <xs:element name="value" type="xs:double"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StationType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element name="Measurement" minOccurs="0" maxOccurs="unbounded" type="MeasurementType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="StationFeature" type="StationType" substitutionGroup="gml:AbstractFeature"/>
+
+</xs:schema>
