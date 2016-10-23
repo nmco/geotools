@@ -49,6 +49,7 @@ public class ComplexAttributeImpl extends AttributeImpl implements ComplexAttrib
     }
     
     public Collection<? extends Property> getValue() {
+        Object value = super.getValue();
        return FeatureImplUtils.unmodifiable((Collection) super.getValue());
     }
     

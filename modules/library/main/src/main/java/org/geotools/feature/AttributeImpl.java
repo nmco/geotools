@@ -25,6 +25,8 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.filter.identity.Identifier;
 
+import java.util.Collection;
+
 /**
  * Simple, mutable class to store attributes.
  * 
@@ -155,7 +157,8 @@ public class AttributeImpl extends PropertyImpl implements Attribute {
 	 */
 	protected Object parse(Object value) throws IllegalArgumentException {
     	if ( value != null ) {
-    		Class target = getType().getBinding(); 
+    		Class target = getType().getBinding();
+			//target = getType().getName().toString().toLowerCase().contains("situationrecord") ? Collection.class : target;
     		if ( !target.isAssignableFrom( value.getClass() ) ) {
     			// attempt to convert
     			Object converted = Converters.convert(value,target);
