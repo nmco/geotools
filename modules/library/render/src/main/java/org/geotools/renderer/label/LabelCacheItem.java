@@ -87,6 +87,8 @@ public class LabelCacheItem implements Comparable<LabelCacheItem> {
     
     int[] graphicMargin = null;
 
+    boolean textUnderlineEnabled = false;
+
     TextSymbolizer symbolizer;
 
     public double getGoodnessOfFit() {
@@ -371,6 +373,14 @@ public class LabelCacheItem implements Comparable<LabelCacheItem> {
 
     public void setPartialsEnabled(boolean partialsEnabled) {
         this.partialsEnabled = partialsEnabled;
+    }
+
+    public boolean isTextUnderlineEnabled() {
+        return textUnderlineEnabled;
+    }
+
+    public void setTextUnderlineEnabled(boolean textUnderlineEnabled) {
+        this.textUnderlineEnabled = textUnderlineEnabled;
     }
 
     @Override

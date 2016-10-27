@@ -16,20 +16,17 @@
  */
 package org.geotools.renderer.label;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -364,7 +361,10 @@ public class LabelPainter {
 
             // draw the label
             if (lines.size() == 1 && lines.get(0).getComponents().size() == 1) {
-                drawGlyphVector(lines.get(0).getComponents().get(0).getGlyphVector());
+                LineComponent component = lines.get(0).getComponents().get(0);
+                LineMetrics metrics = computeLineMetricsIfNeeded(component);
+                drawGlyphVector(component.getGlyphVector(), metrics);
+
             } else {
                 // for multiline labels we have to go thru the lines and apply
                 // the proper transformation
@@ -375,7 +375,8 @@ public class LabelPainter {
                         lineTx.setTransform(newTransform);
                         lineTx.translate(component.getX(), line.getY());
                         graphics.setTransform(lineTx);
-                        drawGlyphVector(component.getGlyphVector());
+                        LineMetrics metrics = computeLineMetricsIfNeeded(component);
+                        drawGlyphVector(component.getGlyphVector(), metrics);
                     }
 
                 }
@@ -489,14 +490,20 @@ public class LabelPainter {
      * 
      * @param gv
      */
-    private void drawGlyphVector(GlyphVector gv) {
+    private void drawGlyphVector(GlyphVector gv, LineMetrics metrics) {
         java.awt.Shape outline = gv.getOutline();
         if (labelItem.getTextStyle().getHaloFill() != null) {
             configureHalo();
             graphics.draw(outline);
         }
+        // draw a line under this label text if needed
+        if (labelItem.isTextUnderlineEnabled()) {
+            // draw the under line halo
+            drawTextUnderlineIfNeeded(outline, metrics, true);
+        }
         configureLabelStyle();
-        
+        // draw the under line
+        drawTextUnderlineIfNeeded(outline, metrics, false);
         if(labelRenderingMode == LabelRenderingMode.STRING) {
             graphics.drawGlyphVector(gv, 0, 0);
         } else if(labelRenderingMode == LabelRenderingMode.OUTLINE) {
@@ -508,6 +515,109 @@ public class LabelPainter {
             } else {
                 graphics.drawGlyphVector(gv, 0, 0);
             }
+        }
+    }
+
+    private LineMetrics computeLineMetricsIfNeeded(LineComponent component) {
+        if (labelItem.isTextUnderlineEnabled()) {
+            return component.computeLineMetrics(graphics.getFontRenderContext());
+        }
+        return null;
+    }
+
+    private List<Double> computeUnderlineIntervalsIfNeeded(java.awt.Shape[] outlines) {
+        if (!labelItem.isTextUnderlineEnabled() || outlines.length < 1) {
+            return Collections.emptyList();
+        }
+        List<Double> intervals = new ArrayList<>();
+        for (int i = 0; i < outlines.length;) {
+            if (isOutlineEmpty(outlines[i])) {
+                List<Double> emptyIntervals = computeUnderlineEmptyIntervals(outlines, i);
+                if (emptyIntervals.isEmpty()) {
+                    return intervals;
+                }
+                intervals.addAll(emptyIntervals);
+                i += emptyIntervals.size() / 2;
+            } else {
+                intervals.add(outlines[i].getBounds().getMinX());
+                intervals.add(outlines[i].getBounds().getMaxX());
+                i++;
+            }
+        }
+        return intervals;
+    }
+
+    private boolean isOutlineEmpty(java.awt.Shape outline) {
+        Rectangle2D bounds = outline.getBounds();
+        double minX = bounds.getMinX();
+        double maxX = bounds.getMaxX();
+        return Math.abs(maxX - minX) < 0.0000001;
+    }
+
+    private List<Double> computeUnderlineEmptyIntervals(java.awt.Shape[] outlines, int emptyIndex) {
+        int emptyIntervals = 0;
+        for (int i = emptyIndex; i < outlines.length; i++) {
+            Rectangle2D bounds = outlines[i].getBounds();
+            double minX = bounds.getMinX();
+            double maxX = bounds.getMaxX();
+            if (!isOutlineEmpty(outlines[i])) {
+                break;
+            }
+            emptyIntervals++;
+        }
+        int nextNonEmptyIndex = emptyIndex + emptyIntervals;
+        if (nextNonEmptyIndex > outlines.length - 1) {
+            return Collections.emptyList();
+        }
+        int previousNonEmptyIndex = Math.max(emptyIndex - 1, 0);
+        double minX = outlines[previousNonEmptyIndex].getBounds().getMaxX();
+        double maxX = outlines[nextNonEmptyIndex].getBounds().getMinX();
+        double step = (maxX - minX) / emptyIntervals;
+        double lastValue = minX;
+        List<Double> intervals = new ArrayList<>();
+        for (int i = 0; i < emptyIntervals; i++) {
+            intervals.add(lastValue);
+            lastValue += step;
+            intervals.add(lastValue);
+        }
+        return intervals;
+    }
+
+    /**
+     * Draws a line under the text with the same color of the text and with the same width
+     * using the provided thickness and offset.
+     */
+    private void drawTextUnderlineIfNeeded(java.awt.Shape outline, LineMetrics metrics, boolean drawingHalo) {
+        Rectangle2D bounds = outline.getBounds2D().getBounds();
+        double minX = bounds.getMinX();
+        double maxX = bounds.getMaxX();
+        drawTextUnderlineIfNeeded(minX, maxX, metrics, drawingHalo);
+    }
+
+    /**
+     * Draws a line under the text with the same color of the text and with the same width
+     * using the provided thickness and offset.
+     */
+    private void drawTextUnderlineIfNeeded(double minX, double maxX, LineMetrics metrics, boolean drawingHalo) {
+        // let's see if text underline is enabled for this label or we have something to draw
+        if (!labelItem.isTextUnderlineEnabled() || (Math.abs(maxX - minX) < 0.0000001)) {
+            // text underline not enabled or nothing to draw
+            return;
+        }
+        // get needed metrics values
+        float underlineThickness = metrics.getUnderlineThickness();
+        float underlineOffset = metrics.getUnderlineOffset();
+        // let's se if we are drawing the halo around the underline line
+        if (drawingHalo) {
+            graphics.draw(new Line2D.Double(minX, underlineOffset * 2, maxX, underlineOffset * 2));
+        } else {
+            // storing the current stroke and setting the stroke according to underline thickness
+            Stroke currentStroke = graphics.getStroke();
+            graphics.setStroke(new BasicStroke(underlineThickness * 2));
+            // we draw a line with the same color of the text and a stroke of 2
+            graphics.draw(new Line2D.Double(minX, underlineOffset * 2, maxX, underlineOffset * 2));
+            // we need to restore the previous stroke
+            graphics.setStroke(currentStroke);
         }
     }
 
@@ -546,6 +656,17 @@ public class LabelPainter {
         graphics.setComposite(comp);
     }
 
+    private static class LineSegment {
+
+        final Coordinate start;
+        final Coordinate end;
+
+        public LineSegment(Coordinate start, Coordinate end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+
     /**
      * Paints a label that follows the line, centered in the current cursor
      * position
@@ -580,12 +701,30 @@ public class LabelPainter {
         if (startOrdinate < 0)
             startOrdinate = 0;
         cursor.moveTo(startOrdinate);
+        float last = 0;
         for (LineComponent component : line.getComponents()) {
             GlyphVector glyphVector = component.getGlyphVector();
+            // if metrics are not need in the current context they will be NULL
+            // compute intervals for the the under line, we need to do this to handle spaces properly
+            List<Float> intervals = new ArrayList<>();
+            List<AffineTransform> intervalsTransforms = new ArrayList<>();
+            LineMetrics metrics = computeLineMetricsIfNeeded(component);
             try {
                 final int numGlyphs = glyphVector.getNumGlyphs();
                 float nextAdvance = glyphVector.getGlyphMetrics(0).getAdvance() * 0.5f;
                 double start = cursor.getCurrentOrdinate();
+                // segments
+                Coordinate[] coordinates = cursor.lineString.getCoordinates();
+                for (int i = 0; i < cursor.lineString.getCoordinates().length; i++) {
+                    if (i + 1 > coordinates.length) {
+                        break;
+                    }
+                    AffineTransform t = new AffineTransform(graphics.getTransform());
+                    t.rotate(cursor.getSegmentAngle(i));
+                    t.translate(coordinates[i].x, coordinates[i].y + getLineHeight() * anchorY);
+                    graphics.setTransform(t);
+                    graphics.draw(new Line2D.Double(coordinates[i].x, 1, coordinates[i + 1].x, 1));
+                }
                 Shape[] outlines = new Shape[numGlyphs];
                 AffineTransform[] transforms = new AffineTransform[numGlyphs];
                 for (int i = 0; i < numGlyphs; i++) {
@@ -594,7 +733,9 @@ public class LabelPainter {
                     float advance = nextAdvance;
                     nextAdvance = i < numGlyphs - 1
                             ? glyphVector.getGlyphMetrics(i + 1).getAdvance() * 0.5f : 0;
-
+                    //intervals.add(last);
+                    //intervals.add(last + advance + nextAdvance);
+                    last += advance + nextAdvance;
                     c = cursor.getCurrentPosition(c);
                     AffineTransform t = new AffineTransform(graphics.getTransform());
                     t.translate(c.x, c.y);
@@ -605,17 +746,41 @@ public class LabelPainter {
                     cursor.moveTo(cursor.getCurrentOrdinate() + advance + nextAdvance);
                 }
 
+                // compute intervals for the the under line, we need to do this to handle spaces properly
+                //List<Double> intervals = computeUnderlineIntervalsIfNeeded(outlines);
+
                 // draw halo and label
                 if (labelItem.getTextStyle().getHaloFill() != null) {
                     configureHalo();
                     for (int i = 0; i < numGlyphs; i++) {
                         graphics.setTransform(transforms[i]);
+                        // draw text under line halo
+                        //if (labelItem.isTextUnderlineEnabled()) {
+                        //    int intervalIndex = i * 2;
+                        //    double minX = intervals.get(intervalIndex);
+                        //    double maxX = intervals.get(intervalIndex + 1);
+                        //    drawTextUnderlineIfNeeded(minX, maxX, metrics, true);
+                        //}
                         graphics.draw(outlines[i]);
                     }
                 }
                 configureLabelStyle();
+                for (int i = 0; i < intervals.size(); i+=2) {
+                    if (labelItem.isTextUnderlineEnabled()) {
+                        double minX = intervals.get(i);
+                        double maxX = intervals.get(i + 1);
+                        //drawTextUnderlineIfNeeded(minX, maxX, metrics, false);
+                    }
+                }
                 for (int i = 0; i < numGlyphs; i++) {
                     graphics.setTransform(transforms[i]);
+                    // draw text under line
+                    //if (labelItem.isTextUnderlineEnabled()) {
+                    //    int intervalIndex = i * 2;
+                    //    double minX = intervals.get(intervalIndex);
+                    //    double maxX = intervals.get(intervalIndex + 1);
+                    //    drawTextUnderlineIfNeeded(minX, maxX, metrics, false);
+                    //}
                     graphics.fill(outlines[i]);
                 }
 
