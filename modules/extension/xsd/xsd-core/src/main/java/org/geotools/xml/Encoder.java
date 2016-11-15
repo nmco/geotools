@@ -74,6 +74,8 @@ import org.geotools.xml.impl.GetPropertyExecutor;
 import org.geotools.xml.impl.NamespaceSupportWrapper;
 import org.geotools.xml.impl.SchemaIndexImpl;
 import org.geotools.xs.XS;
+import org.opengis.feature.ComplexAttribute;
+import org.opengis.feature.Property;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoContainer;
 import org.picocontainer.defaults.DefaultPicoContainer;
@@ -618,6 +620,20 @@ public class Encoder {
         }
     }
 
+    private boolean isNonSttrippedNestedEntity(Object next) {
+        if (!(next instanceof ComplexAttribute)) {
+            return false;
+        }
+        ComplexAttribute complex = (ComplexAttribute) next;
+        // let's se if we need to encode this
+        Collection<Property> nestedProperties = complex.getProperties();
+        if (nestedProperties == null || nestedProperties.isEmpty()) {
+            return false;
+        }
+        // if all the properties have the same
+        return nestedProperties.stream().allMatch(property -> property.getType().getName().equals(complex.getType().getName()));
+    }
+
     public void encode(Object object, QName name, ContentHandler handler)
         throws IOException, SAXException {
         
@@ -744,7 +760,14 @@ public class Encoder {
                         }
                         else {
                             //add the next object to be encoded to the stack
-                            encoded.push(new EncodingEntry(next, element,entry));                            
+                            //encoded.push(new EncodingEntry(next, element, entry));
+                            if (isNonSttrippedNestedEntity(next)) {
+                                for (Property property : ((ComplexAttribute) next).getProperties()) {
+                                    encoded.push(new EncodingEntry(property, element, entry));
+                                }
+                            } else {
+                                encoded.push(new EncodingEntry(next, element, entry));
+                            }
                         }
                     } else {
                         //iterator done, close it
