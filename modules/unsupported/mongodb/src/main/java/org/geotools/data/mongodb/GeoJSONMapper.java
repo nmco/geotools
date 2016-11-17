@@ -37,6 +37,10 @@ public class GeoJSONMapper extends AbstractCollectionMapper {
 
     MongoGeometryBuilder geomBuilder = new MongoGeometryBuilder();
 
+    public GeoJSONMapper() {
+        super(false);
+    }
+
     @Override
     public String getGeometryPath() {
         return "geometry";

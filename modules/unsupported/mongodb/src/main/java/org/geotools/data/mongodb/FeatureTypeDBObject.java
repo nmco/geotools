@@ -21,15 +21,21 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.vividsolutions.jts.geom.Geometry;
+
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geotools.feature.AttributeTypeBuilder;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.AttributeDescriptorImpl;
+import org.geotools.feature.type.AttributeTypeImpl;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.FactoryException;
@@ -125,6 +131,9 @@ public class FeatureTypeDBObject {
     public static SimpleFeatureType convert(DBObject ftDBO, Name name) {
 
         SimpleFeatureTypeBuilder ftBuilder = new SimpleFeatureTypeBuilder();
+
+        AttributeType at = new AttributeTypeImpl(new NameImpl("mongoComplexObject"), Object.class, false, false, Collections.EMPTY_LIST, null, null);
+        AttributeDescriptor atd = new AttributeDescriptorImpl(at, new NameImpl("mongoComplexObject"), 0, 1, false, null);
 
         if (name == null) {
             ftBuilder.setName(extractString(ftDBO, KEY_typeName));

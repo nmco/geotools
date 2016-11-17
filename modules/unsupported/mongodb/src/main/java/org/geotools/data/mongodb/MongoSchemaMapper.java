@@ -37,7 +37,8 @@ public class MongoSchemaMapper extends AbstractCollectionMapper {
 
     final SimpleFeatureType schema;
     
-    public MongoSchemaMapper(SimpleFeatureType schema) {
+    public MongoSchemaMapper(SimpleFeatureType schema, boolean isComplex) {
+        super(isComplex);
         this.schema = schema;
     }
 

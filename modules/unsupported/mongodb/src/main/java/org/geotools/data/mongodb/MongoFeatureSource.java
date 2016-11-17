@@ -19,7 +19,10 @@ package org.geotools.data.mongodb;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,16 +31,26 @@ import org.geotools.data.FeatureReader;
 import org.geotools.data.FilteringFeatureReader;
 import org.geotools.data.Query;
 import org.geotools.data.ReTypeFeatureReader;
+import org.geotools.data.mongodb.complex.CollectionIdFunction;
+import org.geotools.data.mongodb.complex.CollectionInfoHolder;
+import org.geotools.data.mongodb.complex.JsonSelectFunction;
+import org.geotools.data.mongodb.complex.MongoComplexUtilities;
+import org.geotools.data.mongodb.complex.CollectionLinkFunction;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.filter.IsEqualsToImpl;
+import org.geotools.filter.LiteralExpressionImpl;
+import org.geotools.filter.visitor.AbstractFilterVisitor;
 import org.geotools.filter.visitor.PostPreProcessFilterSplittingVisitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.PropertyIsEqualTo;
 import org.opengis.filter.PropertyIsLike;
+import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
@@ -55,16 +68,19 @@ public class MongoFeatureSource extends ContentFeatureSource {
 
     CollectionMapper mapper;
 
-    public MongoFeatureSource(ContentEntry entry, Query query, DBCollection collection) {
+    private final boolean isComplex;
+
+    public MongoFeatureSource(ContentEntry entry, Query query, DBCollection collection, boolean isComplex) {
         super(entry, query);
+        this.isComplex = isComplex;
         this.collection = collection;
-        initMapper();
+        initMapper(isComplex);
     }
 
-    final void initMapper() {
+    final void initMapper(boolean isComplex) {
         // use schema with mapping info if it exists
         SimpleFeatureType type = entry.getState(null).getFeatureType();
-        setMapper(type != null ? new MongoSchemaMapper(type) : new MongoInferredMapper());
+        setMapper(type != null ? new MongoSchemaMapper(type, isComplex) : new MongoInferredMapper(isComplex));
     }
 
     public DBCollection getCollection() {
@@ -129,14 +145,68 @@ public class MongoFeatureSource extends ContentFeatureSource {
         return (int) collection.count(q);
     }
 
+    private static class SubCollectionFilterVisitor extends AbstractFilterVisitor {
+
+        @Override
+        public Object visit(PropertyIsEqualTo filter, Object data) {
+            Expression expression = filter.getExpression1();
+            if (expression instanceof CollectionLinkFunction) {
+                CollectionLinkFunction link = (CollectionLinkFunction) expression;
+                String nodeId = filter.getExpression2().toString();
+                Map<String, String> objectsIds = MongoComplexUtilities.extractCollectionsIndexes(nodeId);
+                CollectionInfoHolder collectionInfoHolder = (CollectionInfoHolder) data;
+                collectionInfoHolder.setContainsCollectionInfo(true);
+                collectionInfoHolder.setCollectionPath(link.getParameters().get(0).toString());
+                collectionInfoHolder.setObjectsIds(objectsIds);
+                collectionInfoHolder.setNodeId(nodeId);
+                String rootId = objectsIds.get("");
+                return buildIdCompare(link.getParameters().get(1), rootId);
+            }
+            if (expression instanceof CollectionIdFunction) {
+                CollectionIdFunction link = (CollectionIdFunction) expression;
+                String nodeId = filter.getExpression2().toString();
+                Map<String, String> objectsIds = MongoComplexUtilities.extractCollectionsIndexes(nodeId);
+                CollectionInfoHolder collectionInfoHolder = (CollectionInfoHolder) data;
+                collectionInfoHolder.setContainsCollectionInfo(false);
+                collectionInfoHolder.setCollectionPath(link.getParameters().get(0).toString());
+                collectionInfoHolder.setObjectsIds(objectsIds);
+                collectionInfoHolder.setNodeId(nodeId);
+                String rootId = objectsIds.get("");
+                return buildIdCompare(link.getParameters().get(1), rootId);
+            }
+            return super.visit(filter, data);
+        }
+
+        private PropertyIsEqualTo buildIdCompare(Expression rootIdPath, String expectedId) {
+            JsonSelectFunction idSelectExpression = new JsonSelectFunction();
+            idSelectExpression.setParameters(Collections.singletonList(rootIdPath));
+            IsEqualsToImpl comparison = new IsEqualsToImpl();
+            comparison.setExpression1(idSelectExpression);
+            comparison.setExpression2(new LiteralExpressionImpl(expectedId));
+            return comparison;
+        }
+    }
+
+
     @Override
     protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query)
             throws IOException {
 
+        SubCollectionFilterVisitor visitor = new SubCollectionFilterVisitor();
+        CollectionInfoHolder collectionInfoHolder = new CollectionInfoHolder();
+        query.getFilter().accept(visitor, collectionInfoHolder);
+
+        Map<String, String> objectsIds = collectionInfoHolder.getObjectsIds();
+        if (objectsIds == null) {
+            objectsIds = new HashMap<>();
+            collectionInfoHolder.setObjectsIds(objectsIds);
+        }
+        objectsIds.put("QUERY.FILTER", query.getFilter().toString());
+
         List<Filter> postFilterList = new ArrayList<Filter>();
         List<String> postFilterAttributes = new ArrayList<String>();
         DBCursor cursor = toCursor(query, postFilterList, postFilterAttributes);
-        FeatureReader<SimpleFeatureType, SimpleFeature> r = new MongoFeatureReader(cursor, this);
+        FeatureReader<SimpleFeatureType, SimpleFeature> r = new MongoFeatureReader(cursor, this, collectionInfoHolder);
 
         if (!postFilterList.isEmpty() && !isAll(postFilterList.get(0))) {
             r = new FilteringFeatureReader<SimpleFeatureType, SimpleFeature>(r, postFilterList.get(0));
