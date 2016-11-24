@@ -427,6 +427,13 @@ public class NestedAttributeMapping extends AttributeMapping {
         return matchingFeatures;
     }
 
+    public List<AttributeMapping> getAttributesMappings() {
+        if (mappingSource != null && mappingSource instanceof MappingFeatureSource) {
+           return ((MappingFeatureSource) mappingSource).getMapping().getAttributeMappings();
+        }
+        return Collections.emptyList();
+    }
+
     protected FeatureSource<FeatureType, Feature> getMappingSource(Object feature)
             throws IOException {
 

@@ -30,11 +30,16 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.mongodb.complex.MongoObjectHolder;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.AttributeDescriptorImpl;
+import org.geotools.feature.type.AttributeTypeImpl;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.Name;
 
 /**
@@ -49,7 +54,11 @@ public class MongoInferredMapper extends AbstractCollectionMapper {
     MongoGeometryBuilder geomBuilder = new MongoGeometryBuilder();
 
     SimpleFeatureType schema;
-    
+
+    public MongoInferredMapper(boolean isComplex) {
+        super(isComplex);
+    }
+
     @Override
     public String getGeometryPath() {
         String gdName = schema.getGeometryDescriptor().getLocalName();
@@ -115,6 +124,7 @@ public class MongoInferredMapper extends AbstractCollectionMapper {
         
         SimpleFeatureTypeBuilder ftBuilder = new SimpleFeatureTypeBuilder();
         ftBuilder.setName(name);
+        MongoObjectHolder.addAttributeDescriptor(ftBuilder);
         
         // NOTE: for now we just use first (hopefully only) indexed geometry we find
         String geometryField = indexedGeometries.iterator().next();

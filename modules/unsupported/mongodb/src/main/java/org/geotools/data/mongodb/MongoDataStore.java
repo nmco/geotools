@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,17 +37,22 @@ import java.util.logging.Level;
 
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
+import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.data.store.ContentState;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.AttributeDescriptorImpl;
+import org.geotools.feature.type.AttributeTypeImpl;
 import org.geotools.filter.FilterCapabilities;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.And;
 import org.opengis.filter.Filter;
@@ -70,20 +76,22 @@ public class MongoDataStore extends ContentDataStore {
     
     final MongoClient dataStoreClient;
     final DB dataStoreDB;
+
+    private final boolean isComplex;
     
     @SuppressWarnings("deprecation")
     FilterCapabilities filterCapabilities;
     
-    public MongoDataStore(String dataStoreURI) {
-        this(dataStoreURI, null);
+    public MongoDataStore(String dataStoreURI, boolean isComplex) {
+        this(dataStoreURI, null, isComplex);
     }
     
-    public MongoDataStore(String dataStoreURI, String schemaStoreURI) {
-        this(dataStoreURI, schemaStoreURI, true);
+    public MongoDataStore(String dataStoreURI, String schemaStoreURI, boolean isComplex) {
+        this(dataStoreURI, schemaStoreURI, true, isComplex);
     }
     
-    public MongoDataStore(String dataStoreURI, String schemaStoreURI, boolean createDatabaseIfNeeded) {
-                
+    public MongoDataStore(String dataStoreURI, String schemaStoreURI, boolean createDatabaseIfNeeded, boolean isComplex) {
+        this.isComplex = isComplex;
         MongoClientURI dataStoreClientURI = createMongoClientURI(dataStoreURI);
         dataStoreClient = createMongoClient(dataStoreClientURI);
         dataStoreDB = createDB(dataStoreClient, dataStoreClientURI.getDatabase(), !createDatabaseIfNeeded);
@@ -140,6 +148,14 @@ public class MongoDataStore extends ContentDataStore {
                 return new MongoSchemaDBStore(schemaStoreURI);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Unable to create mongodb-based schema store with URI \"" + schemaStoreURI + "\"", e);
+            }
+        } else {
+            try {
+                return new MongoSchemaFileStore("file:" + schemaStoreURI);
+            } catch (URISyntaxException e) {
+                LOGGER.log(Level.SEVERE, "Unable to create file-based schema store with URI \"" + schemaStoreURI + "\"", e);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Unable to create file-based schema store with URI \"" + schemaStoreURI + "\"", e);
             }
         }
         LOGGER.log(Level.SEVERE, "Unsupported URI \"{0}\" for schema store", schemaStoreURI);
@@ -205,6 +221,9 @@ public class MongoDataStore extends ContentDataStore {
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
         builder.init(incoming);
         builder.setName(name(incoming.getTypeName()));
+        //AttributeType at = new AttributeTypeImpl(new NameImpl("mongoComplexObject"), Object.class, false, false, Collections.EMPTY_LIST, null, null);
+        //AttributeDescriptor atd = new AttributeDescriptorImpl(at, new NameImpl("mongoComplexObject"), 0, 1, false, null);
+        //builder.add(atd);
         incoming = builder.buildFeatureType();
         
         String gdName = incoming.getGeometryDescriptor().getLocalName();
@@ -305,7 +324,7 @@ public class MongoDataStore extends ContentDataStore {
         for (String name : typeNameSet) {
             typeNameList.add(name(name));
         }
-        
+        //typeNameList.add(new NameImpl(typeNameList.get(0).getNamespaceURI(), typeNameList.get(0).getLocalPart() + ".measurements"));
         return typeNameList;
     }
 
@@ -322,7 +341,7 @@ public class MongoDataStore extends ContentDataStore {
         String collectionName = type != null ?
                 collectionNameFromType(type) :
                 entry.getTypeName();
-        return new MongoFeatureStore(entry, null, dataStoreDB.getCollection(collectionName));
+        return new MongoFeatureStore(entry, null, dataStoreDB.getCollection(collectionName), this.isComplex);
     }
 
     @Override
@@ -358,5 +377,19 @@ public class MongoDataStore extends ContentDataStore {
         dataStoreClient.close();
         schemaStore.close();
         super.dispose();
+    }
+
+    @Override
+    public SimpleFeatureSource getFeatureSource(Name typeName)
+            throws IOException {
+        if (!isComplex || true) {
+            return super.getFeatureSource(typeName);
+        }
+        String[] parts = typeName.getLocalPart().split("\\.");
+        if (parts.length == 1) {
+            return super.getFeatureSource(typeName);
+        }
+        Name finalName = new NameImpl(typeName.getNamespaceURI(), parts[0]);
+        return getFeatureSource(finalName, Transaction.AUTO_COMMIT);
     }
 }
