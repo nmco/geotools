@@ -225,5 +225,4 @@ public class MappingFeatureSource implements FeatureSource<FeatureType, Feature>
     public QueryCapabilities getQueryCapabilities() {
         return mapping.getSource().getQueryCapabilities();
     }
-
 }

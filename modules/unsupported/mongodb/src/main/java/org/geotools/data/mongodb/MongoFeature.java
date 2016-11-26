@@ -17,14 +17,31 @@
  */
 package org.geotools.data.mongodb;
 
+import com.mongodb.DBObject;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.filter.identity.FeatureIdImpl;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 public class MongoFeature extends SimpleFeatureImpl {
 
+    private Object[] values;
+    private final DBObject mongoObject;
+
     public MongoFeature(Object[] values, SimpleFeatureType featureType, String id) {
-        super(values, featureType, new FeatureIdImpl(id), false);
+        this(values, featureType, id, null);
     }
 
+    public MongoFeature(Object[] values, SimpleFeatureType featureType, String id, DBObject mongoObject) {
+        super(values, featureType, new FeatureIdImpl(id), false);
+        this.values = values;
+        this.mongoObject = mongoObject;
+    }
+
+    public Object[] getValues() {
+        return values;
+    }
+
+    public DBObject getMongoObject() {
+        return mongoObject;
+    }
 }

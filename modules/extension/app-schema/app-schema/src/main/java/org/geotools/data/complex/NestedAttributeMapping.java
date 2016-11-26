@@ -228,7 +228,7 @@ public class NestedAttributeMapping extends AttributeMapping {
      * @return list of built features
      * @throws IOException
      */
-    private List<Feature> getFilteredFeatures(Object foreignKeyValue, boolean isMultiple) throws IOException {   
+    protected List<Feature> getFilteredFeatures(Object foreignKeyValue, boolean isMultiple) throws IOException {
     	if (nestedSourceExpression == null) {
             return Collections.EMPTY_LIST;
         }
@@ -425,6 +425,13 @@ public class NestedAttributeMapping extends AttributeMapping {
 
 
         return matchingFeatures;
+    }
+
+    public List<AttributeMapping> getAttributesMappings() {
+        if (mappingSource != null && mappingSource instanceof MappingFeatureSource) {
+           return ((MappingFeatureSource) mappingSource).getMapping().getAttributeMappings();
+        }
+        return Collections.emptyList();
     }
 
     protected FeatureSource<FeatureType, Feature> getMappingSource(Object feature)

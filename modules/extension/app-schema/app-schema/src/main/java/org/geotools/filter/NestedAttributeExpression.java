@@ -377,4 +377,12 @@ public class NestedAttributeExpression extends AttributeExpressionImpl {
         }
         return visitor.visit(this,extraData);
     }
+
+    public NestedAttributeMapping getRootMapping() {
+        return rootMapping;
+    }
+
+    public StepList getFullSteps() {
+        return fullSteps;
+    }
 }

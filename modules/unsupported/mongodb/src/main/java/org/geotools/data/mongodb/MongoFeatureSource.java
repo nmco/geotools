@@ -19,25 +19,55 @@ package org.geotools.data.mongodb;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.org.apache.xerces.internal.dom.AttributeMap;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.data.FilteringFeatureReader;
 import org.geotools.data.Query;
 import org.geotools.data.ReTypeFeatureReader;
+import org.geotools.data.complex.AttributeMapping;
+import org.geotools.data.complex.NestedAttributeMapping;
+import org.geotools.data.complex.filter.XPathUtil;
+import org.geotools.data.mongodb.complex.CollectionIdFunction;
+import org.geotools.data.mongodb.complex.CollectionInfoHolder;
+import org.geotools.data.mongodb.complex.JsonSelectAllFunction;
+import org.geotools.data.mongodb.complex.JsonSelectFunction;
+import org.geotools.data.mongodb.complex.MongoComplexUtilities;
+import org.geotools.data.mongodb.complex.CollectionLinkFunction;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.filter.IsEqualsToImpl;
+import org.geotools.filter.LiteralExpressionImpl;
+import org.geotools.filter.NestedAttributeExpression;
+import org.geotools.filter.visitor.AbstractFilterVisitor;
+import org.geotools.filter.visitor.DuplicatingFilterVisitor;
 import org.geotools.filter.visitor.PostPreProcessFilterSplittingVisitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.PropertyIsBetween;
+import org.opengis.filter.PropertyIsEqualTo;
+import org.opengis.filter.PropertyIsGreaterThan;
+import org.opengis.filter.PropertyIsGreaterThanOrEqualTo;
+import org.opengis.filter.PropertyIsLessThan;
+import org.opengis.filter.PropertyIsLessThanOrEqualTo;
 import org.opengis.filter.PropertyIsLike;
+import org.opengis.filter.PropertyIsNil;
+import org.opengis.filter.PropertyIsNotEqualTo;
+import org.opengis.filter.PropertyIsNull;
+import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.NilExpression;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
@@ -55,16 +85,19 @@ public class MongoFeatureSource extends ContentFeatureSource {
 
     CollectionMapper mapper;
 
-    public MongoFeatureSource(ContentEntry entry, Query query, DBCollection collection) {
+    private final boolean isComplex;
+
+    public MongoFeatureSource(ContentEntry entry, Query query, DBCollection collection, boolean isComplex) {
         super(entry, query);
+        this.isComplex = isComplex;
         this.collection = collection;
-        initMapper();
+        initMapper(isComplex);
     }
 
-    final void initMapper() {
+    final void initMapper(boolean isComplex) {
         // use schema with mapping info if it exists
         SimpleFeatureType type = entry.getState(null).getFeatureType();
-        setMapper(type != null ? new MongoSchemaMapper(type) : new MongoInferredMapper());
+        setMapper(type != null ? new MongoSchemaMapper(type, isComplex) : new MongoInferredMapper(isComplex));
     }
 
     public DBCollection getCollection() {
@@ -129,14 +162,174 @@ public class MongoFeatureSource extends ContentFeatureSource {
         return (int) collection.count(q);
     }
 
+    private static class SubCollectionFilterVisitor extends DuplicatingFilterVisitor {
+
+        @Override
+        protected Expression visit(Expression expression, Object extraData) {
+            return getSourceExpression(expression);
+        }
+
+        @Override
+        public Object visit(PropertyName expression, Object extraData) {
+            return super.visit(expression, extraData);
+        }
+
+        private Expression getSourceExpression(Expression expression) {
+            if (!(expression instanceof NestedAttributeExpression)) {
+                return expression;
+            }
+            NestedAttributeExpression nestedAttributeExpression = (NestedAttributeExpression) expression;
+            NestedAttributeMapping nestedAttributeMapping = nestedAttributeExpression.getRootMapping();
+            XPathUtil.StepList stepList = nestedAttributeExpression.getFullSteps();
+            int steps = stepList.size();
+            AttributeMapping attributeMapping = nestedAttributeMapping;
+            for (int i = 1; i < steps; i++) {
+                attributeMapping = match(attributeMapping, stepList.get(i));
+                if (attributeMapping == null) {
+                    break;
+                }
+            }
+            if (attributeMapping == null) {
+                return NilExpression.NIL;
+            }
+            Expression sourceExpression = attributeMapping.getSourceExpression();
+            if (sourceExpression instanceof JsonSelectFunction) {
+                List<Expression> parameters = new ArrayList<>();
+                JsonSelectAllFunction jsonSelect = new JsonSelectAllFunction();
+                jsonSelect.setParameters(((JsonSelectFunction)sourceExpression).getParameters());
+                return jsonSelect;
+            }
+            return sourceExpression;
+        }
+
+        private AttributeMapping match(AttributeMapping attributeMapping, XPathUtil.Step step) {
+            if (attributeMapping instanceof NestedAttributeMapping) {
+                List<AttributeMapping> attributesMappings =  ((NestedAttributeMapping) attributeMapping).getAttributesMappings();
+                for (AttributeMapping candidateAttributeMapping : attributesMappings) {
+                    if(XPathUtil.equals(new NameImpl(step.getName()), candidateAttributeMapping.getTargetXPath())) {
+                        return candidateAttributeMapping;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Object visit(PropertyIsEqualTo filter, Object data) {
+            Expression expression1 = filter.getExpression1();
+            Expression expression2 = filter.getExpression2();
+            if (expression1 instanceof CollectionLinkFunction) {
+                CollectionLinkFunction link = (CollectionLinkFunction) expression1;
+                String nodeId = filter.getExpression2().toString();
+                Map<String, String> objectsIds = MongoComplexUtilities.extractCollectionsIndexes(nodeId);
+                CollectionInfoHolder collectionInfoHolder = (CollectionInfoHolder) data;
+                collectionInfoHolder.setContainsCollectionInfo(true);
+                collectionInfoHolder.setCollectionPath(link.getParameters().get(0).toString());
+                collectionInfoHolder.setObjectsIds(objectsIds);
+                collectionInfoHolder.setNodeId(nodeId);
+                String rootId = objectsIds.get("");
+                //return buildIdCompare(link.getParameters().get(1), rootId);
+            }
+            if (expression1 instanceof CollectionIdFunction) {
+                CollectionIdFunction link = (CollectionIdFunction) expression1;
+                String nodeId = filter.getExpression2().toString();
+                Map<String, String> objectsIds = MongoComplexUtilities.extractCollectionsIndexes(nodeId);
+                CollectionInfoHolder collectionInfoHolder = (CollectionInfoHolder) data;
+                collectionInfoHolder.setContainsCollectionInfo(false);
+                collectionInfoHolder.setCollectionPath(link.getParameters().get(0).toString());
+                collectionInfoHolder.setObjectsIds(objectsIds);
+                collectionInfoHolder.setNodeId(nodeId);
+                String rootId = objectsIds.get("");
+                //return buildIdCompare(link.getParameters().get(1), rootId);
+            }
+            return ff.equals(getSourceExpression(expression1), getSourceExpression(expression2));
+        }
+
+        @Override
+        public Object visit(PropertyIsBetween filter, Object extraData) {
+            Expression expression1 = filter.getExpression();
+            Expression expression2 = filter.getLowerBoundary();
+            Expression expression3 = filter.getUpperBoundary();
+            return ff.between(getSourceExpression(expression1), getSourceExpression(expression2), getSourceExpression(expression2));
+        }
+
+        @Override
+        public Object visit(PropertyIsNotEqualTo filter, Object extraData) {
+            Expression expression1 = filter.getExpression1();
+            Expression expression2 = filter.getExpression2();
+            return ff.notEqual(getSourceExpression(expression1), getSourceExpression(expression2));
+        }
+
+        @Override
+        public Object visit(PropertyIsGreaterThan filter, Object extraData) {
+            Expression expression1 = filter.getExpression1();
+            Expression expression2 = filter.getExpression2();
+            return ff.greater(getSourceExpression(expression1), getSourceExpression(expression2));
+        }
+
+        @Override
+        public Object visit(PropertyIsGreaterThanOrEqualTo filter, Object extraData) {
+            Expression expression1 = filter.getExpression1();
+            Expression expression2 = filter.getExpression2();
+            return ff.greaterOrEqual(getSourceExpression(expression1), getSourceExpression(expression2));
+        }
+
+        @Override
+        public Object visit(PropertyIsLessThan filter, Object extraData) {
+            return super.visit(filter, extraData);
+        }
+
+        @Override
+        public Object visit(PropertyIsLessThanOrEqualTo filter, Object extraData) {
+            return super.visit(filter, extraData);
+        }
+
+        @Override
+        public Object visit(PropertyIsLike filter, Object extraData) {
+            return super.visit(filter, extraData);
+        }
+
+        @Override
+        public Object visit(PropertyIsNull filter, Object extraData) {
+            return super.visit(filter, extraData);
+        }
+
+        @Override
+        public Object visit(PropertyIsNil filter, Object extraData) {
+            return super.visit(filter, extraData);
+        }
+
+        private PropertyIsEqualTo buildIdCompare(Expression rootIdPath, String expectedId) {
+            JsonSelectFunction idSelectExpression = new JsonSelectFunction();
+            idSelectExpression.setParameters(Collections.singletonList(rootIdPath));
+            IsEqualsToImpl comparison = new IsEqualsToImpl();
+            comparison.setExpression1(idSelectExpression);
+            comparison.setExpression2(new LiteralExpressionImpl(expectedId));
+            return comparison;
+        }
+    }
+
+
     @Override
     protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query)
             throws IOException {
 
+        SubCollectionFilterVisitor visitor = new SubCollectionFilterVisitor();
+        CollectionInfoHolder collectionInfoHolder = new CollectionInfoHolder();
+        Filter newFilter = (Filter) query.getFilter().accept(visitor, collectionInfoHolder);
+        query.setFilter(newFilter);
+
+        Map<String, String> objectsIds = collectionInfoHolder.getObjectsIds();
+        if (objectsIds == null) {
+            objectsIds = new HashMap<>();
+            collectionInfoHolder.setObjectsIds(objectsIds);
+        }
+        objectsIds.put("QUERY.FILTER", query.getFilter().toString());
+
         List<Filter> postFilterList = new ArrayList<Filter>();
         List<String> postFilterAttributes = new ArrayList<String>();
         DBCursor cursor = toCursor(query, postFilterList, postFilterAttributes);
-        FeatureReader<SimpleFeatureType, SimpleFeature> r = new MongoFeatureReader(cursor, this);
+        FeatureReader<SimpleFeatureType, SimpleFeature> r = new MongoFeatureReader(cursor, this, collectionInfoHolder);
 
         if (!postFilterList.isEmpty() && !isAll(postFilterList.get(0))) {
             r = new FilteringFeatureReader<SimpleFeatureType, SimpleFeature>(r, postFilterList.get(0));
