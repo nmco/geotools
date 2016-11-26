@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.xml.namespace.QName;
 
@@ -1034,6 +1035,8 @@ public class DataAccessMappingFeatureIterator extends AbstractMappingFeatureIter
                     skipNestedMapping(attMapping, sources.subList(1, sources.size()));
                 }
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error applying mapping with targetAttribute "
+                        + attMapping.getTargetXPath(), e);
                 throw new RuntimeException("Error applying mapping with targetAttribute "
                         + attMapping.getTargetXPath(), e);
             }

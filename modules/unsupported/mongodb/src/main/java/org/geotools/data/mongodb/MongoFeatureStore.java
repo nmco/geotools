@@ -19,22 +19,30 @@ package org.geotools.data.mongodb;
 
 import com.mongodb.DBCollection;
 import java.io.IOException;
+import java.util.Collections;
+
 import org.geotools.data.FeatureReader;
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Query;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureStore;
+import org.geotools.feature.NameImpl;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.AttributeDescriptorImpl;
+import org.geotools.feature.type.AttributeTypeImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.AttributeType;
 
 public class MongoFeatureStore extends ContentFeatureStore {
 
     MongoFeatureSource delegate;
 
-    public MongoFeatureStore(ContentEntry entry, Query query, DBCollection collection) {
+    public MongoFeatureStore(ContentEntry entry, Query query, DBCollection collection, boolean isComplex) {
         super(entry, query);
-        delegate = new MongoFeatureSource(entry, query, collection);
+        delegate = new MongoFeatureSource(entry, query, collection, isComplex);
     }
 
     @Override
