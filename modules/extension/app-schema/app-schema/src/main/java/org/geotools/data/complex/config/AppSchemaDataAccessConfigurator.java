@@ -54,7 +54,7 @@ import org.geotools.data.complex.NestedAttributeMapping;
 import org.geotools.data.complex.filter.XPath;
 import org.geotools.data.complex.filter.XPathUtil.Step;
 import org.geotools.data.complex.filter.XPathUtil.StepList;
-import org.geotools.data.complex.spi.CustomMappingFinder;
+import org.geotools.data.complex.spi.CustomImplementationsFinder;
 import org.geotools.data.complex.xml.XmlFeatureSource;
 import org.geotools.data.joining.JoiningNestedAttributeMapping;
 import org.geotools.factory.Hints;
@@ -407,7 +407,7 @@ public class AppSchemaDataAccessConfigurator {
                     sourceFieldSteps = XPath.steps(root, sourceField, namespaces);
                 }
                 // a nested feature
-                NestedAttributeMapping customNestedMapping = CustomMappingFinder.find(this, idExpression, sourceExpression,
+                NestedAttributeMapping customNestedMapping = CustomImplementationsFinder.find(this, idExpression, sourceExpression,
                         targetXPathSteps, isMultiValued, clientProperties, elementExpr,
                         sourceFieldSteps, namespaces);
                 if (customNestedMapping != null) {

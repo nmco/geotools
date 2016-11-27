@@ -37,16 +37,7 @@ public final class CollectionLinkFunction extends FunctionExpressionImpl {
 
     public Object evaluate(Object object) {
         String path = (String) this.params.get(0).evaluate(object);
-        if (object instanceof MongoFeature) {
-            return new LinkCollection(path);
-        }
-        if (object instanceof MongoCollectionFeature) {
-            MongoCollectionFeature collectionFeature = (MongoCollectionFeature) object;
-            return new LinkCollection(collectionFeature.getCollectionPath() + "." + path);
-        }
-        throw new RuntimeException(String.format(
-                "Function 'linkCollection' cannot be applied to object of type '%s'.",
-                object.getClass().getCanonicalName()));
+        return new LinkCollection(path);
     }
 
     public static final class LinkCollection {

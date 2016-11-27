@@ -9,9 +9,9 @@ import org.xml.sax.helpers.NamespaceSupport;
 
 import java.util.Map;
 
-public interface CustomMapping {
+public interface CustomMappingFactory {
 
-    NestedAttributeMapping customNestedAttributeMapping(AppSchemaDataAccessConfigurator configuration,
+    NestedAttributeMapping createNestedAttributeMapping(AppSchemaDataAccessConfigurator configuration,
                                                         Expression idExpression, Expression parentExpression,
                                                         XPathUtil.StepList targetXPath, boolean isMultiValued,
                                                         Map<Name, Expression> clientProperties, Expression sourceElement,

@@ -120,7 +120,7 @@
                 <AttributeMapping>
                     <targetAttribute>st:values</targetAttribute>
                     <sourceExpression>
-                        <OCQL>collectionLink('values')</OCQL>
+                        <OCQL>collectionLink('measurements.values')</OCQL>
                         <linkElement>st:Value</linkElement>
                         <linkField>FEATURE_LINK[2]</linkField>
                     </sourceExpression>
@@ -156,7 +156,7 @@
                 <AttributeMapping>
                     <targetAttribute>FEATURE_LINK[2]</targetAttribute>
                     <sourceExpression>
-                        <OCQL>collectionLink('values')</OCQL>
+                        <OCQL>collectionLink('measurements.values')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
             </attributeMappings>
