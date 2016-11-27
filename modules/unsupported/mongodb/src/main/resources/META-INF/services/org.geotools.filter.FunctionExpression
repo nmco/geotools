@@ -1,0 +1,3 @@
+org.geotools.data.mongodb.JsonSelectFunction
+org.geotools.data.mongodb.CollectionIdFunction
+org.geotools.data.mongodb.CollectionLinkFunction
