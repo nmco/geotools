@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<as:AppSchemaDataAccess xmlns:as="http://www.geotools.org/app-schema"
-                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                        xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
+<as:AppSchemaDataAccess xmlns:as='http://www.geotools.org/app-schema'
+                        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                        xsi:schemaLocation='http://www.geotools.org/app-schema AppSchemaDataAccess.xsd'>
     <namespaces>
         <Namespace>
             <prefix>st</prefix>
@@ -39,7 +39,7 @@
 
     <targetTypes>
         <FeatureType>
-            <schemaUri>http://localhost/data/schemas/stations.xsd</schemaUri>
+            <schemaUri>http://localhost/data/schemas/stations_no_gml.xsd</schemaUri>
         </FeatureType>
     </targetTypes>
 
@@ -47,11 +47,11 @@
         <FeatureTypeMapping>
             <sourceDataStore>data_source</sourceDataStore>
             <sourceType>stations</sourceType>
-            <targetElement>st:StationFeature</targetElement>
+            <targetElement>st:StationFeature_NO_GML</targetElement>
             <attributeMappings>
                 <AttributeMapping>
                     <targetAttribute>
-                        st:StationFeature
+                        st:StationFeature_NO_GML
                     </targetAttribute>
                     <idExpression>
                         <OCQL>jsonSelect('id')</OCQL>
@@ -70,22 +70,17 @@
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
-                    <targetAttribute>gml:location</targetAttribute>
-                    <sourceExpression>
-                        <OCQL>jsonSelect('geometry')</OCQL>
-                    </sourceExpression>
-                </AttributeMapping>
-                <AttributeMapping>
                     <targetAttribute>st:contact/st:mail</targetAttribute>
                     <sourceExpression>
                         <OCQL>jsonSelect('contact.mail')</OCQL>
                     </sourceExpression>
+                    <isMultiple>true</isMultiple>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>st:measurement</targetAttribute>
                     <sourceExpression>
                         <OCQL>collectionLink('measurements')</OCQL>
-                        <linkElement>st:Measurement</linkElement>
+                        <linkElement>st:Measurement_NO_GML</linkElement>
                         <linkField>FEATURE_LINK[1]</linkField>
                     </sourceExpression>
                     <isMultiple>true</isMultiple>
@@ -95,11 +90,11 @@
         <FeatureTypeMapping>
             <sourceDataStore>data_source</sourceDataStore>
             <sourceType>stations</sourceType>
-            <targetElement>st:Measurement</targetElement>
+            <targetElement>st:Measurement_NO_GML</targetElement>
             <attributeMappings>
                 <AttributeMapping>
                     <targetAttribute>
-                        st:Measurement
+                        st:Measurement_NO_GML
                     </targetAttribute>
                     <idExpression>
                         <OCQL>collectionId('measurements')</OCQL>
@@ -127,7 +122,7 @@
                     <targetAttribute>st:values</targetAttribute>
                     <sourceExpression>
                         <OCQL>collectionLink('measurements.values')</OCQL>
-                        <linkElement>st:Value</linkElement>
+                        <linkElement>st:Value_NO_GML</linkElement>
                         <linkField>FEATURE_LINK[2]</linkField>
                     </sourceExpression>
                     <isMultiple>true</isMultiple>
@@ -137,11 +132,11 @@
         <FeatureTypeMapping>
             <sourceDataStore>data_source</sourceDataStore>
             <sourceType>stations</sourceType>
-            <targetElement>st:Value</targetElement>
+            <targetElement>st:Value_NO_GML</targetElement>
             <attributeMappings>
                 <AttributeMapping>
                     <targetAttribute>
-                        st:Value
+                        st:Value_NO_GML
                     </targetAttribute>
                     <idExpression>
                         <OCQL>collectionId('measurements.values')</OCQL>

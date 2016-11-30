@@ -17,20 +17,11 @@
 
 package org.geotools.data.mongodb;
 
-import com.mongodb.DBObject;
 import org.geotools.filter.FunctionExpressionImpl;
 import org.geotools.filter.capability.FunctionNameImpl;
 import org.opengis.filter.capability.FunctionName;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.geotools.filter.capability.FunctionNameImpl.parameter;
-
 
 public class JsonSelectFunction extends FunctionExpressionImpl {
 
@@ -56,5 +47,4 @@ public class JsonSelectFunction extends FunctionExpressionImpl {
                 "Function 'jsonSelect' cannot be applied to object of type '%s'.",
                 object.getClass().getCanonicalName()));
     }
-
 }

@@ -2,15 +2,14 @@ package org.geotools.data.mongodb;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
+import org.opengis.feature.Feature;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 /**
  * This class contains utilities methods for dealing with MongoDB complex features.
@@ -29,7 +28,25 @@ public final class MongoComplexUtilities {
             return getAllValues(mongoObject, jsonPath);
         }
         MongoObjectWalker walker = new MongoObjectWalker(mongoObject, collectionsIndexes, jsonPath);
-        return walker.getValue();
+        return tryConverGeometry(walker.getValue());
+    }
+
+    private static Object tryConverGeometry(Object value) {
+        if (!(value instanceof DBObject) || value instanceof List) {
+            return value;
+        }
+        DBObject object = (DBObject) value;
+        Set keys = object.keySet();
+        if (keys.size() != 2 || !keys.contains("coordinates") || !keys.contains("type")) {
+            return value;
+        }
+        MongoGeometryBuilder builder = new MongoGeometryBuilder();
+        try {
+            return builder.toGeometry(object);
+        } catch (Exception exception) {
+            // ignore
+        }
+        return value;
     }
 
     /**
@@ -118,7 +135,9 @@ public final class MongoComplexUtilities {
         index++;
         if (object instanceof List) {
             if (finalPath) {
-                values.addAll((List) object);
+                for (Object value : (List) object) {
+                    values.add(tryConverGeometry(value));
+                }
             } else {
                 for (Object element : (List) object) {
                     walkHelper((DBObject) element, jsonPathParts, values, index);
@@ -126,11 +145,41 @@ public final class MongoComplexUtilities {
             }
         } else {
             if (finalPath) {
-                values.add(object);
+                values.add(tryConverGeometry(object));
             } else {
                 walkHelper((DBObject) object, jsonPathParts, values, index);
             }
         }
         return values;
+    }
+
+    public static List<Feature> expandCollections(DBObject rootMongoObject) {
+        List<Feature> features = new ArrayList<>();
+        return features;
+    }
+
+    public static void expandCollectionsHelper(String path, DBObject object, Map<String, Integer> indexes) {
+        List<List> collections = new ArrayList<>();
+        List<String> paths = new ArrayList<>();
+        for(String key : object.keySet()) {
+            Object value = object.get(key);
+            if (value instanceof List) {
+                collections.add((List)value);
+                paths.add(concatPath(path, key));
+            }
+        }
+    }
+
+    private static String concatPath(String rootPath, String path) {
+        if (rootPath == null || rootPath.isEmpty()) {
+            return path;
+        }
+        return rootPath + "." + path;
+    }
+
+    private Map<String, Integer> copy(Map<String, Integer> indexes) {
+        Map<String, Integer> copy = new HashMap<>();
+        copy.putAll(indexes);
+        return copy;
     }
 }

@@ -1,10 +1,10 @@
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:gml="http://www.opengis.net/gml"
+           xmlns:gml="http://www.opengis.net/gml/3.2"
            xmlns:st="http://www.stations.org/1.0"
            targetNamespace="http://www.stations.org/1.0"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-  <xs:import namespace="http://www.opengis.net/gml"
+  <xs:import namespace="http://www.opengis.net/gml/3.2"
              schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
 
   <xs:complexType name="ContactType">
@@ -13,26 +13,12 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="MeasurementPropertyType">
-    <xs:sequence minOccurs="0">
-      <xs:element ref="st:Measurement"/>
-    </xs:sequence>
-    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
-  </xs:complexType>
-
   <xs:complexType name="MeasurementType">
     <xs:sequence>
       <xs:element name="name" minOccurs="1" maxOccurs="1" type="xs:string"/>
       <xs:element name="unit" minOccurs="1" maxOccurs="1" type="xs:string"/>
-      <xs:element name="values" minOccurs="1" maxOccurs="unbounded" type="st:ValuePropertyType"/>
+      <xs:element name="values" minOccurs="1" maxOccurs="unbounded" type="st:ValueType"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="ValuePropertyType">
-    <xs:sequence minOccurs="0">
-      <xs:element ref="st:Value"/>
-    </xs:sequence>
-    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
   </xs:complexType>
 
   <xs:complexType name="ValueType">
@@ -48,15 +34,15 @@
         <xs:sequence>
           <xs:element name="name" minOccurs="1" maxOccurs="1" type="xs:string"/>
           <xs:element name="contact" minOccurs="0" maxOccurs="1" type="st:ContactType"/>
-          <xs:element name="measurement" minOccurs="0" maxOccurs="unbounded" type="st:MeasurementPropertyType"/>
+          <xs:element name="measurement" minOccurs="0" maxOccurs="unbounded" type="st:MeasurementType"/>
           <xs:element name="geometry" type="gml:GeometryPropertyType" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:element name="StationFeature" type="st:StationFeatureType"  substitutionGroup="gml:_Feature"/>
-  <xs:element name="Measurement" type="st:MeasurementType"  substitutionGroup="gml:_Feature"/>
-  <xs:element name="Value" type="st:ValueType"  substitutionGroup="gml:_Feature"/>
+  <xs:element name="StationFeature_NO_GML" type="st:StationFeatureType" substitutionGroup="gml:AbstractFeature"/>
+  <xs:element name="Measurement_NO_GML" type="st:MeasurementType"/>
+  <xs:element name="Value_NO_GML" type="st:ValueType"/>
 
 </xs:schema>
