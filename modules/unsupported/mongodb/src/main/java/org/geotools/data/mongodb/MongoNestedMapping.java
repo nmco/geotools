@@ -109,6 +109,9 @@ public class MongoNestedMapping extends NestedAttributeMapping {
 
     private List getSubCollection(DBObject mongoObject, String collectionPath, Map<String, Integer> collectionsIndexes) {
         Object value = MongoComplexUtilities.jsonSelect(mongoObject, collectionsIndexes, collectionPath, false);
+        if (value == null) {
+            return Collections.emptyList();
+        }
         if (value instanceof List) {
             return (List) value;
         }

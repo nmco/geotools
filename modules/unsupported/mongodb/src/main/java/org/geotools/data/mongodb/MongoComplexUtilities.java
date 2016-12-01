@@ -111,6 +111,9 @@ public final class MongoComplexUtilities {
 
         private Object next(List basicDBList) {
             Integer rawCollectionIndex = collectionsIndexes.get(currentJsonPath);
+            if (rawCollectionIndex == null && basicDBList.size() == 1) {
+                return basicDBList.get(0);
+            }
             if (rawCollectionIndex == null) {
                 throw new RuntimeException(String.format("There is no index available for collection '%s'.", currentJsonPath));
             }

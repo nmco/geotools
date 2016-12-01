@@ -15,6 +15,10 @@
             <prefix>D2LogicalModel</prefix>
             <uri>http://datex2.eu/schema/2/2_0</uri>
         </Namespace>
+        <Namespace>
+            <prefix>gml</prefix>
+            <uri>http://www.opengis.net/gml</uri>
+        </Namespace>
     </namespaces>
 
     <sourceDataStores>
@@ -51,6 +55,7 @@
     </targetTypes>
 
     <typeMappings>
+
         <FeatureTypeMapping>
             <sourceDataStore>datasource</sourceDataStore>
             <sourceType>incidents</sourceType>
@@ -61,38 +66,38 @@
                         npra:DatexSituationFeature
                     </targetAttribute>
                     <idExpression>
-                        <OCQL>jsonSelect('datex.id')</OCQL>
+                        <OCQL>jsonSelect('_id')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>npra:customID</targetAttribute>
                     <sourceExpression>
-                        <OCQL>jsonSelect('customID')</OCQL>
+                        <OCQL>jsonSelect('data.datex..customID')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>npra:situation/D2LogicalModel:overallSeverity</targetAttribute>
                     <targetAttributeNode>D2LogicalModel:SeverityEnum</targetAttributeNode>
                     <sourceExpression>
-                        <OCQL>jsonSelect('datex.overallSeverity')</OCQL>
+                        <OCQL>jsonSelect('data.datex.datex.overallSeverity')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>npra:situation/datex:situationVersionTime</targetAttribute>
                     <sourceExpression>
-                        <OCQL>jsonSelect('datex.time')</OCQL>
+                        <OCQL>jsonSelect('data.datex.datex.time')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>npra:situation/datex:headerInformation/datex:urgency</targetAttribute>
                     <sourceExpression>
-                        <OCQL>jsonSelect('datex.headerInformation.urgency')</OCQL>
+                        <OCQL>jsonSelect('data.datex.datex.headerInformation.urgency')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>npra:situation/datex:headerInformation/datex:confidentiality</targetAttribute>
                     <sourceExpression>
-                        <OCQL>jsonSelect('datex.headerInformation.confidentiality')</OCQL>
+                        <OCQL>jsonSelect('data.datex.datex.headerInformation.confidentiality')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
@@ -104,7 +109,7 @@
                 <AttributeMapping>
                     <targetAttribute>npra:situation/datex:situationRecord</targetAttribute>
                     <sourceExpression>
-                        <OCQL>collectionLink('datex.situationRecord')</OCQL>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord')</OCQL>
                         <linkElement>npra:DatexSituationRecord</linkElement>
                         <linkField>FEATURE_LINK[1]</linkField>
                     </sourceExpression>
@@ -112,6 +117,7 @@
                 </AttributeMapping>
             </attributeMappings>
         </FeatureTypeMapping>
+
         <FeatureTypeMapping>
             <sourceDataStore>datasource</sourceDataStore>
             <sourceType>incidents</sourceType>
@@ -122,23 +128,226 @@
                         npra:DatexSituationRecord
                     </targetAttribute>
                     <idExpression>
-                        <OCQL>collectionId('datex.situationRecord')</OCQL>
+                        <OCQL>collectionId('data.datex.datex.situationRecord')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>datex:severity</targetAttribute>
                     <sourceExpression>
-                        <OCQL>jsonSelect('datex.situationRecord.severity')</OCQL>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.severity')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordVersionTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordVersionTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordCreationReference</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordCreationReference')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordCreationTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordCreationTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordObservationTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordObservationTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordVersionTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordVersionTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordFirstSupplierVersionTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordFirstSupplierVersionTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:confidentialityOverride</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.confidentialityOverride')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:probabilityOfOccurrence</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.probabilityOfOccurrence')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:severity</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.severity')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:source</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.source')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:validity</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.validity')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:impact</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.impact')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:cause</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.cause')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:nonGeneralPublicComment</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.nonGeneralPublicComment')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:urlLink</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.urlLink')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <!-- Start ~ GroupOfLocations -->
+                <AttributeMapping>
+                    <targetAttribute>datex:groupOfLocations</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <!-- End ~ GroupOfLocations -->
+                <AttributeMapping>
+                    <targetAttribute>datex:management</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.management')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:situationRecordExtension</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.situationRecordExtension')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>FEATURE_LINK[1]</targetAttribute>
                     <sourceExpression>
-                        <OCQL>collectionLink('datex.situationRecord')</OCQL>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:generalPublicComment</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord.generalPublicComment')</OCQL>
+                        <linkElement>npra:DatexComment</linkElement>
+                        <linkField>FEATURE_LINK[2]</linkField>
+                    </sourceExpression>
+                    <isMultiple>true</isMultiple>
+                </AttributeMapping>
+            </attributeMappings>
+        </FeatureTypeMapping>
+
+        <FeatureTypeMapping>
+            <sourceDataStore>datasource</sourceDataStore>
+            <sourceType>incidents</sourceType>
+            <targetElement>npra:DatexComment</targetElement>
+            <attributeMappings>
+                <AttributeMapping>
+                    <targetAttribute>
+                        npra:DatexComment
+                    </targetAttribute>
+                    <idExpression>
+                        <OCQL>collectionId('data.datex.datex.situationRecord.generalPublicComment')</OCQL>
+                    </idExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:commentDateTime</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.commentDateTime')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:commentType</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.commentType')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:commentExtension</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.commentExtension')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>datex:comment</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
+                        <linkElement>npra:DatexMultilingualValue</linkElement>
+                        <linkField>FEATURE_LINK[3]</linkField>
+                    </sourceExpression>
+                    <isMultiple>true</isMultiple>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>FEATURE_LINK[2]</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord.generalPublicComment')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
             </attributeMappings>
         </FeatureTypeMapping>
+
+        <FeatureTypeMapping>
+            <sourceDataStore>datasource</sourceDataStore>
+            <sourceType>incidents</sourceType>
+            <targetElement>npra:DatexMultilingualValue</targetElement>
+            <attributeMappings>
+                <AttributeMapping>
+                    <targetAttribute>
+                        npra:DatexMultilingualValue
+                    </targetAttribute>
+                    <idExpression>
+                        <OCQL>collectionId('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
+                    </idExpression>
+                </AttributeMapping>
+                <!--AttributeMapping>
+                    <targetAttribute>datex:lang</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.comment.values.value.lang')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping-->
+                <!--AttributeMapping>
+                    <targetAttribute>datex:value</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.comment.values.value.value')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping-->
+                <AttributeMapping>
+                    <targetAttribute>FEATURE_LINK[3]</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>collectionLink('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+            </attributeMappings>
+        </FeatureTypeMapping>
+
     </typeMappings>
 
 </as:AppSchemaDataAccess>
