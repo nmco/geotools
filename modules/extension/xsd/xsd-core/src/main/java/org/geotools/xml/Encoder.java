@@ -638,7 +638,8 @@ public class Encoder {
             return false;
         }
         // let's see if all the properties have the same type, and that the type is equal to the current element type
-        if (!nestedProperties.stream().allMatch(property -> property.getType().getName().equals(complex.getType().getName()))) {
+        if (!nestedProperties.stream().allMatch(
+                property -> property.getType().getName().equals(complex.getType().getName()))) {
             // different types which means we are not in the case of nested complex features
             return false;
         }

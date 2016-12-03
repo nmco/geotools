@@ -1,56 +1,66 @@
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        xmlns:gml="http://www.opengis.net/gml"
-        xmlns:npra="http://www.vegvesen.no/datex/1.0"
-        xmlns:datex="http://datex2.eu/schema/2/2_0"
-        targetNamespace="http://www.vegvesen.no/datex/1.0"
-	elementFormDefault="qualified" attributeFormDefault="unqualified">
+           xmlns:gml="http://www.opengis.net/gml"
+           xmlns:npra="http://www.vegvesen.no/datex/1.0"
+           xmlns:datex="http://datex2.eu/schema/2/2_0"
+           targetNamespace="http://www.vegvesen.no/datex/1.0"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-    <xs:import namespace="http://www.opengis.net/gml"
-            schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd" />
-    <xs:import namespace="http://datex2.eu/schema/2/2_0"
-            schemaLocation="http://www.datex2.eu/schema/2/2_3/DATEXIISchema_2_2_3.xsd" />
+  <xs:import namespace="http://www.opengis.net/gml"
+             schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+  <xs:import namespace="http://datex2.eu/schema/2/2_0"
+             schemaLocation="http://www.datex2.eu/schema/2/2_3/DATEXIISchema_2_2_3.xsd"/>
 
-    <xs:complexType name="DatexSituationFeatureType">
-        <xs:complexContent>
-            <xs:extension base="gml:AbstractFeatureType">
-                <xs:sequence>
-                    <xs:element name="customID" minOccurs="1" maxOccurs="1" type="xs:string" />
-                    <xs:element name="situation" minOccurs="1" maxOccurs="1" type="datex:Situation" />
-                    <xs:element name="geometry" type="gml:GeometryPropertyType" minOccurs="0" />
-                </xs:sequence>
-            </xs:extension>
-        </xs:complexContent>
-    </xs:complexType>
+  <xs:complexType name="DatexSituationFeatureType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element name="customID" type="xs:string"/>
+          <xs:element name="situation" type="datex:Situation"/>
+          <xs:element name="overallSeverity" type="datex:SeverityEnum"/>
+          <xs:element name="geometry" type="gml:GeometryPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 
-    <xs:complexType name="DatexSituationRecordFeatureType">
-        <xs:complexContent>
-            <xs:extension base="datex:SituationRecord"/>
-            <xs:sequence>
-                <xs:element name="trafficElementExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0" />
-            </xs:sequence>
-        </xs:complexContent>
-    </xs:complexType>
+  <xs:complexType name="DatexSituationRecordFeatureType">
+    <xs:complexContent>
+      <xs:extension base="datex:SituationRecord"/>
+      <xs:sequence>
+        <xs:element name="trafficElementExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexContent>
+  </xs:complexType>
 
-    <xs:complexType name="DatexGroupOfLocationsFeatureType">
-        <xs:complexContent>
-            <xs:extension base="datex:GroupOfLocations"/>
-            <xs:sequence>
-                <xs:element name="routeDestination" type="D2LogicalModel:Destination" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element name="itineraryExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0" />
-                <xs:element name="externalReferencing" type="D2LogicalModel:ExternalReferencing" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element name="locationForDisplay" type="D2LogicalModel:PointCoordinates" minOccurs="0" />
-                <xs:element name="locationExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0" />
-                <xs:element name="nonOrderedLocationsExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0" />
+  <xs:complexType name="DatexGroupOfLocationsFeatureType">
+    <xs:complexContent>
+      <xs:extension base="datex:GroupOfLocations"/>
+      <xs:sequence>
+        <xs:element name="routeDestination" type="D2LogicalModel:Destination" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="itineraryExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+        <xs:element name="externalReferencing" type="D2LogicalModel:ExternalReferencing" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="locationForDisplay" type="D2LogicalModel:PointCoordinates" minOccurs="0"/>
+        <xs:element name="locationExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+        <xs:element name="nonOrderedLocationsExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexContent>
+  </xs:complexType>
 
-            </xs:sequence>
-        </xs:complexContent>
-    </xs:complexType>
+  <xs:complexType name="DatexMultilingualStringValueFeatureType">
+    <xs:complexContent>
+      <xs:extension base="datex:MultilingualStringValue"/>
+      <xs:sequence>
+        <xs:element name="lang" type="xs:string"/>
+        <xs:element name="value" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexContent>
+  </xs:complexType>
 
-    <xs:element name="DatexSituationFeature" type="npra:DatexSituationFeatureType" substitutionGroup="gml:_Feature"/>
-    <xs:element name="DatexSituationRecord" type="npra:DatexSituationRecordFeatureType" substitutionGroup="gml:_Feature"/>
-    <xs:element name="DatexComment" type="datex:Comment" substitutionGroup="gml:_Feature"/>
-    <xs:element name="DatexMultilingualValue" type="datex:MultilingualStringValue" substitutionGroup="gml:_Feature"/>
-    <xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexSituationFeature" type="npra:DatexSituationFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexSituationRecord" type="datex:SituationRecord" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexGeneralPublicComment" type="datex:Comment" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexGeneralPublicCommentMultilingualValue" type="datex:MultilingualStringValue" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/>
 
 </xs:schema>
 
