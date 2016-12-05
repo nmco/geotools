@@ -25,42 +25,96 @@
 
   <xs:complexType name="DatexSituationRecordFeatureType">
     <xs:complexContent>
-      <xs:extension base="datex:SituationRecord"/>
+      <xs:extension base="datex:SituationRecord">
       <xs:sequence>
-        <xs:element name="trafficElementExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+        <xs:element name="groupOfLocations" type="npra:DatexGroupOfLocationsType" />
       </xs:sequence>
+      </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="DatexGroupOfLocationsFeatureType">
+  <xs:complexType name="DatexDestinationType">
     <xs:complexContent>
-      <xs:extension base="datex:GroupOfLocations"/>
+      <xs:extension base="datex:Destination">
+        <xs:sequence>
+          <xs:element name="point" type="datex:Point" />
+          <xs:element name="pointDestinationExtension" type="datex:_ExtensionType" minOccurs="0" />
+          <xs:element name="area" type="datex:Area" />
+          <xs:element name="areaDestinationExtension" type="datex:_ExtensionType" minOccurs="0" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <xs:complexType name="DatexAlertCLinearType">
+    <xs:complexContent>
+      <xs:extension base="datex:AlertCLinear">
+        <xs:sequence>
+          <xs:element name="alertCLocationCountryCode" type="datex:String" minOccurs="1" maxOccurs="1" />
+          <xs:element name="alertCLocationTableNumber" type="datex:String" minOccurs="1" maxOccurs="1" />
+          <xs:element name="alertCLocationTableVersion" type="datex:String" minOccurs="1" maxOccurs="1" />
+          <xs:element name="alertCLinearExtension" type="datex:_ExtensionType" minOccurs="0" />
+          <xs:element name="alertCDirection" type="datex:AlertCDirection" />
+          <xs:element name="locationCodeForLinearLocation" type="datex:AlertCLocation" />
+          <xs:element name="alertCLinearByCodeExtension" type="datex:_ExtensionType" minOccurs="0" />
+          <xs:element name="alertCMethod2PrimaryPointLocation" type="datex:AlertCMethod2PrimaryPointLocation" />
+          <xs:element name="alertCMethod2SecondaryPointLocation" type="datex:AlertCMethod2SecondaryPointLocation" />
+          <xs:element name="alertCMethod2LinearExtension" type="datex:_ExtensionType" minOccurs="0" /><xs:element name="alertCMethod4PrimaryPointLocation" type="D2LogicalModel:AlertCMethod4PrimaryPointLocation" />
+          <xs:element name="alertCMethod4SecondaryPointLocation" type="datex:AlertCMethod4SecondaryPointLocation" />
+          <xs:element name="alertCMethod4LinearExtension" type="datex:_ExtensionType" minOccurs="0" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DatexGroupOfLocationsType">
+    <xs:complexContent>
+      <xs:extension base="datex:GroupOfLocations">
       <xs:sequence>
-        <xs:element name="routeDestination" type="D2LogicalModel:Destination" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="itineraryExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
-        <xs:element name="externalReferencing" type="D2LogicalModel:ExternalReferencing" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="locationForDisplay" type="D2LogicalModel:PointCoordinates" minOccurs="0"/>
-        <xs:element name="locationExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
-        <xs:element name="nonOrderedLocationsExtension" type="D2LogicalModel:_ExtensionType" minOccurs="0"/>
+        <xs:element name="routeDestination" type="npra:DatexDestinationType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="itineraryExtension" type="datex:_ExtensionType" minOccurs="0"/>
+        <xs:element name="externalReferencing" type="datex:ExternalReferencing" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="locationForDisplay" type="datex:PointCoordinates" minOccurs="0"/>
+        <xs:element name="locationExtension" type="datex:_ExtensionType" minOccurs="0"/>
+        <xs:element name="nonOrderedLocationsExtension" type="datex:_ExtensionType" minOccurs="0"/>
+        <xs:element name="predefinedLocationReference" type="datex:_PredefinedLocationVersionedReference" minOccurs="1" maxOccurs="1" />
+        <xs:element name="locationByReferenceExtension" type="datex:_ExtensionType" minOccurs="0" />
+        <xs:element name="supplementaryPositionalDescription" type="datex:SupplementaryPositionalDescription" minOccurs="0" />
+        <xs:element name="destination" type="datex:Destination" minOccurs="0" />
+        <xs:element name="networkLocationExtension" type="datex:_ExtensionType" minOccurs="0" />
+        <xs:element name="alertCArea" type="npra:DatexAlertCLinearType" minOccurs="0" />
+        <xs:element name="tpegAreaLocation" type="datex:TpegAreaLocation" minOccurs="0" />
+        <xs:element name="areaExtension" type="datex:_AreaExtensionType" minOccurs="0" />
+        <xs:element name="tpegPointLocation" type="datex:TpegPointLocation" minOccurs="0" />
+        <xs:element name="alertCPoint" type="datex:AlertCPoint" minOccurs="0" />
+        <xs:element name="pointAlongLinearElement" type="datex:PointAlongLinearElement" minOccurs="0" />
+        <xs:element name="pointByCoordinates" type="datex:PointByCoordinates" minOccurs="0" />
+        <xs:element name="pointExtension" type="datex:_PointExtensionType" minOccurs="0" />
+        <xs:element name="tpegLinearLocation" type="datex:TpegLinearLocation" minOccurs="0" />
+        <xs:element name="alertCLinear" type="npra:DatexAlertCLinearType" minOccurs="0" />
+        <xs:element name="linearWithinLinearElement" type="datex:LinearWithinLinearElement" minOccurs="0" />
+        <xs:element name="linearExtension" type="datex:_LinearExtensionType" minOccurs="0" />
       </xs:sequence>
+      </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="DatexMultilingualStringValueFeatureType">
     <xs:complexContent>
-      <xs:extension base="datex:MultilingualStringValue"/>
-      <xs:sequence>
-        <xs:element name="lang" type="xs:string"/>
-        <xs:element name="value" type="xs:string"/>
-      </xs:sequence>
+      <xs:extension base="datex:MultilingualStringValue">
+        <xs:sequence>
+          <xs:element name="lang" type="xs:string"/>
+          <xs:element name="value" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
   <xs:element name="DatexSituationFeature" type="npra:DatexSituationFeatureType" substitutionGroup="gml:_Feature"/>
-  <xs:element name="DatexSituationRecord" type="datex:SituationRecord" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexSituationRecord" type="npra:DatexSituationRecordFeatureType" substitutionGroup="gml:_Feature"/>
   <xs:element name="DatexGeneralPublicComment" type="datex:Comment" substitutionGroup="gml:_Feature"/>
-  <xs:element name="DatexGeneralPublicCommentMultilingualValue" type="datex:MultilingualStringValue" substitutionGroup="gml:_Feature"/>
-  <xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexGeneralPublicCommentMultilingualValue" type="npra:DatexMultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
+  <!--xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/-->
 
 </xs:schema>
-

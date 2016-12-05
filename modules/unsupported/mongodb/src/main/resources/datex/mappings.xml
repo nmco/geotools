@@ -234,26 +234,74 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.cause')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <AttributeMapping>
+        <!--AttributeMapping>
           <targetAttribute>datex:nonGeneralPublicComment</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.nonGeneralPublicComment')</OCQL>
           </sourceExpression>
-        </AttributeMapping>
+        </AttributeMapping-->
         <AttributeMapping>
           <targetAttribute>datex:urlLink</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.urlLink')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- Start ~ GroupOfLocations -->
+        <!-- group of locations -->
         <AttributeMapping>
-          <targetAttribute>datex:groupOfLocations</targetAttribute>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCDirection/datex:alertCDirectionCoded</targetAttribute>
           <sourceExpression>
-            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations')</OCQL>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCDirection.alertCDirectionCoded')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- End ~ GroupOfLocations -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCDirection/datex:alertCDirectionExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCDirection.alertCDirectionExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCDirection/datex:alertCDirectionNamed</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCDirection.alertCDirectionNamed')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCDirection/datex:alertCDirectionSense</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCDirection.alertCDirectionSense')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCLinearExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLinearExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCLocationCountryCode</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLocationCountryCode')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCLocationTableNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLocationTableNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCLocationTableVersion</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLocationTableVersion')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCMethod4LinearExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCMethod4LinearExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- group of locations -->
         <AttributeMapping>
           <targetAttribute>datex:management</targetAttribute>
           <sourceExpression>
@@ -353,14 +401,14 @@
             <OCQL>collectionId('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
           </idExpression>
         </AttributeMapping>
-        <!--AttributeMapping>
-          <targetAttribute>datex:lang</targetAttribute>
+        <AttributeMapping>
+          <targetAttribute>npra:lang</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.comment.values.value.lang')</OCQL>
           </sourceExpression>
-        </AttributeMapping-->
+        </AttributeMapping>
         <AttributeMapping>
-          <targetAttribute>simpleContent</targetAttribute>
+          <targetAttribute>npra:value</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.generalPublicComment.comment.values.value.value')</OCQL>
           </sourceExpression>
