@@ -246,7 +246,7 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.urlLink')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- group of locations -->
+        <!-- group of locations - alert c linear - alert c direction -->
         <AttributeMapping>
           <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCDirection/datex:alertCDirectionCoded</targetAttribute>
           <sourceExpression>
@@ -271,6 +271,7 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCDirection.alertCDirectionSense')</OCQL>
           </sourceExpression>
         </AttributeMapping>
+        <!-- group of locations - alert c linear -->
         <AttributeMapping>
           <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCLinearExtension</targetAttribute>
           <sourceExpression>
@@ -296,9 +297,80 @@
           </sourceExpression>
         </AttributeMapping>
         <AttributeMapping>
-          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/datex:alertCMethod4LinearExtension</targetAttribute>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4LinearExtension</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCMethod4LinearExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- group of locations - alert c linear - alertCMethod4PrimaryPointLocation -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:alertCLocation/datex:alertCLocationExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:alertCLocation/datex:specificLocation</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.specificLocation')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- add link to alertCLocationName multi language -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:alertCMethod4PrimaryPointLocationExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCMethod4PrimaryPointLocationExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:offsetDistance/datex:offsetDistance</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.offsetDistance.offsetDistance')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:offsetDistance/datex:offsetDistanceExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.offsetDistance.offsetDistanceExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- group of locations - alert c linear - alertCMethod4SecondaryPointLocation -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:alertCLocation/datex:alertCLocationExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:alertCLocation/datex:specificLocation</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.specificLocation')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- add link to alertCLocationName multi language -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:alertCMethod4SecondaryPointLocationExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCMethod4SecondaryPointLocationExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:offsetDistance/datex:offsetDistance</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.offsetDistance.offsetDistance')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:offsetDistance/datex:offsetDistanceExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.offsetDistance.offsetDistanceExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- group of locations - simple -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:destination</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLinearExtension')</OCQL>
           </sourceExpression>
         </AttributeMapping>
         <!-- group of locations -->

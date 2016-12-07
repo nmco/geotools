@@ -60,7 +60,8 @@
           <xs:element name="alertCLinearByCodeExtension" type="datex:_ExtensionType" minOccurs="0" />
           <xs:element name="alertCMethod2PrimaryPointLocation" type="datex:AlertCMethod2PrimaryPointLocation" />
           <xs:element name="alertCMethod2SecondaryPointLocation" type="datex:AlertCMethod2SecondaryPointLocation" />
-          <xs:element name="alertCMethod2LinearExtension" type="datex:_ExtensionType" minOccurs="0" /><xs:element name="alertCMethod4PrimaryPointLocation" type="D2LogicalModel:AlertCMethod4PrimaryPointLocation" />
+          <xs:element name="alertCMethod2LinearExtension" type="datex:_ExtensionType" minOccurs="0" />
+          <xs:element name="alertCMethod4PrimaryPointLocation" type="datex:AlertCMethod4PrimaryPointLocation" />
           <xs:element name="alertCMethod4SecondaryPointLocation" type="datex:AlertCMethod4SecondaryPointLocation" />
           <xs:element name="alertCMethod4LinearExtension" type="datex:_ExtensionType" minOccurs="0" />
         </xs:sequence>
@@ -112,7 +113,7 @@
   </xs:complexType>
 
   <xs:element name="DatexSituationFeature" type="npra:DatexSituationFeatureType" substitutionGroup="gml:_Feature"/>
-  <xs:element name="DatexSituationRecord" type="npra:DatexSituationRecordFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexSituationRecord" type="npra:DatexSituationRecordFeatureType"/>
   <xs:element name="DatexGeneralPublicComment" type="datex:Comment" substitutionGroup="gml:_Feature"/>
   <xs:element name="DatexGeneralPublicCommentMultilingualValue" type="npra:DatexMultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
   <!--xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/-->
