@@ -46,7 +46,6 @@
     </xs:complexContent>
   </xs:complexType>
 
-
   <xs:complexType name="DatexAlertCLinearType">
     <xs:complexContent>
       <xs:extension base="datex:AlertCLinear">
@@ -116,6 +115,7 @@
   <xs:element name="DatexSituationRecord" type="npra:DatexSituationRecordFeatureType"/>
   <xs:element name="DatexGeneralPublicComment" type="datex:Comment" substitutionGroup="gml:_Feature"/>
   <xs:element name="DatexGeneralPublicCommentMultilingualValue" type="npra:DatexMultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
-  <!--xs:element name="DatexGroupOfLocations" type="npra:DatexGroupOfLocationsFeatureType" substitutionGroup="gml:_Feature"/-->
-
+  <xs:element name="DatexAlertCLocationName1" type="npra:DatexMultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexAlertCLocationName2" type="npra:DatexMultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
+  
 </xs:schema>

@@ -76,6 +76,8 @@ import org.geotools.xml.impl.SchemaIndexImpl;
 import org.geotools.xs.XS;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Property;
+import org.opengis.feature.type.ComplexType;
+import org.opengis.feature.type.PropertyType;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoContainer;
 import org.picocontainer.defaults.DefaultPicoContainer;
@@ -624,6 +626,26 @@ public class Encoder {
     }
 
     /**
+     * Helper method that checks if to XSD types are compatible.
+     */
+    private boolean isCompatibleType(ComplexType rootType, PropertyType propertyType) {
+        if (rootType.getName().equals(propertyType.getName())) {
+            // they are actually the same type so we are good
+            return true;
+        }
+        // let's see if the property type is a sub type of the root type
+        PropertyType candidateType = propertyType.getSuper();
+        while(candidateType != null) {
+            if (rootType.getName().equals(candidateType.getName())) {
+                // is a subtype so we are good
+                return true;
+            }
+            candidateType = candidateType.getSuper();
+        }
+        return false;
+    }
+
+    /**
      * Helper method that checks if the complex feature we want to encode maps
      * to a complex type that respects the GML object-property model.
      */
@@ -638,8 +660,7 @@ public class Encoder {
             return false;
         }
         // let's see if all the properties have the same type, and that the type is equal to the current element type
-        if (!nestedProperties.stream().allMatch(
-                property -> property.getType().getName().equals(complex.getType().getName()))) {
+        if (!nestedProperties.stream().allMatch(property -> isCompatibleType(complex.getType(), property.getType()))) {
             // different types which means we are not in the case of nested complex features
             return false;
         }

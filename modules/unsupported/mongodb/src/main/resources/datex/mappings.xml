@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<as:AppSchemaDataAccess xmlns:as="http://www.geotools.org/app-schema"
-                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                        xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
+<as:AppSchemaDataAccess xmlns:as="http://www.geotools.org/app-schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
   <namespaces>
     <Namespace>
       <prefix>npra</prefix>
@@ -20,7 +18,6 @@
       <uri>http://www.opengis.net/gml</uri>
     </Namespace>
   </namespaces>
-
   <sourceDataStores>
     <DataStore>
       <id>datasource</id>
@@ -44,7 +41,6 @@
       </parameters>
     </DataStore>
   </sourceDataStores>
-
   <targetTypes>
     <FeatureType>
       <schemaUri>http://localhost/data/schemas/datex.xsd</schemaUri>
@@ -53,9 +49,7 @@
       <schemaUri>http://www.datex2.eu/schema/2/2_3/DATEXIISchema_2_2_3.xsd</schemaUri>
     </FeatureType>
   </targetTypes>
-
   <typeMappings>
-
     <FeatureTypeMapping>
       <sourceDataStore>datasource</sourceDataStore>
       <sourceType>incidents</sourceType>
@@ -63,8 +57,7 @@
       <attributeMappings>
         <!-- id -->
         <AttributeMapping>
-          <targetAttribute>
-            npra:DatexSituationFeature
+          <targetAttribute>npra:DatexSituationFeature
           </targetAttribute>
           <idExpression>
             <OCQL>jsonSelect('data.datex.datex.id')</OCQL>
@@ -134,7 +127,6 @@
         </AttributeMapping>
       </attributeMappings>
     </FeatureTypeMapping>
-
     <FeatureTypeMapping>
       <sourceDataStore>datasource</sourceDataStore>
       <sourceType>incidents</sourceType>
@@ -142,14 +134,12 @@
       <attributeMappings>
         <!-- collection element random id -->
         <AttributeMapping>
-          <targetAttribute>
-            npra:DatexSituationRecord
+          <targetAttribute>npra:DatexSituationRecord
           </targetAttribute>
           <idExpression>
             <OCQL>collectionId('data.datex.datex.situationRecord')</OCQL>
           </idExpression>
         </AttributeMapping>
-
         <AttributeMapping>
           <targetAttribute>datex:severity</targetAttribute>
           <sourceExpression>
@@ -222,24 +212,56 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.validity')</OCQL>
           </sourceExpression>
         </AttributeMapping>
+        <!-- start - impact -->
         <AttributeMapping>
-          <targetAttribute>datex:impact</targetAttribute>
+          <targetAttribute>datex:impact/datex:capacityRemaining</targetAttribute>
           <sourceExpression>
-            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact')</OCQL>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.capacityRemaining')</OCQL>
           </sourceExpression>
         </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:numberOfLanesRestricted</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.numberOfLanesRestricted')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:numberOfOperationalLanes</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.numberOfOperationalLanes')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:originalNumberOfLanes</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.originalNumberOfLanes')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:residualRoadWidth</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.residualRoadWidth')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:trafficConstrictionType</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.trafficConstrictionType')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>datex:impact/datex:delays</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.impact.delays')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- end - impact -->
         <AttributeMapping>
           <targetAttribute>datex:cause</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.cause')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!--AttributeMapping>
-          <targetAttribute>datex:nonGeneralPublicComment</targetAttribute>
-          <sourceExpression>
-            <OCQL>jsonSelect('data.datex.datex.situationRecord.nonGeneralPublicComment')</OCQL>
-          </sourceExpression>
-        </AttributeMapping-->
         <AttributeMapping>
           <targetAttribute>datex:urlLink</targetAttribute>
           <sourceExpression>
@@ -315,7 +337,15 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.specificLocation')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- add link to alertCLocationName multi language -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:alertCLocation/datex:alertCLocationName/datex:values/datex:value</targetAttribute>
+          <sourceExpression>
+            <OCQL>collectionLink('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+            <linkElement>npra:DatexAlertCLocationName1</linkElement>
+            <linkField>FEATURE_LINK[4]</linkField>
+          </sourceExpression>
+          <isMultiple>true</isMultiple>
+        </AttributeMapping>
         <AttributeMapping>
           <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4PrimaryPointLocation/datex:alertCMethod4PrimaryPointLocationExtension</targetAttribute>
           <sourceExpression>
@@ -347,7 +377,15 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.specificLocation')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- add link to alertCLocationName multi language -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:alertCLocation/datex:alertCLocationName/datex:values/datex:value</targetAttribute>
+          <sourceExpression>
+            <OCQL>collectionLink('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+            <linkElement>npra:DatexAlertCLocationName2</linkElement>
+            <linkField>FEATURE_LINK[5]</linkField>
+          </sourceExpression>
+          <isMultiple>true</isMultiple>
+        </AttributeMapping>
         <AttributeMapping>
           <targetAttribute>npra:groupOfLocations/npra:alertCLinear/npra:alertCMethod4SecondaryPointLocation/datex:alertCMethod4SecondaryPointLocationExtension</targetAttribute>
           <sourceExpression>
@@ -373,7 +411,58 @@
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCDirection.alertCLinearExtension')</OCQL>
           </sourceExpression>
         </AttributeMapping>
-        <!-- group of locations -->
+        <!-- group of locations linearExtension -->
+        <!--AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:linearExtension/datex:linearLineStringExtension/datex:gmlLineString/datex:coordinates</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearExtension.linearLineStringExtension.gmlLineString.coordinates')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:linearExtension/datex:linearLineStringExtension/datex:gmlLineString/datex:srsName</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearExtension.linearLineStringExtension.gmlLineString.srsName')</OCQL>
+          </sourceExpression>
+        </AttributeMapping-->
+        <!-- group of locations locationExtension -->
+        <!--AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/datex:locationExtension/datex:countyNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.countyNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/datex:locationExtension/datex:municipalityNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.municipalityNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/datex:locationExtension/datex:roadNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.roadNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping -->
+        <!-- location for display -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationForDisplay/datex:latitude</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationForDisplay.latitude')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationForDisplay/datex:longitude</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationForDisplay.longitude')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationForDisplay/datex:pointCoordinatesExtension</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationForDisplay.pointCoordinatesExtension')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- end group of locations -->
         <AttributeMapping>
           <targetAttribute>datex:management</targetAttribute>
           <sourceExpression>
@@ -404,7 +493,6 @@
         </AttributeMapping>
       </attributeMappings>
     </FeatureTypeMapping>
-
     <FeatureTypeMapping>
       <sourceDataStore>datasource</sourceDataStore>
       <sourceType>incidents</sourceType>
@@ -412,8 +500,7 @@
       <attributeMappings>
         <!-- collection element random id -->
         <AttributeMapping>
-          <targetAttribute>
-            npra:DatexGeneralPublicComment
+          <targetAttribute>npra:DatexGeneralPublicComment
           </targetAttribute>
           <idExpression>
             <OCQL>collectionId('data.datex.datex.situationRecord.generalPublicComment')</OCQL>
@@ -459,15 +546,13 @@
         </AttributeMapping>
       </attributeMappings>
     </FeatureTypeMapping>
-
     <FeatureTypeMapping>
       <sourceDataStore>datasource</sourceDataStore>
       <sourceType>incidents</sourceType>
       <targetElement>npra:DatexGeneralPublicCommentMultilingualValue</targetElement>
       <attributeMappings>
         <AttributeMapping>
-          <targetAttribute>
-            npra:DatexGeneralPublicCommentMultilingualValue
+          <targetAttribute>npra:DatexGeneralPublicCommentMultilingualValue
           </targetAttribute>
           <idExpression>
             <OCQL>collectionId('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
@@ -493,7 +578,69 @@
         </AttributeMapping>
       </attributeMappings>
     </FeatureTypeMapping>
-
+    <FeatureTypeMapping>
+      <sourceDataStore>datasource</sourceDataStore>
+      <sourceType>incidents</sourceType>
+      <targetElement>npra:DatexAlertCLocationName1</targetElement>
+      <attributeMappings>
+        <AttributeMapping>
+          <targetAttribute>npra:DatexAlertCLocationName1
+          </targetAttribute>
+          <idExpression>
+            <OCQL>collectionId('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+          </idExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:lang</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationName.values.value.lang')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:value</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationName.values.value.value')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>FEATURE_LINK[4]</targetAttribute>
+          <sourceExpression>
+            <OCQL>collectionLink('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4PrimaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+      </attributeMappings>
+    </FeatureTypeMapping>
+    <FeatureTypeMapping>
+      <sourceDataStore>datasource</sourceDataStore>
+      <sourceType>incidents</sourceType>
+      <targetElement>npra:DatexAlertCLocationName2</targetElement>
+      <attributeMappings>
+        <AttributeMapping>
+          <targetAttribute>npra:DatexAlertCLocationName2
+          </targetAttribute>
+          <idExpression>
+            <OCQL>collectionId('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+          </idExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:lang</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationName.values.value.lang')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:value</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationName.values.value.value')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>FEATURE_LINK[5]</targetAttribute>
+          <sourceExpression>
+            <OCQL>collectionLink('data.datex.datex.situationRecord.groupOfLocations.alertCLinear.alertCMethod4SecondaryPointLocation.alertCLocation.alertCLocationName.values.value')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+      </attributeMappings>
+    </FeatureTypeMapping>
   </typeMappings>
-
 </as:AppSchemaDataAccess>
