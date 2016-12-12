@@ -50,9 +50,7 @@
             <targetElement>st:StationFeature</targetElement>
             <attributeMappings>
                 <AttributeMapping>
-                    <targetAttribute>
-                        st:StationFeature
-                    </targetAttribute>
+                    <targetAttribute>st:StationFeature</targetAttribute>
                     <idExpression>
                         <OCQL>jsonSelect('id')</OCQL>
                     </idExpression>
@@ -61,18 +59,6 @@
                     <targetAttribute>st:name</targetAttribute>
                     <sourceExpression>
                         <OCQL>jsonSelect('name')</OCQL>
-                    </sourceExpression>
-                </AttributeMapping>
-                <AttributeMapping>
-                    <targetAttribute>st:geometry</targetAttribute>
-                    <sourceExpression>
-                        <OCQL>jsonSelect('geometry')</OCQL>
-                    </sourceExpression>
-                </AttributeMapping>
-                <AttributeMapping>
-                    <targetAttribute>gml:location</targetAttribute>
-                    <sourceExpression>
-                        <OCQL>jsonSelect('geometry')</OCQL>
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
@@ -90,6 +76,12 @@
                     </sourceExpression>
                     <isMultiple>true</isMultiple>
                 </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>st:geometry</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('geometry')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
             </attributeMappings>
         </FeatureTypeMapping>
         <FeatureTypeMapping>
@@ -98,11 +90,9 @@
             <targetElement>st:Measurement</targetElement>
             <attributeMappings>
                 <AttributeMapping>
-                    <targetAttribute>
-                        st:Measurement
-                    </targetAttribute>
+                    <targetAttribute>st:Measurement</targetAttribute>
                     <idExpression>
-                        <OCQL>collectionId('measurements')</OCQL>
+                        <OCQL>collectionLink('measurements')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>
@@ -118,12 +108,6 @@
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
-                    <targetAttribute>FEATURE_LINK[1]</targetAttribute>
-                    <sourceExpression>
-                        <OCQL>collectionLink('measurements')</OCQL>
-                    </sourceExpression>
-                </AttributeMapping>
-                <AttributeMapping>
                     <targetAttribute>st:values</targetAttribute>
                     <sourceExpression>
                         <OCQL>collectionLink('measurements.values')</OCQL>
@@ -131,6 +115,12 @@
                         <linkField>FEATURE_LINK[2]</linkField>
                     </sourceExpression>
                     <isMultiple>true</isMultiple>
+                </AttributeMapping>
+                <AttributeMapping>
+                    <targetAttribute>FEATURE_LINK[1]</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>collectionLink('measurements')</OCQL>
+                    </sourceExpression>
                 </AttributeMapping>
             </attributeMappings>
         </FeatureTypeMapping>
@@ -140,11 +130,9 @@
             <targetElement>st:Value</targetElement>
             <attributeMappings>
                 <AttributeMapping>
-                    <targetAttribute>
-                        st:Value
-                    </targetAttribute>
+                    <targetAttribute>st:Value</targetAttribute>
                     <idExpression>
-                        <OCQL>collectionId('measurements.values')</OCQL>
+                        <OCQL>collectionLink('measurements.values')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>
