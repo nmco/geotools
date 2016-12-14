@@ -15,9 +15,19 @@
       <xs:extension base="gml:AbstractFeatureType">
         <xs:sequence>
           <xs:element name="customID" type="xs:string"/>
-          <xs:element name="situation" type="datex:Situation"/>
+          <xs:element name="situation" type="npra:DatexExtendedSituationType"/>
           <xs:element name="overallSeverity" type="datex:SeverityEnum"/>
           <xs:element name="geometry" type="gml:GeometryPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DatexExtendedSituationType">
+    <xs:complexContent>
+      <xs:extension base="datex:Situation">
+        <xs:sequence>
+          <xs:element name="situationRecord" type="npra:DatexSituationRecordFeatureType" maxOccurs="unbounded" />
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>

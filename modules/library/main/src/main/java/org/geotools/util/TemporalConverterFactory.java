@@ -239,7 +239,63 @@ public class TemporalConverterFactory implements ConverterFactory {
                 }
             };
         }
+
+        // if we have a string as input and are targeting a date type we may be able to extract a date
+        if (String.class.isAssignableFrom(source) && java.util.Date.class.isAssignableFrom(target)) {
+            // we may need to convert the parsed date to another date subtype
+            Converter dateConverter = createConverter(Date.class, target, hints);
+            if (dateConverter == null) {
+                // well the target date subtype is not supported
+                return null;
+            }
+            return stringToDateConverter(dateConverter);
+        }
+
         return null;
+    }
+
+    /**
+     * <p>Utility method that creates a converter that will try to extract a timestamp from a
+     * string and convert it to a target date type.</p>
+     *
+     * <p>The date converter parameter will be used to convert the parsed data to the correct
+     * targeted date type.</p>
+     *
+     * <p>If the source string doesn't contain a valid timestamp, i.e. is not a number NULL will
+     * be returned.</p>
+     *
+     * @param dateConverter will be used to convert the parsed date to the targeted date type
+     * @return a date type that represents the parsed timestamp or NULL
+     */
+    private Converter stringToDateConverter(Converter dateConverter) {
+
+        return new Converter() {
+            @Override
+            public Object convert(Object source, Class target) throws Exception {
+                if (source == null || target == null) {
+                    // nothing to do here
+                    return null;
+                }
+                // let's check that we are dealing with the correct types here
+                if (!(source instanceof String && java.util.Date.class.isAssignableFrom(target))) {
+                    // this is not good, the source needs to be a String and the target a date or a subtype of date
+                    throw new RuntimeException(String.format(
+                            "String to date converter received a wrong input type '%s' or a wrong target type '%s'.",
+                            source.getClass().getCanonicalName(), target.getCanonicalName()));
+                }
+                long timeStamp;
+                // trying to extract a timestamp from the source string
+                try {
+                    timeStamp = Long.parseLong((String) source);
+                } catch(NumberFormatException exception) {
+                    // the source string is not a timestamp
+                    return null;
+                }
+                // let's create a date and convert it to the expected date type
+                Date date = new Date(timeStamp);
+                return dateConverter.convert(date, target);
+            }
+        };
     }
     
     /**

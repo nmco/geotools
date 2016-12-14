@@ -120,7 +120,7 @@
           </sourceExpression>
         </AttributeMapping>
         <AttributeMapping>
-          <targetAttribute>npra:situation/npra:situationRecord</targetAttribute>
+          <targetAttribute>npra:situation/datex:situationRecord</targetAttribute>
           <sourceExpression>
             <OCQL>collectionLink('data.datex.datex.situationRecord')</OCQL>
             <linkElement>npra:DatexSituationRecordFeature</linkElement>
@@ -8926,7 +8926,7 @@
           </idExpression>
         </AttributeMapping>
         <AttributeMapping>
-          <targetAttribute>datex:comment/</targetAttribute>
+          <targetAttribute>datex:comment</targetAttribute>
           <sourceExpression>
             <OCQL>collectionLink('data.datex.datex.situationRecord.generalPublicComment.comment.values.value')</OCQL>
             <linkElement>MultilingualStringValue77</linkElement>
