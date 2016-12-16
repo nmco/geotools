@@ -21,7 +21,9 @@ import org.geotools.feature.NameImpl;
 import org.geotools.filter.AttributeExpressionImpl;
 import org.geotools.filter.FunctionExpressionImpl;
 import org.geotools.filter.capability.FunctionNameImpl;
+import org.geotools.filter.visitor.DuplicatingFilterVisitor;
 import org.opengis.filter.capability.FunctionName;
+import org.opengis.filter.expression.ExpressionVisitor;
 import org.opengis.filter.expression.PropertyName;
 import org.xml.sax.helpers.NamespaceSupport;
 
@@ -39,7 +41,8 @@ public class JsonSelectFunction extends FunctionExpressionImpl {
     public Object evaluate(Object object) {
         String path = (String) this.params.get(0).evaluate(object);
         if (object == null) {
-            return new AttributeExpressionImpl(new NameImpl(path));
+            // return new AttributeExpressionImpl(new NameImpl(path));
+            return new JsonPropertyName(path);
         }
         if (object instanceof MongoFeature) {
             MongoFeature mongoFeature = (MongoFeature) object;
@@ -53,5 +56,42 @@ public class JsonSelectFunction extends FunctionExpressionImpl {
         throw new RuntimeException(String.format(
                 "Function 'jsonSelect' cannot be applied to object of type '%s'.",
                 object.getClass().getCanonicalName()));
+    }
+
+    public static final class JsonPropertyName implements PropertyName {
+
+        private final String jsonPath;
+
+        public JsonPropertyName(String jsonPath) {
+            this.jsonPath = jsonPath;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return jsonPath;
+        }
+
+        @Override
+        public NamespaceSupport getNamespaceContext() {
+            return null;
+        }
+
+        @Override
+        public Object evaluate(Object object) {
+            return null;
+        }
+
+        @Override
+        public <T> T evaluate(Object object, Class<T> context) {
+            return null;
+        }
+
+        @Override
+        public Object accept(ExpressionVisitor visitor, Object extraData) {
+            if (visitor instanceof DuplicatingFilterVisitor) {
+                return new JsonPropertyName(jsonPath);
+            }
+            return visitor.visit(this,extraData);
+        }
     }
 }

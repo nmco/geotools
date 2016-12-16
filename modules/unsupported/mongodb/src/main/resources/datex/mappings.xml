@@ -65,7 +65,7 @@
         <AttributeMapping>
           <targetAttribute>npra:DatexSituationFeature</targetAttribute>
           <idExpression>
-            <OCQL>jsonSelect('data.datex.datex.id')</OCQL>
+            <OCQL>jsonSelect('_id')</OCQL>
           </idExpression>
         </AttributeMapping>
         <AttributeMapping>
@@ -137,7 +137,7 @@
         <AttributeMapping>
           <targetAttribute>npra:geometry</targetAttribute>
           <sourceExpression>
-            <OCQL>jsonSelect('data.datex.datex.geometry')</OCQL>
+            <OCQL>jsonSelect('geometry')</OCQL>
           </sourceExpression>
         </AttributeMapping>
       </attributeMappings>
@@ -556,6 +556,26 @@
           </sourceExpression>
           <isMultiple>true</isMultiple>
         </AttributeMapping>
+        <!-- start custom mapping location extension -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/npra:countyNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.countyNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/npra:municipalityNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.municipalityNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:locationExtension/npra:roadNumber</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.locationExtension.locationExtension.roadNumber')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- end custom mapping location extension -->
         <AttributeMapping>
           <targetAttribute>npra:groupOfLocations/npra:locationForDisplay/datex:latitude</targetAttribute>
           <sourceExpression>
@@ -764,6 +784,26 @@
           <targetAttribute>npra:groupOfLocations/npra:linearWithinLinearElement/datex:linearElement/datex:linearElementNature</targetAttribute>
           <sourceExpression>
             <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearWithinLinearElement.linearElement.linearElementNature')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- start custom linear extension -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:linearExtension/npra:gmlLineString/npra:coordinates</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearExtension.linearLineStringExtension.gmlLineString.coordinates')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:linearExtension/npra:gmlLineString/npra:srsName</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearExtension.linearLineStringExtension.gmlLineString.srsName')</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <!-- end custom linear extension -->
+        <AttributeMapping>
+          <targetAttribute>npra:groupOfLocations/npra:linearExtension/datex:openlrExtendedLinear/datex:firstDirection/datex:openlrLastLocationReferencePoint/datex:openlrCoordinate/datex:latitude</targetAttribute>
+          <sourceExpression>
+            <OCQL>jsonSelect('data.datex.datex.situationRecord.groupOfLocations.linearExtension.openlrExtendedLinear.firstDirection.openlrLastLocationReferencePoint.openlrCoordinate.latitude')</OCQL>
           </sourceExpression>
         </AttributeMapping>
         <AttributeMapping>

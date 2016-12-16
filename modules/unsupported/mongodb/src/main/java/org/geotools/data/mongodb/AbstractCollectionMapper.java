@@ -50,6 +50,8 @@ public abstract class AbstractCollectionMapper implements CollectionMapper {
                         .getBinding()));
             }
         }
-        return new MongoFeature(rootDBO, values.toArray(), featureType, rootDBO.get("_id").toString());
+        SimpleFeature feature = new MongoFeature(rootDBO, values.toArray(), featureType, rootDBO.get("_id").toString());
+        feature.getUserData().put("MONGO_OBJECT", rootDBO);
+        return feature;
     }
 }

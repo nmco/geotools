@@ -48,6 +48,43 @@
   <xs:element name="DatexSituationRecordFeature" type="npra:AllSituationRecord" substitutionGroup="gml:_Feature"/>
   <xs:element name="multilingualStringValue" type="npra:MultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
 
+  <!-- custom extensions -->
+
+  <xs:complexType name="CustomLinearExtension">
+    <xs:complexContent>
+      <xs:extension base="datex:_LinearExtensionType">
+        <xs:sequence>
+          <xs:element name="gmlLineString" type="npra:CustomGmlLineString"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CustomGmlLineString">
+    <xs:sequence>
+      <xs:element name="coordinates" type="xs:string"/>
+      <xs:element name="srsName" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CustomLocationExtension">
+    <xs:complexContent>
+      <xs:extension base="datex:_ExtensionType">
+        <xs:sequence>
+          <xs:element name="locationExtension" type="npra:CustomLocationExtension"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CustomLocationExtension">
+    <xs:sequence>
+      <xs:element name="countyNumber" type="xs:integer"/>
+      <xs:element name="municipalityNumber" type="xs:integer"/>
+      <xs:element name="roadNumber" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Super types created to map Mongo data model -->
 
   <xs:complexType name="AllParkingRoute">
@@ -700,11 +737,11 @@
           <xs:element minOccurs="0" name="areaExtension" type="datex:_AreaExtensionType"/>
           <xs:element maxOccurs="unbounded" minOccurs="0" name="externalReferencing" type="datex:ExternalReferencing"/>
           <xs:element minOccurs="0" name="locationForDisplay" type="datex:PointCoordinates"/>
-          <xs:element minOccurs="0" name="locationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="locationExtension" type="npra:CustomLocationExtension"/>
           <xs:element minOccurs="0" name="tpegLinearLocation" type="datex:TpegLinearLocation"/>
           <xs:element minOccurs="0" name="alertCLinear" type="npra:AllAlertCLinear"/>
           <xs:element minOccurs="0" name="linearWithinLinearElement" type="datex:LinearWithinLinearElement"/>
-          <xs:element minOccurs="0" name="linearExtension" type="datex:_LinearExtensionType"/>
+          <xs:element minOccurs="0" name="linearExtension" type="npra:CustomLinearExtension"/>
           <xs:element minOccurs="0" name="supplementaryPositionalDescription" type="datex:SupplementaryPositionalDescription"/>
           <xs:element minOccurs="0" name="destination" type="npra:AllDestination"/>
           <xs:element minOccurs="0" name="networkLocationExtension" type="datex:_ExtensionType"/>
@@ -1219,7 +1256,8 @@
   <xs:element name="HeightCharacteristic2" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
   <xs:element name="HeightCharacteristic3" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
   <xs:element name="HeightCharacteristic4" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
-  <xs:element name="_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics1" type="datex:_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics1"
+              type="datex:_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics" substitutionGroup="gml:_Feature"/>
   <xs:element name="GroupOfPeopleInvolved1" type="datex:GroupOfPeopleInvolved" substitutionGroup="gml:_Feature"/>
   <xs:element name="OpenlrLocationReferencePoint1" type="datex:OpenlrLocationReferencePoint" substitutionGroup="gml:_Feature"/>
   <xs:element name="OpenlrLocationReferencePoint2" type="datex:OpenlrLocationReferencePoint" substitutionGroup="gml:_Feature"/>
