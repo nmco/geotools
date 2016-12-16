@@ -102,6 +102,12 @@
                     </sourceExpression>
                 </AttributeMapping>
                 <AttributeMapping>
+                    <targetAttribute>st:comment</targetAttribute>
+                    <sourceExpression>
+                        <OCQL>jsonSelect('measurements.name')</OCQL>
+                    </sourceExpression>
+                </AttributeMapping>
+                <AttributeMapping>
                     <targetAttribute>st:unit</targetAttribute>
                     <sourceExpression>
                         <OCQL>jsonSelect('measurements.unit')</OCQL>
