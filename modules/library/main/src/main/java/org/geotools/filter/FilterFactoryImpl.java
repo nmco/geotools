@@ -428,8 +428,10 @@ public class FilterFactoryImpl implements Factory, org.opengis.filter.FilterFact
     	PropertyName name = null;
         if ( e instanceof PropertyName ) {
             name = (PropertyName) e;
+        } else {
+            name = (PropertyName) e.evaluate(null);
         }
-        else {
+        if (name == null) {
             throw new IllegalArgumentException("BBOX requires PropertyName expression");
         }
         

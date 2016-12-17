@@ -1,0 +1,1299 @@
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:gml="http://www.opengis.net/gml"
+           xmlns:npra="http://www.vegvesen.no/datex/1.0"
+           xmlns:datex="http://datex2.eu/schema/2/2_0"
+           targetNamespace="http://www.vegvesen.no/datex/1.0"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:import namespace="http://www.opengis.net/gml"
+             schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+  <xs:import namespace="http://datex2.eu/schema/2/2_0"
+             schemaLocation="http://www.datex2.eu/schema/2/2_3/DATEXIISchema_2_2_3.xsd"/>
+
+  <xs:complexType name="DatexSituationFeatureType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element name="customID" type="xs:string"/>
+          <xs:element name="situation" type="npra:DatexExtendedSituationType"/>
+          <xs:element name="overallSeverity" type="datex:SeverityEnum"/>
+          <xs:element name="geometry" type="gml:GeometryPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DatexExtendedSituationType">
+    <xs:complexContent>
+      <xs:extension base="datex:Situation">
+        <xs:sequence>
+          <xs:element name="situationRecord" type="npra:AllSituationRecord" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="MultilingualStringValueFeatureType">
+    <xs:complexContent>
+      <xs:extension base="datex:MultilingualStringValue">
+        <xs:sequence>
+          <xs:element name="lang" type="xs:string"/>
+          <xs:element name="value" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="DatexSituationFeature" type="npra:DatexSituationFeatureType" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DatexSituationRecordFeature" type="npra:AllSituationRecord" substitutionGroup="gml:_Feature"/>
+  <xs:element name="multilingualStringValue" type="npra:MultilingualStringValueFeatureType" substitutionGroup="gml:_Feature"/>
+
+  <!-- custom extensions -->
+
+  <xs:complexType name="CustomLinearExtension">
+    <xs:complexContent>
+      <xs:extension base="datex:_LinearExtensionType">
+        <xs:sequence>
+          <xs:element name="gmlLineString" type="npra:CustomGmlLineString"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CustomGmlLineString">
+    <xs:sequence>
+      <xs:element name="coordinates" type="xs:string"/>
+      <xs:element name="srsName" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CustomLocationExtension">
+    <xs:complexContent>
+      <xs:extension base="datex:_ExtensionType">
+        <xs:sequence>
+          <xs:element name="locationExtension" type="npra:CustomLocationExtension"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CustomLocationExtension">
+    <xs:sequence>
+      <xs:element name="countyNumber" type="xs:integer"/>
+      <xs:element name="municipalityNumber" type="xs:integer"/>
+      <xs:element name="roadNumber" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Super types created to map Mongo data model -->
+
+  <xs:complexType name="AllParkingRoute">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingRoute">
+        <xs:sequence>
+          <xs:element name="parkingRouteReference" type="datex:_ParkingRouteDetailsVersionedReference"/>
+          <xs:element minOccurs="0" name="parkingRouteByReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingRouteColour" type="datex:RGBColour"/>
+          <xs:element minOccurs="0" name="parkingRouteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingRouteName" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="parkingRouteType" type="datex:ParkingRouteTypeEnum"/>
+          <xs:element minOccurs="0" name="dynamicRouteManagement" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="parkingRouteIconIndex" type="datex:String"/>
+          <xs:element minOccurs="0" name="parkingRouteDirection" type="datex:DirectionEnum"/>
+          <xs:element minOccurs="0" name="parkingRouteDirection2" type="datex:ParkingRouteDirectionEnum"/>
+          <xs:element minOccurs="0" name="groupOfLocations" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="parkingRouteDetailsExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllContact">
+    <xs:complexContent>
+      <xs:extension base="datex:Contact">
+        <xs:sequence>
+          <xs:element name="contactReference" type="datex:_ContactDetailsVersionedReference"/>
+          <xs:element minOccurs="0" name="contactByReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="contactUnknown" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="contactNotDefined" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="validityOfContact" type="datex:OverallPeriod"/>
+          <xs:element minOccurs="0" name="contactExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="contactOrganisationName" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="contactPersonName" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactPersonFirstName" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactPersonPosition" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="contactDetailsLanguage" type="datex:Language"/>
+          <xs:element minOccurs="0" name="contactDetailsAddress" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="contactDetailsStreet" type="datex:String"/>
+          <xs:element maxOccurs="2" minOccurs="0" name="contactDetailsHouseNumber" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactDetailsPostcode" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactDetailsCity" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="country" type="datex:CountryEnum"/>
+          <xs:element minOccurs="0" name="contactDetailsTelephoneNumber" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactDetailsFax" type="datex:String"/>
+          <xs:element minOccurs="0" name="contactDetailsEMail" type="datex:String"/>
+          <xs:element minOccurs="0" name="urlLinkAddress" type="datex:Url"/>
+          <xs:element minOccurs="0" name="contactDetailsLogoUrl" type="datex:Url"/>
+          <xs:element minOccurs="0" name="available24hours" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="contactDetailsResponsibility" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="contactDetailsMoreInfo" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="publishingAgreement" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="contactDetailsOwnership" type="datex:OwnershipTypeEnum"/>
+          <xs:element minOccurs="0" name="groupOfLocations" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="contactDetailsExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllWeatherData">
+    <xs:complexContent>
+      <xs:extension base="datex:WeatherData">
+        <xs:sequence>
+          <xs:element name="wind" type="datex:Wind"/>
+          <xs:element minOccurs="0" name="windInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="weatherDataExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationPeriod" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="pertinentLocation" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="basicDataExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="weatherRelatedRoadConditionType" type="datex:WeatherRelatedRoadConditionTypeEnum"/>
+          <xs:element name="roadSurfaceConditionMeasurements" type="datex:RoadSurfaceConditionMeasurements"/>
+          <xs:element minOccurs="0" name="roadSurfaceConditionInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="temperature" type="datex:Temperature"/>
+          <xs:element minOccurs="0" name="temperatureInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="humidity" type="datex:Humidity"/>
+          <xs:element minOccurs="0" name="humidityInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="pollution" type="datex:Pollution"/>
+          <xs:element minOccurs="0" name="pollutionInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="noPrecipitation" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="precipitationDetail" type="datex:PrecipitationDetail"/>
+          <xs:element minOccurs="0" name="precipitationInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="visibility" type="datex:Visibility"/>
+          <xs:element minOccurs="0" name="visibilityInformationExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllOpenlrBasePointLocation">
+    <xs:complexContent>
+      <xs:extension base="datex:OpenlrBasePointLocation">
+        <xs:sequence>
+          <xs:element name="openlrCoordinate" type="datex:PointCoordinates"/>
+          <xs:element minOccurs="0" name="openlrPoiWithAccessPointExtension" type="datex:_ExtensionType"/>
+          <xs:element name="openlrSideOfRoad" type="datex:OpenlrSideOfRoadEnum"/>
+          <xs:element name="openlrOrientation" type="datex:OpenlrOrientationEnum"/>
+          <xs:element minOccurs="0" name="openlrPositiveOffset" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element name="openlrLocationReferencePoint" type="datex:OpenlrLocationReferencePoint"/>
+          <xs:element name="openlrLastLocationReferencePoint" type="datex:OpenlrLastLocationReferencePoint"/>
+          <xs:element minOccurs="0" name="openlrBasePointLocationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="openlrPointAlongLineExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllSituationRecord">
+    <xs:complexContent>
+      <xs:extension base="datex:SituationRecord">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" name="nonWeatherRelatedRoadConditionType" type="datex:NonWeatherRelatedRoadConditionTypeEnum"/>
+          <xs:element minOccurs="0" name="nonWeatherRelatedRoadConditionsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="roadConditionsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="drivingConditionType" type="datex:DrivingConditionTypeEnum"/>
+          <xs:element minOccurs="0" name="conditionsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="trafficElementExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="situationRecordCreationReference" type="datex:String"/>
+          <xs:element name="situationRecordCreationTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="situationRecordObservationTime" type="datex:DateTime"/>
+          <xs:element name="situationRecordVersionTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="situationRecordFirstSupplierVersionTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="confidentialityOverride" type="datex:ConfidentialityValueEnum"/>
+          <xs:element name="probabilityOfOccurrence" type="datex:ProbabilityOfOccurrenceEnum"/>
+          <xs:element minOccurs="0" name="severity" type="datex:SeverityEnum"/>
+          <xs:element minOccurs="0" name="source" type="datex:Source"/>
+          <xs:element name="validity" type="datex:Validity"/>
+          <xs:element minOccurs="0" name="impact" type="datex:Impact"/>
+          <xs:element minOccurs="0" name="cause" type="npra:AllCause"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="generalPublicComment" type="datex:Comment"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="nonGeneralPublicComment" type="datex:Comment"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="urlLink" type="datex:UrlLink"/>
+          <xs:element name="groupOfLocations" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="management" type="datex:Management"/>
+          <xs:element minOccurs="0" name="situationRecordExtension" type="datex:_SituationRecordExtensionType"/>
+          <xs:element minOccurs="0" name="constructionWorkType" type="datex:ConstructionWorkTypeEnum"/>
+          <xs:element minOccurs="0" name="constructionWorksExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="roadworksDuration" type="datex:RoadworksDurationEnum"/>
+          <xs:element minOccurs="0" name="roadworksScale" type="datex:RoadworksScaleEnum"/>
+          <xs:element minOccurs="0" name="underTraffic" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="urgentRoadworks" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="mobility" type="datex:Mobility"/>
+          <xs:element minOccurs="0" name="subjects" type="datex:Subjects"/>
+          <xs:element minOccurs="0" name="maintenanceVehicles" type="datex:MaintenanceVehicles"/>
+          <xs:element minOccurs="0" name="roadworksExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="actionOrigin" type="datex:OperatorActionOriginEnum"/>
+          <xs:element minOccurs="0" name="actionPlanIdentifier" type="datex:String"/>
+          <xs:element minOccurs="0" name="operatorActionStatus" type="datex:OperatorActionStatusEnum"/>
+          <xs:element minOccurs="0" name="operatorActionExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="numberOfObstructions" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="mobilityOfObstruction" type="datex:Mobility"/>
+          <xs:element minOccurs="0" name="obstructionExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="reroutingManagementType" type="datex:ReroutingManagementTypeEnum"/>
+          <xs:element minOccurs="0" name="reroutingItineraryDescription" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="signedRerouting" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="entry" type="datex:String"/>
+          <xs:element minOccurs="0" name="exit" type="datex:String"/>
+          <xs:element minOccurs="0" name="roadOrJunctionNumber" type="datex:String"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="alternativeRoute" type="datex:Itinerary"/>
+          <xs:element minOccurs="0" name="reroutingManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element name="complianceOption" type="datex:ComplianceOptionEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="applicableForTrafficDirection" type="datex:DirectionEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="applicableForTrafficType" type="datex:TrafficTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="placesAtWhichApplicable" type="datex:PlacesEnum"/>
+          <xs:element minOccurs="0" name="automaticallyInitiated" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="forVehiclesWithCharacteristicsOf" type="datex:VehicleCharacteristics"/>
+          <xs:element minOccurs="0" name="networkManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="carParkConfiguration" type="datex:CarParkConfigurationEnum"/>
+          <xs:element name="carParkIdentity" type="datex:String"/>
+          <xs:element minOccurs="0" name="carParkOccupancy" type="datex:Percentage"/>
+          <xs:element minOccurs="0" name="carParkStatus" type="datex:CarParkStatusEnum"/>
+          <xs:element minOccurs="0" name="exitRate" type="datex:VehiclesPerHour"/>
+          <xs:element minOccurs="0" name="fillRate" type="datex:VehiclesPerHour"/>
+          <xs:element minOccurs="0" name="numberOfVacantParkingSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="occupiedSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="queuingTime" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="totalCapacity" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="carParksExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="nonRoadEventInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="disturbanceActivityType" type="datex:DisturbanceActivityTypeEnum"/>
+          <xs:element minOccurs="0" name="disturbanceActivityExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="mobilityOfActivity" type="datex:Mobility"/>
+          <xs:element minOccurs="0" name="activityExtension" type="datex:_ExtensionType"/>
+          <xs:element name="publicEventType" type="datex:PublicEventTypeEnum"/>
+          <xs:element minOccurs="0" name="publicEventExtension" type="datex:_ExtensionType"/>
+          <xs:element name="authorityOperationType" type="datex:AuthorityOperationTypeEnum"/>
+          <xs:element minOccurs="0" name="authorityOperationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="weatherRelatedRoadConditionType" type="datex:WeatherRelatedRoadConditionTypeEnum"/>
+          <xs:element minOccurs="0" name="roadSurfaceConditionMeasurements" type="datex:RoadSurfaceConditionMeasurements"/>
+          <xs:element minOccurs="0" name="weatherRelatedRoadConditionsExtension" type="datex:_ExtensionType"/>
+          <xs:element name="vmsSetting" type="npra:AllVmsSetting"/>
+          <xs:element minOccurs="0" name="signSettingExtension" type="datex:_ExtensionType"/>
+          <xs:element name="roadOrCarriagewayOrLaneManagementType" type="datex:RoadOrCarriagewayOrLaneManagementTypeEnum"/>
+          <xs:element minOccurs="0" name="minimumCarOccupancy" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="roadOrCarriagewayOrLaneManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="speedManagementType" type="datex:SpeedManagementTypeEnum"/>
+          <xs:element minOccurs="0" name="temporarySpeedLimit" type="datex:KilometresPerHour"/>
+          <xs:element minOccurs="0" name="speedManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="roadsideServiceDisruptionType" type="datex:RoadsideServiceDisruptionTypeEnum"/>
+          <xs:element minOccurs="0" name="roadsideServiceDisruptionExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="poorEnvironmentType" type="datex:PoorEnvironmentTypeEnum"/>
+          <xs:element minOccurs="0" name="precipitationDetail" type="datex:PrecipitationDetail"/>
+          <xs:element minOccurs="0" name="visibility" type="datex:Visibility"/>
+          <xs:element minOccurs="0" name="pollution" type="datex:Pollution"/>
+          <xs:element minOccurs="0" name="temperature" type="datex:Temperature"/>
+          <xs:element minOccurs="0" name="wind" type="datex:Wind"/>
+          <xs:element minOccurs="0" name="humidity" type="datex:Humidity"/>
+          <xs:element minOccurs="0" name="poorEnvironmentConditionsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="generalInstructionToRoadUsersType" type="datex:GeneralInstructionToRoadUsersTypeEnum"/>
+          <xs:element minOccurs="0" name="generalMessageToRoadUsers" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="generalInstructionOrMessageToRoadUsersExtension" type="datex:_ExtensionType"/>
+          <xs:element name="generalNetworkManagementType" type="datex:GeneralNetworkManagementTypeEnum"/>
+          <xs:element minOccurs="0" name="trafficManuallyDirectedBy" type="datex:PersonCategoryEnum"/>
+          <xs:element minOccurs="0" name="generalNetworkManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="journeyDestination" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="journeyOrigin" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="journeyReference" type="datex:String"/>
+          <xs:element name="transitServiceInformation" type="datex:TransitServiceInformationEnum"/>
+          <xs:element name="transitServiceType" type="datex:TransitServiceTypeEnum"/>
+          <xs:element minOccurs="0" name="scheduledDepartureTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="transitInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="roadMaintenanceType" type="datex:RoadMaintenanceTypeEnum"/>
+          <xs:element minOccurs="0" name="maintenanceWorksExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="depth" type="datex:MetresAsFloat"/>
+          <xs:element name="environmentalObstructionType" type="datex:EnvironmentalObstructionTypeEnum"/>
+          <xs:element minOccurs="0" name="environmentalObstructionExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="accidentCause" type="datex:AccidentCauseEnum"/>
+          <xs:element maxOccurs="unbounded" name="accidentType" type="datex:AccidentTypeEnum"/>
+          <xs:element minOccurs="0" name="totalNumberOfPeopleInvolved" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="totalNumberOfVehiclesInvolved" type="datex:NonNegativeInteger"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vehicleInvolved" type="datex:Vehicle"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="groupOfVehiclesInvolved" type="datex:GroupOfVehiclesInvolved"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="groupOfPeopleInvolved" type="datex:GroupOfPeopleInvolved"/>
+          <xs:element minOccurs="0" name="accidentExtension" type="datex:_ExtensionType"/>
+          <xs:element name="roadsideAssistanceType" type="datex:RoadsideAssistanceTypeEnum"/>
+          <xs:element minOccurs="0" name="roadsideAssistanceExtension" type="datex:_ExtensionType"/>
+          <xs:element name="equipmentOrSystemFaultType" type="datex:EquipmentOrSystemFaultTypeEnum"/>
+          <xs:element name="faultyEquipmentOrSystemType" type="datex:EquipmentOrSystemTypeEnum"/>
+          <xs:element minOccurs="0" name="equipmentOrSystemFaultExtension" type="datex:_ExtensionType"/>
+          <xs:element name="vehicleObstructionType" type="datex:VehicleObstructionTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="obstructingVehicle" type="datex:Vehicle"/>
+          <xs:element minOccurs="0" name="vehicleObstructionExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="roadOperatorServiceDisruptionType" type="datex:RoadOperatorServiceDisruptionTypeEnum"/>
+          <xs:element minOccurs="0" name="roadOperatorServiceDisruptionExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="abnormalTrafficType" type="datex:AbnormalTrafficTypeEnum"/>
+          <xs:element minOccurs="0" name="numberOfVehiclesWaiting" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="queueLength" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element minOccurs="0" name="relativeTrafficFlow" type="datex:RelativeTrafficFlowEnum"/>
+          <xs:element minOccurs="0" name="trafficFlowCharacteristics" type="datex:TrafficFlowCharacteristicsEnum"/>
+          <xs:element minOccurs="0" name="trafficTrendType" type="datex:TrafficTrendTypeEnum"/>
+          <xs:element minOccurs="0" name="abnormalTrafficExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="alive" type="datex:Boolean"/>
+          <xs:element name="animalPresenceType" type="datex:AnimalPresenceTypeEnum"/>
+          <xs:element minOccurs="0" name="animalPresenceObstructionExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="obstructionType" type="datex:ObstructionTypeEnum"/>
+          <xs:element minOccurs="0" name="generalObstructionExtension" type="datex:_ExtensionType"/>
+          <xs:element name="winterEquipmentManagementType" type="datex:WinterEquipmentManagementTypeEnum"/>
+          <xs:element minOccurs="0" name="winterDrivingManagementExtension" type="datex:_ExtensionType"/>
+          <xs:element name="genericSituationRecordName" type="datex:String"/>
+          <xs:element minOccurs="0" name="genericSituationRecordExtension" type="datex:_ExtensionType"/>
+          <xs:element name="infrastructureDamageType" type="datex:InfrastructureDamageTypeEnum"/>
+          <xs:element minOccurs="0" name="infrastructureDamageObstructionExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTpegDescriptor">
+    <xs:complexContent>
+      <xs:extension base="datex:TpegDescriptor">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="tpegPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="descriptor" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="tpegDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegOtherPointDescriptorType" type="datex:TpegLoc03OtherPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegOtherPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegJunctionPointDescriptorType" type="datex:TpegLoc03JunctionPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegJunctionPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegAreaDescriptorType" type="datex:TpegLoc03AreaDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegAreaDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegIlcPointDescriptorType" type="datex:TpegLoc03IlcPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegIlcPointDescriptorExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllLinearElement">
+    <xs:complexContent>
+      <xs:extension base="datex:LinearElement">
+        <xs:sequence>
+          <xs:element name="startPointOfLinearElement" type="datex:Referent"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="intermediatePointOnLinearElement" type="datex:_IntermediatePointOnLinearElement"/>
+          <xs:element name="endPointOfLinearElement" type="datex:Referent"/>
+          <xs:element minOccurs="0" name="linearElementByPointsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="roadName" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="roadNumber" type="datex:String"/>
+          <xs:element minOccurs="0" name="linearElementReferenceModel" type="datex:String"/>
+          <xs:element minOccurs="0" name="linearElementReferenceModelVersion" type="datex:String"/>
+          <xs:element minOccurs="0" name="linearElementNature" type="datex:LinearElementNatureEnum"/>
+          <xs:element minOccurs="0" name="linearElementExtension" type="datex:_ExtensionType"/>
+          <xs:element name="linearElementIdentifier" type="datex:String"/>
+          <xs:element minOccurs="0" name="linearElementByCodeExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingSite">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingSite">
+        <xs:sequence>
+          <xs:element name="interUrbanParkingSiteLocation" type="datex:InterUrbanParkingSiteLocationEnum"/>
+          <xs:element minOccurs="0" name="interUrbanParkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingReservation" type="datex:ReservationTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingLayout" type="datex:ParkingLayoutEnum"/>
+          <xs:element minOccurs="0" name="highestFloor" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="lowestFloor" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="temporaryParking" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSiteAddress" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="reservationService" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingUsageScenario" type="datex:_ParkingSiteScenarioIndexParkingUsageScenario"/>
+          <xs:element minOccurs="0" name="openingTimes" type="datex:OpeningTimes"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingAccess" type="datex:ParkingAccess"/>
+          <xs:element minOccurs="0" name="parkingStandardsAndSecurity" type="datex:ParkingStandardsAndSecurity"/>
+          <xs:element minOccurs="0" name="parkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingName" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingAlias" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="parkingDescription" type="datex:MultilingualString"/>
+          <xs:element name="parkingRecordVersionTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="parkingNumberOfSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingPrincipalNumberOfSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="maximumParkingDuration" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="photoUrl" type="datex:Url"/>
+          <xs:element minOccurs="0" name="urlLinkAddress" type="datex:Url"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingOccupanyDetectionType" type="datex:OccupancyDetectionTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="emergencyContact" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="owner" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="responisbleAuthority" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="securityService" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="operator" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="servicePartner" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingVMS" type="datex:ParkingVMS"/>
+          <xs:element name="parkingLocation" type="npra:AllGroupOfLocations"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingRoute" type="npra:AllParkingRoute"/>
+          <xs:element minOccurs="0" name="parkingColour" type="datex:RGBColour"/>
+          <xs:element minOccurs="0" name="onlyAssignedParking" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="assignedParkingAmongOthers" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="prohibitedParking" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="tariffsAndPayment" type="datex:TariffsAndPayment"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingEquipmentOrServiceFacility" type="datex:_ParkingRecordEquipmentOrServiceFacilityIndexParkingEquipmentOrServiceFacility"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSpace" type="datex:_ParkingSpace"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="groupOfParkingSpaces" type="datex:_GroupOfParkingSpaces"/>
+          <xs:element minOccurs="0" name="parkingThresholds" type="datex:ParkingThresholds"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="permitsAndProhibitions" type="datex:PermitsAndProhibitions"/>
+          <xs:element minOccurs="0" name="emergencyAssemblyPoint" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="entireArea" type="datex:Area"/>
+          <xs:element minOccurs="0" name="parkingRecordDimension" type="datex:Dimension"/>
+          <xs:element minOccurs="0" name="parkingRecordExtension" type="datex:_ExtensionType"/>
+          <xs:element name="urbanParkingSiteType" type="datex:UrbanParkingSiteTypeEnum"/>
+          <xs:element minOccurs="0" name="parkingZone" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="urbanParkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element name="parkingSpecialLocation" type="datex:ParkingSpecialLocationEnum"/>
+          <xs:element minOccurs="0" name="parkingOtherSpecialLocation" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="specialLocationParkingSiteExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllReference">
+    <xs:complexContent>
+      <xs:extension base="datex:Reference">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllRoad">
+    <xs:complexContent>
+      <xs:extension base="datex:Road">
+        <xs:sequence>
+          <xs:element name="junctionName" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="roadNodeExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="nameOfRoad" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="roadIdentifier" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="typeOfRoad" type="datex:RoadTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="roadDestination" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="roadOrigination" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="distanceToThisRoad" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element minOccurs="0" name="roadExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllOpenlrBaseLocationReferencePoint">
+    <xs:complexContent>
+      <xs:extension base="datex:OpenlrBaseLocationReferencePoint">
+        <xs:sequence>
+          <xs:element name="openlrPathAttributes" type="datex:OpenlrPathAttributes"/>
+          <xs:element minOccurs="0" name="openlrLocationReferencePointExtension" type="datex:_ExtensionType"/>
+          <xs:element name="openlrCoordinate" type="datex:PointCoordinates"/>
+          <xs:element name="openlrLineAttributes" type="datex:OpenlrLineAttributes"/>
+          <xs:element minOccurs="0" name="openlrBaseLocationReferencePointExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="openlrLastLocationReferencePointExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingRecord">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingRecord">
+        <xs:sequence>
+          <xs:element name="interUrbanParkingSiteLocation" type="datex:InterUrbanParkingSiteLocationEnum"/>
+          <xs:element minOccurs="0" name="interUrbanParkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingReservation" type="datex:ReservationTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingLayout" type="datex:ParkingLayoutEnum"/>
+          <xs:element minOccurs="0" name="highestFloor" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="lowestFloor" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="temporaryParking" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSiteAddress" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="reservationService" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingUsageScenario" type="datex:_ParkingSiteScenarioIndexParkingUsageScenario"/>
+          <xs:element minOccurs="0" name="openingTimes" type="datex:OpeningTimes"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingAccess" type="datex:ParkingAccess"/>
+          <xs:element minOccurs="0" name="parkingStandardsAndSecurity" type="datex:ParkingStandardsAndSecurity"/>
+          <xs:element minOccurs="0" name="parkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingName" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingAlias" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="parkingDescription" type="datex:MultilingualString"/>
+          <xs:element name="parkingRecordVersionTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="parkingNumberOfSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingPrincipalNumberOfSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="maximumParkingDuration" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="photoUrl" type="datex:Url"/>
+          <xs:element minOccurs="0" name="urlLinkAddress" type="datex:Url"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingOccupanyDetectionType" type="datex:OccupancyDetectionTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="emergencyContact" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="owner" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="responisbleAuthority" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="securityService" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="operator" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="servicePartner" type="npra:AllContact"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingVMS" type="datex:ParkingVMS"/>
+          <xs:element name="parkingLocation" type="npra:AllGroupOfLocations"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingRoute" type="npra:AllParkingRoute"/>
+          <xs:element minOccurs="0" name="parkingColour" type="datex:RGBColour"/>
+          <xs:element minOccurs="0" name="onlyAssignedParking" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="assignedParkingAmongOthers" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="prohibitedParking" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="tariffsAndPayment" type="datex:TariffsAndPayment"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingEquipmentOrServiceFacility" type="datex:_ParkingRecordEquipmentOrServiceFacilityIndexParkingEquipmentOrServiceFacility"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSpace" type="datex:_ParkingSpace"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="groupOfParkingSpaces" type="datex:_GroupOfParkingSpaces"/>
+          <xs:element minOccurs="0" name="parkingThresholds" type="datex:ParkingThresholds"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="permitsAndProhibitions" type="datex:PermitsAndProhibitions"/>
+          <xs:element minOccurs="0" name="emergencyAssemblyPoint" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="entireArea" type="datex:Area"/>
+          <xs:element minOccurs="0" name="parkingRecordDimension" type="datex:Dimension"/>
+          <xs:element minOccurs="0" name="parkingRecordExtension" type="datex:_ExtensionType"/>
+          <xs:element name="urbanParkingSiteType" type="datex:UrbanParkingSiteTypeEnum"/>
+          <xs:element minOccurs="0" name="parkingZone" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="urbanParkingSiteExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="groupOfParkingSitesType" type="datex:GroupOfParkingSitesTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSiteByReference" type="datex:_ParkingRecordVersionedReference"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSite" type="npra:AllParkingSite"/>
+          <xs:element minOccurs="0" name="groupOfParkingSitesExtension" type="datex:_ExtensionType"/>
+          <xs:element name="parkingSpecialLocation" type="datex:ParkingSpecialLocationEnum"/>
+          <xs:element minOccurs="0" name="parkingOtherSpecialLocation" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="specialLocationParkingSiteExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingOccupancy">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingOccupancy">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="groupDeclarationValidNow" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="groupOfParkingSpacesClosed" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="groupOfParkingSpacesStatusExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingNumberOfSpacesOverride" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingNumberOfVacantSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingNumberOfVacantSpacesLowerThan" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingNumberOfVacantSpacesHigherThan" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingNumberOfVacantSpacesGraded" type="datex:ParkingVacantSpacesEnum"/>
+          <xs:element minOccurs="0" name="parkingNumberOfOccupiedSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingNumberOfVehicles" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="parkingOccupancy" type="datex:Percentage"/>
+          <xs:element minOccurs="0" name="parkingOccupancyGraded" type="datex:ParkingOccupancyEnum"/>
+          <xs:element minOccurs="0" name="parkingOccupancyTrend" type="datex:ParkingOccupancyTrendEnum"/>
+          <xs:element minOccurs="0" name="parkingNotAllowed" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vehicleCountAndRate" type="datex:VehicleCountAndRate"/>
+          <xs:element minOccurs="0" name="parkingOccupancyExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllOpenlrAreaLocationReference">
+    <xs:complexContent>
+      <xs:extension base="datex:OpenlrAreaLocationReference">
+        <xs:sequence>
+          <xs:element name="openlrRectangle" type="datex:OpenlrRectangle"/>
+          <xs:element minOccurs="0" name="openlrRectangleLocationReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="openlrAreaLocationReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element name="openlrPolygonCorners" type="datex:OpenlrPolygonCorners"/>
+          <xs:element minOccurs="0" name="openlrPolygonLocationReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element name="radius" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element name="openlrGeoCoordinate" type="datex:OpenlrGeoCoordinate"/>
+          <xs:element minOccurs="0" name="openlrCircleLocationReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="openlrLocationReferencePoint" type="datex:OpenlrLocationReferencePoint"/>
+          <xs:element name="openlrLastLine" type="datex:OpenlrLineAttributes"/>
+          <xs:element minOccurs="0" name="openlrClosedLineLocationReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element name="openlrGridAttributes" type="datex:OpenlrGridAttributes"/>
+          <xs:element minOccurs="0" name="openlrGridLocationReferenceExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingEquipmentOrServiceFacility">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingEquipmentOrServiceFacility">
+        <xs:sequence>
+          <xs:element name="equipmentType" type="datex:EquipmentTypeEnum"/>
+          <xs:element minOccurs="0" name="electricCharging" type="datex:ElectricCharging"/>
+          <xs:element minOccurs="0" name="equipmentExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="equipmentOrServiceFacilityIdentifier" type="datex:String"/>
+          <xs:element minOccurs="0" name="availability" type="datex:AvailabilityEnum"/>
+          <xs:element minOccurs="0" name="numberOfEquipmentOrServiceFacility" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="additionalDescription" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="otherEquipmentOrServiceFacility" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="accessibility" type="datex:AccessibilityEnum"/>
+          <xs:element minOccurs="0" name="nameOrBrand" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="comment" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="photoUrl" type="datex:Url"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="applicableForUser" type="datex:UserTypeEnum"/>
+          <xs:element minOccurs="0" name="availabilityAndOpeningTimes" type="datex:OpeningTimes"/>
+          <xs:element minOccurs="0" name="tariffsAndPayment" type="datex:TariffsAndPayment"/>
+          <xs:element minOccurs="0" name="groupOfLocations" type="npra:AllGroupOfLocations"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="applicableForVehicles" type="datex:VehicleCharacteristics"/>
+          <xs:element minOccurs="0" name="parkingEquipmentOrServiceFacilityExtension" type="datex:_ExtensionType"/>
+          <xs:element name="serviceFacilityType" type="datex:ServiceFacilityTypeEnum"/>
+          <xs:element minOccurs="0" name="numberOfSubitems" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="distanceFromParkingSite" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element minOccurs="0" name="serviceFacilityExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllBasicData">
+    <xs:complexContent>
+      <xs:extension base="datex:BasicData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="averageDistanceHeadway" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="averageTimeHeadway" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="trafficHeadwayExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="forVehiclesWithCharacteristicsOf" type="datex:VehicleCharacteristics"/>
+          <xs:element minOccurs="0" name="trafficDataExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationPeriod" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="pertinentLocation" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="basicDataExtension" type="datex:_ExtensionType"/>
+          <xs:element name="wind" type="datex:Wind"/>
+          <xs:element minOccurs="0" name="windInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="weatherDataExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="weatherRelatedRoadConditionType" type="datex:WeatherRelatedRoadConditionTypeEnum"/>
+          <xs:element name="roadSurfaceConditionMeasurements" type="datex:RoadSurfaceConditionMeasurements"/>
+          <xs:element minOccurs="0" name="roadSurfaceConditionInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="travelTimeTrendType" type="datex:TravelTimeTrendTypeEnum"/>
+          <xs:element minOccurs="0" name="travelTimeType" type="datex:TravelTimeTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vehicleType" type="datex:VehicleTypeEnum"/>
+          <xs:element minOccurs="0" name="travelTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="freeFlowTravelTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="normallyExpectedTravelTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="freeFlowSpeed" type="datex:SpeedValue"/>
+          <xs:element minOccurs="0" name="travelTimeDataExtension" type="datex:_ExtensionType"/>
+          <xs:element name="temperature" type="datex:Temperature"/>
+          <xs:element minOccurs="0" name="temperatureInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="concentration" type="datex:ConcentrationOfVehiclesValue"/>
+          <xs:element minOccurs="0" name="occupancy" type="datex:PercentageValue"/>
+          <xs:element minOccurs="0" name="trafficConcentrationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="axleFlow" type="datex:AxleFlowValue"/>
+          <xs:element minOccurs="0" name="pcuFlow" type="datex:PcuFlowValue"/>
+          <xs:element minOccurs="0" name="percentageLongVehicles" type="datex:PercentageValue"/>
+          <xs:element minOccurs="0" name="vehicleFlow" type="datex:VehicleFlowValue"/>
+          <xs:element minOccurs="0" name="trafficFlowExtension" type="datex:_ExtensionType"/>
+          <xs:element name="humidity" type="datex:Humidity"/>
+          <xs:element minOccurs="0" name="humidityInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="individualVehicleSpeed" type="datex:SpeedValue"/>
+          <xs:element minOccurs="0" name="arrivalTime" type="datex:DateTimeValue"/>
+          <xs:element minOccurs="0" name="exitTime" type="datex:DateTimeValue"/>
+          <xs:element minOccurs="0" name="passageDurationTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="presenceDurationTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="timeGap" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="timeHeadway" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="distanceGap" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="distanceHeadway" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="individualVehicleDataValuesExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="trafficTrendType" type="datex:TrafficTrendTypeEnum"/>
+          <xs:element minOccurs="0" name="trafficStatus" type="datex:TrafficStatusValue"/>
+          <xs:element minOccurs="0" name="trafficStatusExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="pollution" type="datex:Pollution"/>
+          <xs:element minOccurs="0" name="pollutionInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="noPrecipitation" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="precipitationDetail" type="datex:PrecipitationDetail"/>
+          <xs:element minOccurs="0" name="precipitationInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="visibility" type="datex:Visibility"/>
+          <xs:element minOccurs="0" name="visibilityInformationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="averageVehicleSpeed" type="datex:SpeedValue"/>
+          <xs:element minOccurs="0" name="speedPercentile" type="datex:SpeedPercentile"/>
+          <xs:element minOccurs="0" name="trafficSpeedExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllVmsSetting">
+    <xs:complexContent>
+      <xs:extension base="datex:VmsSetting">
+        <xs:sequence>
+          <xs:element name="vmsUnitTableReference" type="datex:_VmsUnitTableVersionedReference"/>
+          <xs:element name="vmsUnitReference" type="datex:_VmsUnitRecordVersionedReference"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vms" type="datex:_VmsUnitVmsIndexVms"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vmsUnitFault" type="datex:VmsUnitFault"/>
+          <xs:element minOccurs="0" name="vmsUnitExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="vmsSettingExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllGroupOfLocations">
+    <xs:complexContent>
+      <xs:extension base="datex:GroupOfLocations">
+        <xs:sequence>
+          <xs:element name="predefinedNonOrderedLocationGroupReference" type="datex:_PredefinedNonOrderedLocationGroupVersionedReference"/>
+          <xs:element minOccurs="0" name="nonOrderedLocationGroupByReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="nonOrderedLocationsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="groupOfLocationsExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="alertCArea" type="datex:AlertCArea"/>
+          <xs:element minOccurs="0" name="tpegAreaLocation" type="npra:AllTpegAreaLocation"/>
+          <xs:element minOccurs="0" name="areaExtension" type="datex:_AreaExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="externalReferencing" type="datex:ExternalReferencing"/>
+          <xs:element minOccurs="0" name="locationForDisplay" type="datex:PointCoordinates"/>
+          <xs:element minOccurs="0" name="locationExtension" type="npra:CustomLocationExtension"/>
+          <xs:element minOccurs="0" name="tpegLinearLocation" type="datex:TpegLinearLocation"/>
+          <xs:element minOccurs="0" name="alertCLinear" type="npra:AllAlertCLinear"/>
+          <xs:element minOccurs="0" name="linearWithinLinearElement" type="datex:LinearWithinLinearElement"/>
+          <xs:element minOccurs="0" name="linearExtension" type="npra:CustomLinearExtension"/>
+          <xs:element minOccurs="0" name="supplementaryPositionalDescription" type="datex:SupplementaryPositionalDescription"/>
+          <xs:element minOccurs="0" name="destination" type="npra:AllDestination"/>
+          <xs:element minOccurs="0" name="networkLocationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="routeDestination" type="npra:AllDestination"/>
+          <xs:element minOccurs="0" name="itineraryExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="tpegPointLocation" type="npra:AllTpegPointLocation"/>
+          <xs:element minOccurs="0" name="alertCPoint" type="npra:AllAlertCPoint"/>
+          <xs:element minOccurs="0" name="pointAlongLinearElement" type="datex:PointAlongLinearElement"/>
+          <xs:element minOccurs="0" name="pointByCoordinates" type="datex:PointByCoordinates"/>
+          <xs:element minOccurs="0" name="pointExtension" type="datex:_PointExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="locationContainedInItinerary" type="datex:_LocationContainedInItinerary"/>
+          <xs:element minOccurs="0" name="itineraryByIndexedLocationsExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="2" name="locationContainedInGroup" type="datex:Location"/>
+          <xs:element minOccurs="0" name="nonOrderedLocationGroupByListExtension" type="datex:_ExtensionType"/>
+          <xs:element name="predefinedLocationReference" type="datex:_PredefinedLocationVersionedReference"/>
+          <xs:element minOccurs="0" name="locationByReferenceExtension" type="datex:_ExtensionType"/>
+          <xs:element name="predefinedItineraryReference" type="datex:_PredefinedItineraryVersionedReference"/>
+          <xs:element minOccurs="0" name="itineraryByReferenceExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllAlertCLinear">
+    <xs:complexContent>
+      <xs:extension base="datex:AlertCLinear">
+        <xs:sequence>
+          <xs:element name="alertCDirection" type="datex:AlertCDirection"/>
+          <xs:element name="alertCMethod2PrimaryPointLocation" type="datex:AlertCMethod2PrimaryPointLocation"/>
+          <xs:element name="alertCMethod2SecondaryPointLocation" type="datex:AlertCMethod2SecondaryPointLocation"/>
+          <xs:element minOccurs="0" name="alertCMethod2LinearExtension" type="datex:_ExtensionType"/>
+          <xs:element name="alertCLocationCountryCode" type="datex:String"/>
+          <xs:element name="alertCLocationTableNumber" type="datex:String"/>
+          <xs:element name="alertCLocationTableVersion" type="datex:String"/>
+          <xs:element minOccurs="0" name="alertCLinearExtension" type="datex:_ExtensionType"/>
+          <xs:element name="locationCodeForLinearLocation" type="datex:AlertCLocation"/>
+          <xs:element minOccurs="0" name="alertCLinearByCodeExtension" type="datex:_ExtensionType"/>
+          <xs:element name="alertCMethod4PrimaryPointLocation" type="datex:AlertCMethod4PrimaryPointLocation"/>
+          <xs:element name="alertCMethod4SecondaryPointLocation" type="datex:AlertCMethod4SecondaryPointLocation"/>
+          <xs:element minOccurs="0" name="alertCMethod4LinearExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllPayloadPublication">
+    <xs:complexContent>
+      <xs:extension base="datex:PayloadPublication">
+        <xs:sequence>
+          <xs:element name="headerInformation" type="datex:HeaderInformation"/>
+          <xs:element maxOccurs="unbounded" name="measurementSiteTable" type="datex:MeasurementSiteTable"/>
+          <xs:element minOccurs="0" name="measurementSiteTablePublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="feedDescription" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="feedType" type="datex:String"/>
+          <xs:element name="publicationTime" type="datex:DateTime"/>
+          <xs:element name="publicationCreator" type="datex:InternationalIdentifier"/>
+          <xs:element minOccurs="0" name="payloadPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="forecastDefault" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="periodDefault" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="timeDefault" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="referenceSettings" type="datex:ReferenceSettings"/>
+          <xs:element maxOccurs="unbounded" name="elaboratedData" type="datex:ElaboratedData"/>
+          <xs:element minOccurs="0" name="elaboratedDataPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="situation" type="datex:Situation"/>
+          <xs:element minOccurs="0" name="situationPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="predefinedLocationContainer" type="npra:AllPredefinedLocationContainer"/>
+          <xs:element minOccurs="0" name="predefinedLocationsPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="genericPublicationName" type="datex:String"/>
+          <xs:element minOccurs="0" name="genericPublicationExtension" type="datex:_GenericPublicationExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="vmsUnit" type="datex:VmsUnit"/>
+          <xs:element minOccurs="0" name="vmsPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="vmsUnitTable" type="datex:VmsUnitTable"/>
+          <xs:element minOccurs="0" name="vmsTablePublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" name="trafficView" type="datex:TrafficView"/>
+          <xs:element minOccurs="0" name="trafficViewPublicationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="measurementSiteTableReference" type="datex:_MeasurementSiteTableVersionedReference"/>
+          <xs:element maxOccurs="unbounded" name="siteMeasurements" type="datex:SiteMeasurements"/>
+          <xs:element minOccurs="0" name="measuredDataPublicationExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllFault">
+    <xs:complexContent>
+      <xs:extension base="datex:Fault">
+        <xs:sequence>
+          <xs:element name="vmsFault" type="datex:VmsFaultEnum"/>
+          <xs:element minOccurs="0" name="vmsFaultExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="faultIdentifier" type="datex:String"/>
+          <xs:element minOccurs="0" name="faultDescription" type="datex:String"/>
+          <xs:element minOccurs="0" name="faultCreationTime" type="datex:DateTime"/>
+          <xs:element name="faultLastUpdateTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="faultSeverity" type="datex:FaultSeverityEnum"/>
+          <xs:element minOccurs="0" name="faultExtension" type="datex:_ExtensionType"/>
+          <xs:element name="vmsUnitFault" type="datex:VmsFaultEnum"/>
+          <xs:element minOccurs="0" name="vmsUnitFaultExtension" type="datex:_ExtensionType"/>
+          <xs:element name="elaboratedDataFault" type="datex:ElaboratedDataFaultEnum"/>
+          <xs:element minOccurs="0" name="elaboratedDataFaultExtension" type="datex:_ExtensionType"/>
+          <xs:element name="measurementEquipmentFault" type="datex:MeasurementEquipmentFaultEnum"/>
+          <xs:element minOccurs="0" name="measurementEquipmentFaultExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTimePeriodOfDay">
+    <xs:complexContent>
+      <xs:extension base="datex:TimePeriodOfDay">
+        <xs:sequence>
+          <xs:element name="startTimeOfPeriod" type="datex:Time"/>
+          <xs:element name="endTimeOfPeriod" type="datex:Time"/>
+          <xs:element minOccurs="0" name="timePeriodByHourExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="timePeriodOfDayExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllDataValue">
+    <xs:complexContent>
+      <xs:extension base="datex:DataValue">
+        <xs:sequence>
+          <xs:element name="dateTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="dateTimeValueExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="dataError" type="datex:Boolean"/>
+          <xs:element minOccurs="0" name="reasonForDataError" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="dataValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="applicationRate" type="datex:IntensityKilogramsPerSquareMetre"/>
+          <xs:element minOccurs="0" name="applicationRateValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="kilogramsConcentration" type="datex:ConcentrationKilogramsPerCubicMetre"/>
+          <xs:element minOccurs="0" name="kilogramsConcentrationValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="microgramsConcentration" type="datex:ConcentrationMicrogramsPerCubicMetre"/>
+          <xs:element minOccurs="0" name="microgramsConcentrationValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="directionCompass" type="datex:DirectionCompassEnum"/>
+          <xs:element minOccurs="0" name="directionCompassValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="trafficStatusValue" type="datex:TrafficStatusEnum"/>
+          <xs:element minOccurs="0" name="trafficStatusValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="concentrationOfVehicles" type="datex:ConcentrationVehiclesPerKilometre"/>
+          <xs:element minOccurs="0" name="concentrationOfVehiclesValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="directionBearing" type="datex:AngleInDegrees"/>
+          <xs:element minOccurs="0" name="directionBearingValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="pcuFlowRate" type="datex:PassengerCarUnitsPerHour"/>
+          <xs:element minOccurs="0" name="pcuFlowValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="vehicleCount" type="datex:NonNegativeInteger"/>
+          <xs:element minOccurs="0" name="vehicleCountValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="percentage" type="datex:Percentage"/>
+          <xs:element minOccurs="0" name="percentageValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="vehicleFlowRate" type="datex:VehiclesPerHour"/>
+          <xs:element minOccurs="0" name="vehicleFlowValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="occupancyChange" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="occupancyChangeValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="millimetresPerHourIntensity" type="datex:IntensityMillimetresPerHour"/>
+          <xs:element minOccurs="0" name="precipitationIntensityValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="speed" type="datex:KilometresPerHour"/>
+          <xs:element minOccurs="0" name="speedValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="integerMetreDistance" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element minOccurs="0" name="integerMetreDistanceValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="temperature" type="datex:TemperatureCelsius"/>
+          <xs:element minOccurs="0" name="temperatureValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="floatingPointMetreDistance" type="datex:MetresAsFloat"/>
+          <xs:element minOccurs="0" name="floatingPointMetreDistanceValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="axleFlowRate" type="datex:AxlesPerHour"/>
+          <xs:element minOccurs="0" name="axleFlowValueExtension" type="datex:_ExtensionType"/>
+          <xs:element name="duration" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="durationValueExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTrafficData">
+    <xs:complexContent>
+      <xs:extension base="datex:TrafficData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="averageDistanceHeadway" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="averageTimeHeadway" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="trafficHeadwayExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="forVehiclesWithCharacteristicsOf" type="datex:VehicleCharacteristics"/>
+          <xs:element minOccurs="0" name="trafficDataExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationPeriod" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="measurementOrCalculationTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="pertinentLocation" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="basicDataExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="concentration" type="datex:ConcentrationOfVehiclesValue"/>
+          <xs:element minOccurs="0" name="occupancy" type="datex:PercentageValue"/>
+          <xs:element minOccurs="0" name="trafficConcentrationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="axleFlow" type="datex:AxleFlowValue"/>
+          <xs:element minOccurs="0" name="pcuFlow" type="datex:PcuFlowValue"/>
+          <xs:element minOccurs="0" name="percentageLongVehicles" type="datex:PercentageValue"/>
+          <xs:element minOccurs="0" name="vehicleFlow" type="datex:VehicleFlowValue"/>
+          <xs:element minOccurs="0" name="trafficFlowExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="individualVehicleSpeed" type="datex:SpeedValue"/>
+          <xs:element minOccurs="0" name="arrivalTime" type="datex:DateTimeValue"/>
+          <xs:element minOccurs="0" name="exitTime" type="datex:DateTimeValue"/>
+          <xs:element minOccurs="0" name="passageDurationTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="presenceDurationTime" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="timeGap" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="timeHeadway" type="datex:DurationValue"/>
+          <xs:element minOccurs="0" name="distanceGap" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="distanceHeadway" type="datex:FloatingPointMetreDistanceValue"/>
+          <xs:element minOccurs="0" name="individualVehicleDataValuesExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="averageVehicleSpeed" type="datex:SpeedValue"/>
+          <xs:element minOccurs="0" name="speedPercentile" type="datex:SpeedPercentile"/>
+          <xs:element minOccurs="0" name="trafficSpeedExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllDestination">
+    <xs:complexContent>
+      <xs:extension base="datex:Destination">
+        <xs:sequence>
+          <xs:element name="area" type="datex:Area"/>
+          <xs:element minOccurs="0" name="areaDestinationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="destinationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="point" type="datex:Point"/>
+          <xs:element minOccurs="0" name="pointDestinationExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTpegPointLocation">
+    <xs:complexContent>
+      <xs:extension base="datex:TpegPointLocation">
+        <xs:sequence>
+          <xs:element name="tpegFramedPointLocationType" type="datex:TpegLoc01FramedPointLocationSubtypeEnum"/>
+          <xs:element name="framedPoint" type="datex:TpegNonJunctionPoint"/>
+          <xs:element name="to" type="npra:AllTpegPoint"/>
+          <xs:element name="from" type="npra:AllTpegPoint"/>
+          <xs:element minOccurs="0" name="tpegFramedPointExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegDirection" type="datex:DirectionEnum"/>
+          <xs:element minOccurs="0" name="tpegPointLocationExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegSimplePointLocationType" type="datex:TpegLoc01SimplePointLocationSubtypeEnum"/>
+          <xs:element name="point" type="npra:AllTpegPoint"/>
+          <xs:element minOccurs="0" name="tpegSimplePointExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllAlertCPoint">
+    <xs:complexContent>
+      <xs:extension base="datex:AlertCPoint">
+        <xs:sequence>
+          <xs:element name="alertCDirection" type="datex:AlertCDirection"/>
+          <xs:element name="alertCMethod2PrimaryPointLocation" type="datex:AlertCMethod2PrimaryPointLocation"/>
+          <xs:element minOccurs="0" name="alertCMethod2PointExtension" type="datex:_ExtensionType"/>
+          <xs:element name="alertCLocationCountryCode" type="datex:String"/>
+          <xs:element name="alertCLocationTableNumber" type="datex:String"/>
+          <xs:element name="alertCLocationTableVersion" type="datex:String"/>
+          <xs:element minOccurs="0" name="alertCPointExtension" type="datex:_ExtensionType"/>
+          <xs:element name="alertCMethod4PrimaryPointLocation" type="datex:AlertCMethod4PrimaryPointLocation"/>
+          <xs:element minOccurs="0" name="alertCMethod4PointExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllDistanceAlongLinearElement">
+    <xs:complexContent>
+      <xs:extension base="datex:DistanceAlongLinearElement">
+        <xs:sequence>
+          <xs:element name="distanceAlong" type="datex:MetresAsFloat"/>
+          <xs:element name="fromReferent" type="datex:Referent"/>
+          <xs:element minOccurs="0" name="towardsReferent" type="datex:Referent"/>
+          <xs:element minOccurs="0" name="distanceFromLinearElementReferentExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="distanceAlongLinearElementExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="distanceFromLinearElementStartExtension" type="datex:_ExtensionType"/>
+          <xs:element name="percentageDistanceAlong" type="datex:Percentage"/>
+          <xs:element minOccurs="0" name="percentageDistanceAlongLinearElementExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTpegPoint">
+    <xs:complexContent>
+      <xs:extension base="datex:TpegPoint">
+        <xs:sequence>
+          <xs:element name="pointCoordinates" type="datex:PointCoordinates"/>
+          <xs:element minOccurs="0" name="name" type="datex:TpegJunctionPointDescriptor"/>
+          <xs:element maxOccurs="3" name="ilc" type="datex:TpegIlcPointDescriptor"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="otherName" type="datex:TpegOtherPointDescriptor"/>
+          <xs:element minOccurs="0" name="tpegJunctionExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="tpegPointExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="tpegNonJunctionPointExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingRecordStatus">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingRecordStatus">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="parkingSiteStatus" type="datex:ParkingSiteStatusEnum"/>
+          <xs:element minOccurs="0" name="parkingSiteOpeningStatus" type="datex:OpeningStatusEnum"/>
+          <xs:element minOccurs="0" name="parkingSiteOvercrowdingStatus" type="datex:ParkingSiteOvercrowdingStatusEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSiteFullAtFloor" type="datex:Integer"/>
+          <xs:element minOccurs="0" name="parkingSiteStatusExtension" type="datex:_ExtensionType"/>
+          <xs:element name="parkingRecordReference" type="datex:_ParkingRecordVersionedReference"/>
+          <xs:element name="parkingStatusOriginTime" type="datex:DateTime"/>
+          <xs:element minOccurs="0" name="parkingStatusDescription" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="parkingQueueingTime" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="parkingConditions" type="datex:ParkingConditionsEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="blurredAvailability" type="datex:Boolean"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingFault" type="datex:ParkingFaultEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="winterEquipmentManagementType" type="datex:WinterEquipmentManagementTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSpaceStatus" type="datex:_ParkingRecordStatusParkingSpaceIndexParkingSpaceStatus"/>
+          <xs:element name="parkingOccupancy" type="npra:AllParkingOccupancy"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="groupOfParkingSpacesStatus" type="datex:_ParkingRecordStatusGroupIndexGroupOfParkingSpacesStatus"/>
+          <xs:element minOccurs="0" name="parkingStatusValidity" type="datex:ParkingStatusValidity"/>
+          <xs:element minOccurs="0" name="overrideParkingThresholds" type="datex:ParkingThresholds"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingEquipmentOrServiceFacilityStatus"
+                      type="datex:_ParkingRecordStatusEquipmentOrServiceFacilityIndexParkingEquipmentOrServiceFacilityStatus"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingUsageScenarioStatus" type="datex:_ParkingRecordStatusScenarioIndexParkingUsageScenarioStatus"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingAccessStatus" type="datex:ParkingAccessStatus"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingRouteStatus" type="datex:ParkingRouteStatus"/>
+          <xs:element minOccurs="0" name="parkingRecordStatusExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="groupOfParkingSitesStatus" type="datex:GroupOfParkingSitesStatusEnum"/>
+          <xs:element minOccurs="0" name="groupOfParkingSitesStatusExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllPredefinedLocationContainer">
+    <xs:complexContent>
+      <xs:extension base="datex:PredefinedLocationContainer">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="predefinedNonOrderedLocationGroupName" type="datex:MultilingualString"/>
+          <xs:element maxOccurs="unbounded" minOccurs="2" name="predefinedLocation" type="datex:PredefinedLocation"/>
+          <xs:element minOccurs="0" name="predefinedNonOrderedLocationGroupExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="predefinedLocationContainerExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="predefinedLocationName" type="datex:MultilingualString"/>
+          <xs:element name="location" type="datex:Location"/>
+          <xs:element minOccurs="0" name="predefinedLocationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="predefinedItineraryName" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="predefinedItineraryExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTpegPointDescriptor">
+    <xs:complexContent>
+      <xs:extension base="datex:TpegPointDescriptor">
+        <xs:sequence>
+          <xs:element name="tpegOtherPointDescriptorType" type="datex:TpegLoc03OtherPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegOtherPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="tpegPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="descriptor" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="tpegDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegJunctionPointDescriptorType" type="datex:TpegLoc03JunctionPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegJunctionPointDescriptorExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegIlcPointDescriptorType" type="datex:TpegLoc03IlcPointDescriptorSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegIlcPointDescriptorExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllVersionedReference">
+    <xs:complexContent>
+      <xs:extension base="datex:VersionedReference">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllParkingSpaceBasics">
+    <xs:complexContent>
+      <xs:extension base="datex:ParkingSpaceBasics">
+        <xs:sequence>
+          <xs:element name="parkingNumberOfSpaces" type="datex:NonNegativeInteger"/>
+          <xs:element name="parkingTypeOfGroup" type="datex:ParkingTypeOfGroup"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="identicalToGroup" type="datex:IndexReference"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="realSubsetOfGroup" type="datex:IndexReference"/>
+          <xs:element minOccurs="0" name="minimumParkingSpaceDimension" type="datex:Dimension"/>
+          <xs:element minOccurs="0" name="dimensionOfGroup" type="datex:Dimension"/>
+          <xs:element minOccurs="0" name="maximumParkingSpaceDimension" type="datex:Dimension"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSpace" type="datex:_GroupOfParkingSpacesParkingSpaceIndexParkingSpace"/>
+          <xs:element minOccurs="0" name="groupOfLocations" type="npra:AllGroupOfLocations"/>
+          <xs:element minOccurs="0" name="groupOfParkingSpacesExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="parkingSpaceOrGroupIdentifier" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="parkingFloorOrLevel" type="datex:Integer"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="accessibility" type="datex:AccessibilityEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSpaceAccessibility" type="datex:ParkingSpaceAccessibilityEnum"/>
+          <xs:element maxOccurs="2" minOccurs="0" name="parkingSpacePhysics" type="datex:ParkingSpacePhysicsEnum"/>
+          <xs:element minOccurs="0" name="parkingMode" type="datex:ParkingModeEnum"/>
+          <xs:element minOccurs="0" name="parkingReservation" type="datex:ReservationTypeEnum"/>
+          <xs:element minOccurs="0" name="maximumParkingDuration" type="datex:Seconds"/>
+          <xs:element minOccurs="0" name="distanceFromPrimaryRoad" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingOccupanyDetectionType" type="datex:OccupancyDetectionTypeEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingSecurity" type="datex:ParkingSecurityEnum"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="dedicatedAccess" type="datex:DedicatedAccess"/>
+          <xs:element minOccurs="0" name="onlyAssignedParking" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="assignedParkingAmongOthers" type="datex:ParkingAssignment"/>
+          <xs:element minOccurs="0" name="prohibitedParking" type="datex:ParkingAssignment"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingEquipmentOrServiceFacility" type="datex:_ParkingSpaceBasicsEquipmentOrServiceFacilityIndexParkingEquipmentOrServiceFacility"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="parkingUsageScenario" type="datex:_ParkingSpaceBasicsScenarioIndexParkingUsageScenario"/>
+          <xs:element minOccurs="0" name="parkingSpaceBasicsExtension" type="datex:_ExtensionType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="identicalToParkingSpace" type="datex:IndexReference"/>
+          <xs:element minOccurs="0" name="location" type="datex:Location"/>
+          <xs:element minOccurs="0" name="parkingSpaceDimension" type="datex:Dimension"/>
+          <xs:element minOccurs="0" name="parkingSpaceExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllCause">
+    <xs:complexContent>
+      <xs:extension base="datex:Cause">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="managedCause" type="datex:_SituationRecordVersionedReference"/>
+          <xs:element minOccurs="0" name="managedCauseExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="causeExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="causeDescription" type="datex:MultilingualString"/>
+          <xs:element minOccurs="0" name="causeType" type="datex:CauseTypeEnum"/>
+          <xs:element minOccurs="0" name="nonManagedCauseExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AllTpegAreaLocation">
+    <xs:complexContent>
+      <xs:extension base="datex:TpegAreaLocation">
+        <xs:sequence>
+          <xs:element name="radius" type="datex:MetresAsNonNegativeInteger"/>
+          <xs:element name="centrePoint" type="datex:PointCoordinates"/>
+          <xs:element minOccurs="0" name="name" type="datex:TpegAreaDescriptor"/>
+          <xs:element minOccurs="0" name="tpegGeometricAreaExtension" type="datex:_ExtensionType"/>
+          <xs:element name="tpegAreaLocationType" type="datex:TpegLoc01AreaLocationSubtypeEnum"/>
+          <xs:element minOccurs="0" name="tpegHeight" type="datex:TpegHeight"/>
+          <xs:element minOccurs="0" name="tpegAreaLocationExtension" type="datex:_ExtensionType"/>
+          <xs:element minOccurs="0" name="tpegNamedOnlyAreaExtension" type="datex:_ExtensionType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Elements required for feature chaining -->
+
+  <xs:element name="_VmsMessagePictogramDisplayAreaIndexVmsPictogramDisplayArea1" type="datex:_VmsMessagePictogramDisplayAreaIndexVmsPictogramDisplayArea" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegIlcPointDescriptor1" type="datex:TpegIlcPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegIlcPointDescriptor2" type="datex:TpegIlcPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegIlcPointDescriptor3" type="datex:TpegIlcPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Destination1" type="datex:Destination" substitutionGroup="gml:_Feature"/>
+  <xs:element name="LengthCharacteristic1" type="datex:LengthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="LengthCharacteristic2" type="datex:LengthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="LengthCharacteristic3" type="datex:LengthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="LengthCharacteristic4" type="datex:LengthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="SpecialDay1" type="datex:SpecialDay" substitutionGroup="gml:_Feature"/>
+  <xs:element name="SpecialDay2" type="datex:SpecialDay" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_LocationContainedInItinerary1" type="datex:_LocationContainedInItinerary" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Itinerary1" type="datex:Itinerary" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AffectedCarriagewayAndLanes1" type="datex:AffectedCarriagewayAndLanes" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AffectedCarriagewayAndLanes2" type="datex:AffectedCarriagewayAndLanes" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AffectedCarriagewayAndLanes3" type="datex:AffectedCarriagewayAndLanes" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegOtherPointDescriptor1" type="datex:TpegOtherPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegOtherPointDescriptor2" type="datex:TpegOtherPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegOtherPointDescriptor3" type="datex:TpegOtherPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TpegOtherPointDescriptor4" type="datex:TpegOtherPointDescriptor" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_PolygonAreaIndexPointCoordinates1" type="datex:_PolygonAreaIndexPointCoordinates" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_PolygonAreaIndexPointCoordinates2" type="datex:_PolygonAreaIndexPointCoordinates" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_PolygonAreaIndexPointCoordinates3" type="datex:_PolygonAreaIndexPointCoordinates" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsMessageIndexVmsMessage1" type="datex:_VmsMessageIndexVmsMessage" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsPictogramDisplayAreaPictogramSequencingIndexVmsPictogram1" type="datex:_VmsPictogramDisplayAreaPictogramSequencingIndexVmsPictogram" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_SituationVersionedReference1" type="datex:_SituationVersionedReference" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Comment1" type="datex:Comment" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Comment2" type="datex:Comment" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString1" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString2" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString3" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString4" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString5" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString6" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString7" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString8" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString9" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString10" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString11" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="MultilingualString12" type="datex:MultilingualString" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Location1" type="datex:Location" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Vehicle1" type="datex:Vehicle" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Vehicle2" type="datex:Vehicle" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GrossWeightCharacteristic1" type="datex:GrossWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GrossWeightCharacteristic2" type="datex:GrossWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GrossWeightCharacteristic3" type="datex:GrossWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GrossWeightCharacteristic4" type="datex:GrossWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="PublicHoliday1" type="datex:PublicHoliday" substitutionGroup="gml:_Feature"/>
+  <xs:element name="PublicHoliday2" type="datex:PublicHoliday" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsPictogramDisplayAreaIndexPictogramDisplayAreaSettings1" type="datex:_VmsPictogramDisplayAreaIndexPictogramDisplayAreaSettings" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsUnitVmsIndexVms1" type="datex:_VmsUnitVmsIndexVms" substitutionGroup="gml:_Feature"/>
+  <xs:element name="VehicleCharacteristics1" type="datex:VehicleCharacteristics" substitutionGroup="gml:_Feature"/>
+  <xs:element name="WidthCharacteristic1" type="datex:WidthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="WidthCharacteristic2" type="datex:WidthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="WidthCharacteristic3" type="datex:WidthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="WidthCharacteristic4" type="datex:WidthCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DayWeekMonth1" type="datex:DayWeekMonth" substitutionGroup="gml:_Feature"/>
+  <xs:element name="DayWeekMonth2" type="datex:DayWeekMonth" substitutionGroup="gml:_Feature"/>
+  <xs:element name="UrlLink1" type="datex:UrlLink" substitutionGroup="gml:_Feature"/>
+  <xs:element name="VmsUnitFault1" type="datex:VmsUnitFault" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TimePeriodOfDay1" type="datex:TimePeriodOfDay" substitutionGroup="gml:_Feature"/>
+  <xs:element name="TimePeriodOfDay2" type="datex:TimePeriodOfDay" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeightCharacteristic1" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeightCharacteristic2" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeightCharacteristic3" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeightCharacteristic4" type="datex:HeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics1"
+              type="datex:_VmsDynamicCharacteristicsPictogramDisplayAreaIndexVmsPictogramDisplayCharacteristics" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GroupOfPeopleInvolved1" type="datex:GroupOfPeopleInvolved" substitutionGroup="gml:_Feature"/>
+  <xs:element name="OpenlrLocationReferencePoint1" type="datex:OpenlrLocationReferencePoint" substitutionGroup="gml:_Feature"/>
+  <xs:element name="OpenlrLocationReferencePoint2" type="datex:OpenlrLocationReferencePoint" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeaviestAxleWeightCharacteristic1" type="datex:HeaviestAxleWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeaviestAxleWeightCharacteristic2" type="datex:HeaviestAxleWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeaviestAxleWeightCharacteristic3" type="datex:HeaviestAxleWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="HeaviestAxleWeightCharacteristic4" type="datex:HeaviestAxleWeightCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="GroupOfVehiclesInvolved1" type="datex:GroupOfVehiclesInvolved" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AllDestination1" type="npra:AllDestination" substitutionGroup="gml:_Feature"/>
+  <xs:element name="NumberOfAxlesCharacteristic1" type="datex:NumberOfAxlesCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="NumberOfAxlesCharacteristic2" type="datex:NumberOfAxlesCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="NumberOfAxlesCharacteristic3" type="datex:NumberOfAxlesCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="NumberOfAxlesCharacteristic4" type="datex:NumberOfAxlesCharacteristic" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Road1" type="datex:Road" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Road2" type="datex:Road" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Road3" type="datex:Road" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AxleWeight1" type="datex:AxleWeight" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AxleWeight2" type="datex:AxleWeight" substitutionGroup="gml:_Feature"/>
+  <xs:element name="PolygonArea1" type="datex:PolygonArea" substitutionGroup="gml:_Feature"/>
+  <xs:element name="PolygonArea2" type="datex:PolygonArea" substitutionGroup="gml:_Feature"/>
+  <xs:element name="PolygonArea3" type="datex:PolygonArea" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AxleSpacing1" type="datex:AxleSpacing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="AxleSpacing2" type="datex:AxleSpacing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_TextPage1" type="datex:_TextPage" substitutionGroup="gml:_Feature"/>
+  <xs:element name="_VmsTextLineIndexVmsTextLine1" type="datex:_VmsTextLineIndexVmsTextLine" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Period1" type="datex:Period" substitutionGroup="gml:_Feature"/>
+  <xs:element name="Period2" type="datex:Period" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing1" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing2" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing3" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing4" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing5" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing6" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing7" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing8" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="ExternalReferencing9" type="datex:ExternalReferencing" substitutionGroup="gml:_Feature"/>
+  <xs:element name="VmsFault1" type="datex:VmsFault" substitutionGroup="gml:_Feature"/>
+
+</xs:schema>

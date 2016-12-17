@@ -117,10 +117,10 @@ public class ElementEncodeExecutor implements BindingWalker.Visitor {
             if (converted != null) {
                 object = converted;
             } else {
-                if (logger.isLoggable(Level.FINE)) {
+                if (logger.isLoggable(Level.WARNING)) {
                     // do not log the object, may be a multi-megabyte feature collection
                     // that can trigger an OOM toStringing itself
-                    logger.fine("[ " + object.getClass() + " ] is not of type " + binding.getType());
+                    logger.warning("[ " + object.getClass() + " ] is not of type " + binding.getType());
                 }
 
                 return;
