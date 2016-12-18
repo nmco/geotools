@@ -22,6 +22,7 @@ import org.opengis.feature.Feature;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,9 +56,9 @@ public final class MongoComplexUtilities {
     }
 
     /**
-     * Helper method for extracting or casting a feature from the provided object.
+     * Method for extracting or casting a feature from the provided object.
      */
-    private static Feature extractFeature(Object feature, String jsonPath) {
+    public static Feature extractFeature(Object feature, String jsonPath) {
         // we should have a feature
         if (!(feature instanceof Feature)) {
             // not a feature so nothing to do
@@ -276,11 +277,51 @@ public final class MongoComplexUtilities {
     /**
      * Simple method that adds an element ot a json path.
      */
-    private static String concatPath(String rootPath, String path) {
-        if (rootPath == null || rootPath.isEmpty()) {
+    private static String concatPath(String parentPath, String path) {
+        if (parentPath == null || parentPath.isEmpty()) {
             // first element of the path
             return path;
         }
-        return rootPath + "." + path;
+        return parentPath + "." + path;
+    }
+
+    /**
+     * Compute the mappings for a mongo db object, this can be used to create a feature mapping.
+     */
+    public static Map<String, Class> findMappings(DBObject dbObject) {
+        Map<String, Class> mappings = new HashMap<>();
+        findMappingsHelper(dbObject, "", mappings);
+        return mappings;
+    }
+
+    /**
+     * Helper method that will recursively walk a mongo db object and compute is mappings.
+     */
+    private static void findMappingsHelper(Object object, String parentPath, Map<String, Class> mappings) {
+        if (object == null) {
+            return;
+        }
+        if (object instanceof DBObject) {
+            DBObject dbObject = (DBObject) object;
+            for (String key : dbObject.keySet()) {
+                Object value = dbObject.get(key);
+                if (value == null) {
+                    continue;
+                }
+                String path = concatPath(parentPath, key);
+                if (value instanceof List) {
+                    List list = (List) value;
+                    if (!list.isEmpty()) {
+                        findMappingsHelper(list.get(0), path, mappings);
+                    }
+                } else if (value instanceof DBObject) {
+                    findMappingsHelper(value, path, mappings);
+                } else {
+                    mappings.put(path, value.getClass());
+                }
+            }
+        } else {
+            mappings.put(parentPath, object.getClass());
+        }
     }
 }

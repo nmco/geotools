@@ -844,6 +844,8 @@ public class UnmappingFilterVisitor implements org.opengis.filter.FilterVisitor,
             }
         }
 
+        matchingMappings.remove(Expression.NIL);
+
         if (matchingMappings.size() == 0) {
             throw new IllegalArgumentException("Can't find source expression for: " + targetXPath);
         }

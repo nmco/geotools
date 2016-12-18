@@ -16,6 +16,8 @@
  */
 package org.geotools.data.mongodb;
 
+import org.geotools.feature.NameImpl;
+import org.geotools.filter.AttributeExpressionImpl;
 import org.geotools.filter.FunctionExpressionImpl;
 import org.geotools.filter.capability.FunctionNameImpl;
 import org.opengis.filter.capability.FunctionName;
@@ -34,6 +36,13 @@ public class JsonSelectAllFunction extends FunctionExpressionImpl {
 
     public Object evaluate(Object object) {
         String path = (String) this.params.get(0).evaluate(object);
+        if (object == null) {
+            return new AttributeExpressionImpl(new NameImpl(path));
+        }
         return MongoComplexUtilities.getValues(object, path);
+    }
+
+    public String getJsonPath() {
+        return (String) this.params.get(0).evaluate(null);
     }
 }

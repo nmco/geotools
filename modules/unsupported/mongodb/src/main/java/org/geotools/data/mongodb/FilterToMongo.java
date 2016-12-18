@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
+import org.geotools.util.Converters;
 import org.geotools.util.logging.LoggerFactory;
 import org.geotools.util.logging.Logging;
 
@@ -43,6 +44,7 @@ import static org.geotools.util.Converters.convert;
 
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.And;
 import org.opengis.filter.BinaryComparisonOperator;
 import org.opengis.filter.ExcludeFilter;
@@ -273,8 +275,25 @@ public class FilterToMongo implements FilterVisitor, ExpressionVisitor {
         return output;
     }
 
+    private Class getJsonSelectType(Expression expression) {
+        if (expression instanceof JsonSelectFunction) {
+            PropertyDescriptor descriptor = featureType.getDescriptor(((JsonSelectFunction) expression).getJsonPath());
+            return descriptor == null ? null : descriptor.getType().getBinding();
+        }
+        if (expression instanceof JsonSelectAllFunction) {
+            PropertyDescriptor descriptor = featureType.getDescriptor(((JsonSelectAllFunction) expression).getJsonPath());
+            return descriptor == null ? null : descriptor.getType().getBinding();
+        }
+        return null;
+    }
+
     private Class<?> getValueType(Expression e) {
         Class<?> valueType = null;
+
+        valueType = getJsonSelectType(e);
+        if (valueType != null) {
+            return valueType;
+        }
 
         if (e instanceof PropertyName && featureType != null) {
             // we should get the value type from the correspondent attribute descriptor
@@ -510,6 +529,12 @@ public class FilterToMongo implements FilterVisitor, ExpressionVisitor {
 
     @Override
     public Object visit(Function function, Object extraData) {
+        if (function instanceof JsonSelectFunction) {
+            return ((JsonSelectFunction) function).getJsonPath();
+        }
+        if (function instanceof JsonSelectAllFunction) {
+            return ((JsonSelectAllFunction) function).getJsonPath();
+        }
         throw new UnsupportedOperationException();
     }
 
@@ -620,9 +645,11 @@ public class FilterToMongo implements FilterVisitor, ExpressionVisitor {
                 }
             }
             // by default, return string as is
-            return literal;
+            Object result = Converters.convert(literal, targetType);
+            return result == null ? literal : result;
         } else {
-            return literal.toString();
+            Object result = Converters.convert(literal, targetType);
+            return result == null ? literal.toString() : result;
         }
     }
 }

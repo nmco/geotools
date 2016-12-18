@@ -87,6 +87,7 @@ public class MongoNestedMapping extends NestedAttributeMapping {
     }
 
     private List getSubCollection(Object feature, String collectionPath) {
+        feature = MongoComplexUtilities.extractFeature(feature, collectionPath);
         if (feature instanceof MongoFeature) {
             DBObject mongoObject = ((MongoFeature) feature).getMongoObject();
             return getSubCollection(mongoObject, collectionPath, Collections.emptyMap());

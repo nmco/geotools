@@ -31,6 +31,7 @@ public class MongoCollectionFeature extends SimpleFeatureImpl {
     private final Map<String, Integer> collectionsIndexes = new HashMap<>();
 
     public static MongoCollectionFeature build(Object feature, String collectionPath, int collectionIndex) {
+        feature = MongoComplexUtilities.extractFeature(feature, collectionPath);
         if (feature instanceof MongoFeature) {
             return new MongoCollectionFeature((MongoFeature) feature, collectionPath, collectionIndex);
         } else if (feature instanceof MongoCollectionFeature) {

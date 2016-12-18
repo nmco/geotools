@@ -5,9 +5,7 @@ import org.geotools.data.complex.FeatureTypeMapping;
 import org.geotools.data.complex.NestedAttributeMapping;
 import org.geotools.data.complex.filter.XPathUtil;
 import org.geotools.data.complex.spi.CustomAttributeExpressionFactory;
-import org.geotools.feature.NameImpl;
 import org.opengis.filter.expression.Expression;
-import org.opengis.filter.expression.NilExpression;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,20 +22,28 @@ public class MongoNestedAttributeExpressionFactory implements CustomAttributeExp
 
     private Expression getSourceExpression(FeatureTypeMapping mappings, XPathUtil.StepList xpath,
                                            NestedAttributeMapping nestedMapping) {
+        if (!nestedMapping.getTargetXPath().equalsIgnoreIndex(xpath.subList(0, nestedMapping.getTargetXPath().size()))) {
+            return Expression.NIL;
+        }
         int steps = xpath.size();
+        XPathUtil.StepList finalXpath = xpath.subList(nestedMapping.getTargetXPath().size(), steps);
         AttributeMapping attributeMapping = nestedMapping;
-        for (int i = 1; i < steps; i++) {
+        int end = finalXpath.size();
+        int start = 0;
+        while (end > start) {
             try {
-                attributeMapping = match(attributeMapping, xpath.get(i));
+                SearchResult result = search(finalXpath.subList(start, end), attributeMapping);
+                if (!result.found) {
+                    break;
+                }
+                attributeMapping = result.attributeMapping;
+                start += result.index;
             } catch (Exception exception) {
                 throw new RuntimeException("Error getting feature type mapping.");
             }
-            if (attributeMapping == null) {
-                break;
-            }
         }
         if (attributeMapping == null) {
-            return NilExpression.NIL;
+            return Expression.NIL;
         }
         Expression sourceExpression = attributeMapping.getSourceExpression();
         if (sourceExpression instanceof JsonSelectFunction) {
@@ -49,12 +55,37 @@ public class MongoNestedAttributeExpressionFactory implements CustomAttributeExp
         return sourceExpression;
     }
 
-    private AttributeMapping match(AttributeMapping attributeMapping, XPathUtil.Step step) throws IOException {
+    private static final class SearchResult {
+
+        static final SearchResult NOT_FOUND = new SearchResult(false, -1, null);
+
+        final boolean found;
+        final int index;
+        final AttributeMapping attributeMapping;
+
+        SearchResult(boolean found, int index, AttributeMapping attributeMapping) {
+            this.found = found;
+            this.index = index;
+            this.attributeMapping = attributeMapping;
+        }
+    }
+
+    private SearchResult search(XPathUtil.StepList xpath, AttributeMapping attributeMapping) throws Exception {
+        for (int i = xpath.size(); i > 0; i--) {
+            AttributeMapping foundAttributeMapping = match(attributeMapping, xpath.subList(0, i));
+            if (foundAttributeMapping != null) {
+                return new SearchResult(true, i, foundAttributeMapping);
+            }
+        }
+        return SearchResult.NOT_FOUND;
+    }
+
+    private AttributeMapping match(AttributeMapping attributeMapping, XPathUtil.StepList xpath) throws IOException {
         if (attributeMapping instanceof NestedAttributeMapping) {
             FeatureTypeMapping mappings = ((NestedAttributeMapping) attributeMapping).getFeatureTypeMapping(null);
             List<AttributeMapping> attributesMappings = mappings.getAttributeMappings();
             for (AttributeMapping candidateAttributeMapping : attributesMappings) {
-                if (XPathUtil.equals(new NameImpl(step.getName()), candidateAttributeMapping.getTargetXPath())) {
+                if (xpath.equalsIgnoreIndex(candidateAttributeMapping.getTargetXPath())) {
                     return candidateAttributeMapping;
                 }
             }

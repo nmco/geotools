@@ -85,7 +85,8 @@ public class MongoInferredMapper extends AbstractCollectionMapper {
         
         Set<String> indexedGeometries = MongoUtil.findIndexedGeometries(collection);
         Set<String> indexedFields = MongoUtil.findIndexedFields(collection);
-        Map<String, Class<?>> mappedFields = MongoUtil.findMappableFields(collection);
+        //Map<String, Class<?>> mappedFields = MongoUtil.findMappableFields(collection);
+        Map<String, Class> mappedFields = MongoComplexUtilities.findMappings(collection.findOne());
         
         // don't need to worry about indexed properties we've found in our scan...
         indexedFields.removeAll(mappedFields.keySet());
@@ -128,7 +129,7 @@ public class MongoInferredMapper extends AbstractCollectionMapper {
         LOG.log(Level.INFO, "building type {0}: mapping geometry field {1} from collection {2}",
                     new Object[] {name, geometryField, collection.getFullName() });
         
-        for (Map.Entry<String, Class<?>> mappedField : mappedFields.entrySet()) {
+        for (Map.Entry<String, Class> mappedField : mappedFields.entrySet()) {
             String field = mappedField.getKey();
             Class<?> binding = mappedField.getValue();
             ftBuilder.userData(MongoDataStore.KEY_mapping, field);
