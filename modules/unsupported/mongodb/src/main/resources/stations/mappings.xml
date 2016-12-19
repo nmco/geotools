@@ -92,17 +92,11 @@
                 <AttributeMapping>
                     <targetAttribute>st:Measurement</targetAttribute>
                     <idExpression>
-                        <OCQL>collectionLink('measurements')</OCQL>
+                        <OCQL>collectionId('measurements')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>
                     <targetAttribute>st:name</targetAttribute>
-                    <sourceExpression>
-                        <OCQL>jsonSelect('measurements.name')</OCQL>
-                    </sourceExpression>
-                </AttributeMapping>
-                <AttributeMapping>
-                    <targetAttribute>st:comment</targetAttribute>
                     <sourceExpression>
                         <OCQL>jsonSelect('measurements.name')</OCQL>
                     </sourceExpression>
@@ -138,7 +132,7 @@
                 <AttributeMapping>
                     <targetAttribute>st:Value</targetAttribute>
                     <idExpression>
-                        <OCQL>collectionLink('measurements.values')</OCQL>
+                        <OCQL>collectionId('measurements.values')</OCQL>
                     </idExpression>
                 </AttributeMapping>
                 <AttributeMapping>

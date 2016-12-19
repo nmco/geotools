@@ -13,19 +13,22 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="MeasurementPropertyType">
-    <xs:sequence minOccurs="0">
-      <xs:element ref="st:Measurement"/>
-    </xs:sequence>
-    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
-  </xs:complexType>
-
   <xs:complexType name="MeasurementType" abstract="true">
     <xs:sequence>
       <xs:element name="name" minOccurs="1" maxOccurs="1" type="xs:string"/>
       <xs:element name="unit" minOccurs="1" maxOccurs="1" type="xs:string"/>
       <xs:element name="values" minOccurs="1" maxOccurs="unbounded" type="st:ValuePropertyType"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExtendedMeasurementType">
+    <xs:complexContent>
+      <xs:extension base="st:MeasurementType">
+        <xs:sequence>
+          <xs:element name="comment" minOccurs="0" maxOccurs="1" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="ValuePropertyType">
@@ -48,7 +51,7 @@
         <xs:sequence>
           <xs:element name="name" minOccurs="1" maxOccurs="1" type="xs:string"/>
           <xs:element name="contact" minOccurs="0" maxOccurs="1" type="st:ContactType"/>
-          <xs:element name="measurement" minOccurs="0" maxOccurs="unbounded" type="st:MeasurementPropertyType"/>
+          <xs:element name="measurement" minOccurs="0" maxOccurs="unbounded" type="st:MeasurementType"/>
           <xs:element name="geometry" type="gml:GeometryPropertyType" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
       </xs:extension>
@@ -56,7 +59,7 @@
   </xs:complexType>
 
   <xs:element name="StationFeature" type="st:StationFeatureType"  substitutionGroup="gml:_Feature"/>
-  <xs:element name="Measurement" type="st:MeasurementType"  substitutionGroup="gml:_Feature"/>
+  <xs:element name="Measurement" type="st:ExtendedMeasurementType"  substitutionGroup="gml:_Feature"/>
   <xs:element name="Value" type="st:ValueType"  substitutionGroup="gml:_Feature"/>
 
 </xs:schema>

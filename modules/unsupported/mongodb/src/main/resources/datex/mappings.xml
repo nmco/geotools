@@ -3,6 +3,7 @@
                         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                         xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
 
+  <!-- name spaces configuration -->
   <namespaces>
     <Namespace>
       <prefix>npra</prefix>
@@ -22,6 +23,7 @@
     </Namespace>
   </namespaces>
 
+  <!-- mongodb data store configuration -->
   <sourceDataStores>
     <DataStore>
       <id>datasource</id>
@@ -46,9 +48,10 @@
     </DataStore>
   </sourceDataStores>
 
+  <!-- schemas that contains used features types -->
   <targetTypes>
     <FeatureType>
-      <schemaUri>http://localhost/data/schemas/datex.xsd</schemaUri>
+      <schemaUri>http://demo.geo-solutions.it/share/temp/datex/datex.xsd</schemaUri>
     </FeatureType>
     <FeatureType>
       <schemaUri>http://www.datex2.eu/schema/2/2_3/DATEXIISchema_2_2_3.xsd</schemaUri>
