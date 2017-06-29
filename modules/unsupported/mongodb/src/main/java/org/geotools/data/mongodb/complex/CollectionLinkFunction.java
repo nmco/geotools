@@ -39,6 +39,10 @@ public final class CollectionLinkFunction extends FunctionExpressionImpl {
         return new LinkCollection(path);
     }
 
+    public String getPath() {
+        return (String) this.params.get(0).evaluate(null);
+    }
+
     /**
      * Contains information about a linked collection.
      */

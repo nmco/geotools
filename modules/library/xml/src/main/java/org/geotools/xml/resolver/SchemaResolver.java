@@ -393,5 +393,8 @@ public class SchemaResolver {
         return String.format("%032x", new BigInteger(1, md.digest(bytesOfMessage)));
     }
 
+    public SchemaCatalog getCatalog() {
+        return catalog;
+    }
 }
 

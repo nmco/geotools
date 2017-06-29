@@ -327,4 +327,15 @@ public final class MongoComplexUtilities {
             mappings.put(parentPath, object.getClass());
         }
     }
+
+    public static final String MONGO_PARENT_PATH = "MONGO_PARENT_PATH";
+
+    public static String resolvePath(Feature feature, String jsonPath) {
+        Object parentPath = feature.getUserData().get(MONGO_PARENT_PATH);
+        return parentPath == null ? jsonPath : parentPath + "." + jsonPath;
+    }
+
+    public static void setParentPath(Feature feature, String parentPath) {
+        feature.getUserData().put(MONGO_PARENT_PATH, parentPath);
+    }
 }

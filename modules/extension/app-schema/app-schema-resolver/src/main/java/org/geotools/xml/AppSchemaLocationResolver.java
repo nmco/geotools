@@ -18,7 +18,10 @@
 package org.geotools.xml;
 
 import org.eclipse.xsd.XSDSchema;
+import org.geotools.xml.resolver.SchemaCache;
 import org.geotools.xml.resolver.SchemaResolver;
+
+import java.io.File;
 
 /**
  * A {@link SchemaLocationResolver} that uses {@link SchemaResolver} to locate schema resources
@@ -45,7 +48,8 @@ public class AppSchemaLocationResolver extends SchemaLocationResolver {
      */
     public AppSchemaLocationResolver(SchemaResolver resolver) {
         super(null);
-        this.resolver = resolver;
+        this.resolver = new SchemaResolver(resolver.getCatalog(),
+                new SchemaCache(new File("/tmp/app-schema"), true));
     }
 
     /**

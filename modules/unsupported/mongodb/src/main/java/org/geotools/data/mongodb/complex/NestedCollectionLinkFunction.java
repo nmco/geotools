@@ -16,8 +16,6 @@
  */
 package org.geotools.data.mongodb.complex;
 
-import org.geotools.feature.NameImpl;
-import org.geotools.filter.AttributeExpressionImpl;
 import org.geotools.filter.FunctionExpressionImpl;
 import org.geotools.filter.capability.FunctionNameImpl;
 import org.opengis.filter.capability.FunctionName;
@@ -25,34 +23,18 @@ import org.opengis.filter.capability.FunctionName;
 import static org.geotools.filter.capability.FunctionNameImpl.parameter;
 
 /**
- * Function that selects a JSON object using a JSON path.
+ * Function used to chain an entity with a sub collection.
  */
-public final class JsonSelectFunction extends FunctionExpressionImpl {
+public final class NestedCollectionLinkFunction extends FunctionExpressionImpl {
 
     private static final FunctionName DEFINITION = new FunctionNameImpl(
-            "jsonSelect", parameter("path", String.class));
+            "nestedCollectionLink", parameter("value", String.class));
 
-    public JsonSelectFunction() {
+    public NestedCollectionLinkFunction() {
         super(DEFINITION);
     }
 
     public Object evaluate(Object object) {
-        String path = (String) this.params.get(0).evaluate(object);
-        if (object instanceof MongoCollectionFeature) {
-            String parentPath = ((MongoCollectionFeature) object).getCollectionPath();
-            path = parentPath + "." + path;
-        }
-        if (object == null) {
-            return new AttributeExpressionImpl(new NameImpl(path));
-        }
-        return MongoComplexUtilities.getValue(object, path);
-    }
-
-    public String getPath() {
-        return (String) this.params.get(0).evaluate(null);
-    }
-
-    public String getJsonPath() {
-        return (String) this.params.get(0).evaluate(null);
+        return null;
     }
 }
