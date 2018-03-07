@@ -3348,10 +3348,11 @@ public final class JDBCDataStore extends ContentDataStore
         //filtering
         Filter filter = query.getFilter();
         if (filter != null && !Filter.INCLUDE.equals(filter)) {
-            sql.append(" WHERE ");
             
             //encode filter
             filter(featureType, filter, sql);
+        } else {
+            removeWhereClausePlaceHolder(sql);
         }
 
         //sorting
@@ -3466,7 +3467,7 @@ public final class JDBCDataStore extends ContentDataStore
     }
 
     FilterToSQL filter(SimpleFeatureType featureType, Filter filter, StringBuffer sql) throws IOException {
-        
+
         try {
             // grab the full feature type, as we might be encoding a filter
             // that uses attributes that aren't returned in the results
@@ -3474,7 +3475,13 @@ public final class JDBCDataStore extends ContentDataStore
             FilterToSQL toSQL = dialect instanceof PreparedStatementSQLDialect ? 
                 createPreparedFilterToSQL(fullSchema) : createFilterToSQL(fullSchema);
             toSQL.setInline(true);
-            sql.append(" ").append(toSQL.encodeToString(filter));
+            String filterSql = toSQL.encodeToString(filter);
+            int whereClauseIndex = sql.indexOf(":where_clause:");
+            if (whereClauseIndex != -1) {
+                sql.replace(whereClauseIndex, whereClauseIndex + 14, "AND " + filterSql);
+            } else {
+                sql.append(" WHERE ").append(filterSql);
+            }
             return toSQL;
         } catch (FilterToSQLException e) {
             throw new RuntimeException(e);
@@ -3559,10 +3566,10 @@ public final class JDBCDataStore extends ContentDataStore
         PreparedFilterToSQL toSQL = null;
         Filter filter = query.getFilter();
         if (filter != null && !Filter.INCLUDE.equals(filter)) {
-            sql.append(" WHERE ");
-            
             //encode filter
             toSQL = (PreparedFilterToSQL) filter(featureType, filter, sql);
+        } else {
+            removeWhereClausePlaceHolder(sql);
         }
 
         //sorting
@@ -3717,6 +3724,8 @@ public final class JDBCDataStore extends ContentDataStore
             } catch (FilterToSQLException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            removeWhereClausePlaceHolder(sql);
         }
         
         // finally encode limit/offset, if necessary
@@ -3776,6 +3785,8 @@ public final class JDBCDataStore extends ContentDataStore
             } catch (FilterToSQLException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            removeWhereClausePlaceHolder(sql);
         }
         
         // finally encode limit/offset, if necessary
@@ -3803,6 +3814,14 @@ public final class JDBCDataStore extends ContentDataStore
         }
         
         return ps;
+    }
+
+    static void removeWhereClausePlaceHolder(StringBuffer sql) {
+        int whereClauseIndex = sql.indexOf(":where_clause:");
+        if (whereClauseIndex != -1) {
+            // remove the where clause
+            sql.delete(whereClauseIndex, whereClauseIndex + 14);
+        }
     }
 
     /**
@@ -3970,8 +3989,9 @@ public final class JDBCDataStore extends ContentDataStore
         else {
             Filter filter = query.getFilter();
             if (filter != null && !Filter.INCLUDE.equals(filter)) {
-                sql.append(" WHERE ");
                 toSQL.add(filter(featureType, filter, sql));
+            }  else {
+                removeWhereClausePlaceHolder(sql);
             }
         }
         if(dialect.isAggregatedSortSupported(function)) {
@@ -4627,11 +4647,11 @@ public final class JDBCDataStore extends ContentDataStore
         boolean whereEncoded = false;
         Filter filter = join.getFilter();
         if (filter != null && !Filter.INCLUDE.equals(filter)) {
-            sql.append(" WHERE ");
-            whereEncoded = true;
             
             //encode filter
             toSQL.add(filter(featureType, filter, sql));
+        }  else {
+            removeWhereClausePlaceHolder(sql);
         }
 
         //filters for joined feature types
