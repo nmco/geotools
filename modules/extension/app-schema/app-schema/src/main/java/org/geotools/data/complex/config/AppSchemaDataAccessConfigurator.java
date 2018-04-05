@@ -54,6 +54,7 @@ import org.geotools.data.complex.filter.XPath;
 import org.geotools.data.complex.filter.XPathUtil.Step;
 import org.geotools.data.complex.filter.XPathUtil.StepList;
 import org.geotools.data.complex.spi.CustomImplementationsFinder;
+import org.geotools.data.complex.spi.CustomSourceDataStore;
 import org.geotools.data.complex.xml.XmlFeatureSource;
 import org.geotools.data.joining.JoiningNestedAttributeMapping;
 import org.geotools.factory.Hints;
@@ -648,6 +649,10 @@ public class AppSchemaDataAccessConfigurator {
     }
 
     private Expression parseOgcCqlExpression(String sourceExpr) throws DataSourceException {
+        return parseOgcCqlExpression(sourceExpr, ff);
+    }
+
+    public static Expression parseOgcCqlExpression(String sourceExpr, FilterFactory ff) throws DataSourceException {
         Expression expression = Expression.NIL;
         if (sourceExpr != null && sourceExpr.trim().length() > 0) {
             try {
@@ -850,6 +855,8 @@ public class AppSchemaDataAccessConfigurator {
         final List<SourceDataStore> dsParams = config.getSourceDataStores();
         String id;
 
+        List<CustomSourceDataStore> extensions = CustomSourceDataStore.loadExtensions();
+
         for (SourceDataStore dsconfig : dsParams) {
             id = dsconfig.getId();
 
@@ -864,7 +871,8 @@ public class AppSchemaDataAccessConfigurator {
             if (dataStoreMap != null && dataStoreMap.containsKey(datastoreParams)) {
                 dataStore = dataStoreMap.get(datastoreParams);
             } else {
-                dataStore = DataAccessFinder.getDataStore(datastoreParams);
+                dataStore = CustomSourceDataStore.apply(extensions, dsconfig, config);
+                dataStore = dataStore == null ? DataAccessFinder.getDataStore(datastoreParams) : dataStore;
                 dataStoreMap.put(datastoreParams, dataStore);
             }
 

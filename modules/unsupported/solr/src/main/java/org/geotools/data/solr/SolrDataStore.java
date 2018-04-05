@@ -20,14 +20,7 @@ package org.geotools.data.solr;
 import com.vividsolutions.jts.geom.Geometry;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import org.apache.commons.beanutils.BeanComparator;
@@ -56,6 +49,8 @@ import org.opengis.filter.FilterFactory;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * Datastore implementation for SOLR document <br>
  * The types provided from the datastore are obtained querying with distinct a specific SOLR field
@@ -83,6 +78,17 @@ public class SolrDataStore extends ContentDataStore {
             new ConcurrentHashMap<String, SolrLayerConfiguration>();
 
     HttpSolrClient solrServer;
+
+    private final Map<String, SimpleFeatureType> defaultFeatureTypes = new HashMap<>();
+
+    public SolrDataStore(URL url, SolrLayerMapper layerMapper, IndexesConfig indexesConfig) {
+        this(url, layerMapper);
+        indexesConfig.getIndexesNames().forEach(indexName -> {
+            List<SolrAttribute> solrAttributes = getSolrAttributes(indexName);
+            SimpleFeatureType defaultFeatureType = indexesConfig.buildFeatureType(indexName, solrAttributes);
+            defaultFeatureTypes.put(indexName, defaultFeatureType);
+        });
+    }
 
     /**
      * Create the data store, using the {@link FieldLayerMapper}.
@@ -216,7 +222,7 @@ public class SolrDataStore extends ContentDataStore {
     @Override
     protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
         ContentEntry type = ensureEntry(entry.getName());
-        return new SolrFeatureSource(type);
+        return new SolrFeatureSource(type, defaultFeatureTypes);
     }
 
     @Override
