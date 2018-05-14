@@ -18,11 +18,16 @@
 package org.geotools.jdbc;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+
+import org.geotools.data.complex.AttributeMapping;
 import org.geotools.data.complex.FeatureTypeMapping;
 import org.geotools.data.complex.NestedAttributeMapping;
+import org.geotools.data.complex.config.JdbcMultipleValue;
+import org.geotools.data.complex.config.MultipleValue;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor.FeatureChainLink;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor.FeatureChainedAttributeDescriptor;
@@ -38,6 +43,7 @@ import org.geotools.filter.NestedAttributeExpression;
 import org.geotools.jdbc.JoiningJDBCFeatureSource.JoiningFieldEncoder;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.filter.BinaryComparisonOperator;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.PropertyIsBetween;
@@ -102,6 +108,8 @@ public class NestedFilterToSQL extends FilterToSQL {
     public void encode(Filter filter) throws FilterToSQLException {
         if (out == null) throw new FilterToSQLException("Can't encode to a null writer.");
         original.setWriter(out);
+        JdbcMultipleValueEncoder encoder = new JdbcMultipleValueEncoder(rootMapping, out);
+        filter = (Filter) filter.accept(encoder, null);
         if (original.getCapabilities().fullySupports(filter)) {
 
             try {
@@ -120,7 +128,32 @@ public class NestedFilterToSQL extends FilterToSQL {
         }
     }
 
-    protected Object visitBinaryComparison(Filter filter, Object extraData, String xpath) {
+    private void encodeMultipleValueJoin(FeatureChainedAttributeDescriptor nestedAttribute, JDBCDataStore store, StringBuffer sql) {
+        FeatureTypeMapping featureMapping = nestedAttribute.getFeatureTypeOwningAttribute();
+        AttributeMapping mapping = featureMapping.getAttributeMapping(nestedAttribute.getAttributePath());
+        if (!mapping.isMultiValued() || !(mapping.getMultipleValue() instanceof JdbcMultipleValue)) {
+            return;
+        }
+        JdbcMultipleValue multipleValue = (JdbcMultipleValue) mapping.getMultipleValue();
+        sql.append(" LEFT JOIN ");
+        String alias = String.valueOf(multipleValue.getId());
+        try {
+            store.encodeAliasedTableName(multipleValue.getTargetTable(), sql, null, alias);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        sql.append(" ON ");
+        store.dialect.encodeColumnName(nestedAttribute.getLastLink().getAlias(), sql);
+        sql.append(".");
+        store.dialect.encodeColumnName(multipleValue.getSourceColumn(), sql);
+        sql.append(" = ");
+        store.dialect.encodeTableName(alias, sql);
+        sql.append(".");
+        store.dialect.encodeColumnName(multipleValue.getTargetColumn(), sql);
+        sql.append(" ");
+    }
+
+    protected Object visitBinaryComparison(Filter  filter, Object extraData, String xpath) {
         try {
 
             FeatureChainedAttributeVisitor nestedMappingsExtractor =
@@ -138,15 +171,17 @@ public class NestedFilterToSQL extends FilterToSQL {
 
                     FeatureChainLink lastMappingStep = nestedAttrDescr.getLastLink();
                     StringBuffer sql = encodeSelectKeyFrom(lastMappingStep);
+                    JDBCDataStore store = (JDBCDataStore) lastMappingStep.getFeatureTypeMapping().getSource().getDataStore();
+                    encodeMultipleValueJoin(nestedAttrDescr, store, sql);
 
                     for (int i = numMappings - 2; i > 0; i--) {
                         FeatureChainLink mappingStep = nestedAttrDescr.getLink(i);
                         if (mappingStep.hasNestedFeature()) {
                             FeatureTypeMapping parentFeature = mappingStep.getFeatureTypeMapping();
-                            JDBCDataStore store =
-                                    (JDBCDataStore) parentFeature.getSource().getDataStore();
-                            String parentTableName =
-                                    parentFeature.getSource().getSchema().getName().getLocalPart();
+                            store = (JDBCDataStore) parentFeature.getSource()
+                                    .getDataStore();
+                            String parentTableName = parentFeature.getSource().getSchema().getName()
+                                    .getLocalPart();
 
                             sql.append(" INNER JOIN ");
                             store.encodeTableName(parentTableName, sql, null);
@@ -197,7 +232,7 @@ public class NestedFilterToSQL extends FilterToSQL {
         SimpleFeatureType parentSource = (SimpleFeatureType) parentFeature.getSource().getSchema();
         String parentTableName = parentFeature.getSource().getSchema().getName().getLocalPart();
         String parentTableAlias = parentStep.getAlias();
-        FilterToSQL parentToSQL = createFilterToSQL(store, parentSource);
+        WrappedFilterToSql parentToSQL = createFilterToSQL(parentFeature);
         // don't escape, as it will be done by the encodeColumn methods
         parentToSQL.setSqlNameEscape("");
         Expression parentExpression = nestedFeatureAttr.getSourceExpression();
@@ -205,7 +240,7 @@ public class NestedFilterToSQL extends FilterToSQL {
 
         SimpleFeatureType nestedSource = (SimpleFeatureType) parentFeature.getSource().getSchema();
         String nestedTableAlias = nestedStep.getAlias();
-        FilterToSQL nestedFilterToSQL = createFilterToSQL(store, nestedSource);
+        WrappedFilterToSql nestedFilterToSQL = createFilterToSQL(parentFeature);
         // don't escape, as it will be done by the encodeColumn methods
         nestedFilterToSQL.setSqlNameEscape("");
         Expression nestedExpr = nestedFeatureAttr.getMapping(nestedFeature).getSourceExpression();
@@ -274,13 +309,15 @@ public class NestedFilterToSQL extends FilterToSQL {
         Filter unrolled = unrollFilter(duplicated, featureMappingForUnrolling);
 
         JoiningFieldEncoder fieldEncoder = new JoiningFieldEncoder(lastLink.getAlias(), store);
-        FilterToSQL filterToSQL = createFilterToSQL(store, sourceType);
+        WrappedFilterToSql filterToSQL = createFilterToSQL(featureMapping);
         filterToSQL.setFieldEncoder(fieldEncoder);
         String encodedFilter = filterToSQL.encodeToString(unrolled);
         sql.append(" ").append(encodedFilter);
     }
 
-    private FilterToSQL createFilterToSQL(JDBCDataStore store, SimpleFeatureType sourceType) {
+    private WrappedFilterToSql createFilterToSQL(FeatureTypeMapping featureMapping) {
+        JDBCDataStore store = (JDBCDataStore) featureMapping.getSource().getDataStore();
+        SimpleFeatureType sourceType = (SimpleFeatureType) featureMapping.getSource().getSchema();
         FilterToSQL filterToSQL = null;
         if (store.getSQLDialect() instanceof PreparedStatementSQLDialect) {
             PreparedFilterToSQL preparedFilterToSQL = store.createPreparedFilterToSQL(sourceType);
@@ -290,7 +327,7 @@ public class NestedFilterToSQL extends FilterToSQL {
         } else {
             filterToSQL = store.createFilterToSQL(sourceType);
         }
-        return filterToSQL;
+        return new WrappedFilterToSql(featureMapping, filterToSQL);
     }
 
     private void encodeColumnName(

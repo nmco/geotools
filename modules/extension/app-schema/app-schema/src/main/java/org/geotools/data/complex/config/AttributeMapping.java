@@ -126,6 +126,8 @@ public class AttributeMapping implements Serializable {
      */
     private Map clientProperties;
 
+    private MultipleValue multipleValue;
+
     /**
      * Returns the expression whose evaluation result against a Feature of the source FeatureType is
      * going to be the value of the target attribute in output FeatureType.
@@ -451,5 +453,13 @@ public class AttributeMapping implements Serializable {
 
     public void setIdentifierExpression(String identifierExpression) {
         this.identifierExpression = identifierExpression;
+    }
+
+    public MultipleValue getMultipleValue() {
+        return multipleValue;
+    }
+
+    public void setMultipleValue(MultipleValue multipleValue) {
+        this.multipleValue = multipleValue;
     }
 }

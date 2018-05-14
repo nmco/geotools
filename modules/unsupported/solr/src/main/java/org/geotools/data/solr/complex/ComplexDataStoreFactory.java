@@ -39,7 +39,6 @@ import org.geotools.filter.expression.AbstractExpressionVisitor;
 import org.geotools.util.Converters;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
@@ -56,7 +55,7 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
     private final FilterFactory filterFactory = new FilterFactoryImplReportInvalidProperty();
 
     @Override
-    public void configXmlDigester(Digester digester) {
+    public void configXmlDigesterDataStore(Digester digester) {
         XMLConfigDigester.setCommonSourceDataStoreRules(ComplexDataStoreConfigWithContext.class, "SolrDataStore", digester);
         String dataStores = "AppSchemaDataAccess/sourceDataStores/";
         // set a rule for passing the URL
@@ -69,6 +68,16 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
         digester.addCallParam(dataStores + "SolrDataStore/index/geometry/srid", 1);
         digester.addCallParam(dataStores + "SolrDataStore/index/geometry/type", 2);
         digester.addCallParam(dataStores + "SolrDataStore/index/geometry", 3, "default");
+    }
+
+    @Override
+    public void configXmlDigesterAttributesMappings(Digester digester) {
+        String rootPath = "AppSchemaDataAccess/typeMappings/FeatureTypeMapping/attributeMappings/AttributeMapping";
+        String multipleValuePath = rootPath + "/solrMultipleValue";
+        digester.addObjectCreate(multipleValuePath, XMLConfigDigester.CONFIG_NS_URI, SolrMultipleValue.class);
+        digester.addCallMethod(multipleValuePath, "setExpression", 1);
+        digester.addCallParam(multipleValuePath, 0);
+        digester.addSetNext(multipleValuePath, "setMultipleValue");
     }
 
     @Override
@@ -106,6 +115,12 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
                 // mapped attributes
                 Expression expression = parseExpression(attributeMapping.getSourceExpression());
                 attributes.addAll(extractAttributesNames(expression));
+                if (attributeMapping.getMultipleValue() instanceof SolrMultipleValue) {
+                    expression = ((SolrMultipleValue)
+                            attributeMapping.getMultipleValue()).getExpression();
+                    attributes.addAll(extractAttributesNames(expression));
+
+                }
                 // mapped identifiers
                 expression = parseExpression(attributeMapping.getIdentifierExpression());
                 attributes.addAll(extractAttributesNames(expression));

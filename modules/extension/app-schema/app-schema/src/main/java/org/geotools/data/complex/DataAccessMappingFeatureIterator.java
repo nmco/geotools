@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,9 +34,11 @@ import org.apache.commons.lang.StringUtils;
 import org.geotools.data.DataAccess;
 import org.geotools.data.DataSourceException;
 import org.geotools.data.DefaultTransaction;
+import org.geotools.data.FeatureReader;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
+import org.geotools.data.complex.config.JdbcMultipleValue;
 import org.geotools.data.complex.config.NonFeatureTypeProxy;
 import org.geotools.data.complex.config.Types;
 import org.geotools.data.complex.filter.XPath;
@@ -59,6 +62,8 @@ import org.opengis.feature.Attribute;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
@@ -560,6 +565,8 @@ public class DataAccessMappingFeatureIterator extends AbstractMappingFeatureIter
         return expression.evaluate(sourceFeatureInput);
     }
 
+    public Map<JdbcMultipleValue, Map<Object, List<Object>>> jdbcMvMap = new HashMap<>();
+
     /**
      * Sets the values of grouping attributes.
      *
@@ -636,6 +643,33 @@ public class DataAccessMappingFeatureIterator extends AbstractMappingFeatureIter
                 // polymorphism could result in null, to skip the attribute
                 return null;
             }
+        }
+        if (source instanceof Feature && attMapping.isMultiValued() && attMapping.getMultipleValue() != null) {
+            if (attMapping.getMultipleValue() instanceof JdbcMultipleValue) {
+                // JDBC data stores are explicitly handled in App-Schema
+                JdbcMultipleValue mv = (JdbcMultipleValue) attMapping.getMultipleValue();
+                if (jdbcMvMap.get(mv) == null) {
+                    JoiningJDBCFeatureSource s = (JoiningJDBCFeatureSource) mappedSource;
+                    FeatureReader<SimpleFeatureType, SimpleFeature> r = s.getJoiningReaderInternal(mv, (JoiningQuery) this.query);
+                    Map<Object, List<Object>> map = new HashMap<>();
+                    while (r.hasNext()) {
+                        SimpleFeature f = r.next();
+                        List<Object> vls = map.get(f.getAttribute("id"));
+                        if (vls == null) {
+                            vls = new ArrayList<>();
+                            map.put(f.getAttribute("id"), vls);
+                        }
+                        vls.add(f.getAttribute("value"));
+                    }
+                    jdbcMvMap.put(mv, map);
+                }
+                Object mvid = ((Feature) source).getProperty(mv.getSourceColumn()).getValue();
+                values = jdbcMvMap.get(mv).get(mvid);
+            } else {
+                values = attMapping.getMultipleValue().getValues((Feature) source, attMapping);
+            }
+        } else if (values == null && source != null) {
+            values = getValues(attMapping.isMultiValued(), sourceExpression, source);
         }
         if (values == null && source != null) {
             values = getValues(attMapping.isMultiValued(), sourceExpression, source);

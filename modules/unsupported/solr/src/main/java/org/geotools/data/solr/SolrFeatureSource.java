@@ -19,7 +19,6 @@ package org.geotools.data.solr;
 
 import com.vividsolutions.jts.geom.Geometry;
 import java.io.IOException;
-<<<<<<< 0784bb0fe0630fe1642c64bcf99415c10b959eed
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -260,10 +260,14 @@ public abstract class AbstractMappingFeatureIterator implements IMappingFeatureI
         xpathAttributeBuilder.setFeatureFactory(attf);
         initialiseSourceFeatures(mapping, unrolledQuery, query.getCoordinateSystemReproject());
         xpathAttributeBuilder.setFilterFactory(namespaceAwareFilterFactory);
+        this.query = unrolledQuery;
     }
 
-    // properties can only be set by constructor, before initialising source features
-    // (for joining nested mappings)
+
+    protected Query query;
+
+    //properties can only be set by constructor, before initialising source features 
+    //(for joining nested mappings)
     private void setPropertyNames(Collection<PropertyName> propertyNames) {
         selectedProperties = new HashMap<AttributeMapping, List<PropertyName>>();
 

@@ -588,15 +588,8 @@ public class AppSchemaDataAccessConfigurator {
                 }
 
             } else {
-                attMapping =
-                        new AttributeMapping(
-                                idExpression,
-                                sourceExpression,
-                                attDto.getSourceIndex(),
-                                targetXPathSteps,
-                                expectedInstanceOf,
-                                isMultiValued,
-                                clientProperties);
+                attMapping = new AttributeMapping(idExpression, sourceExpression, attDto.getSourceIndex(), targetXPathSteps,
+                        expectedInstanceOf, isMultiValued, clientProperties, attDto.getMultipleValue());
             }
 
             if (attDto.isList()) {

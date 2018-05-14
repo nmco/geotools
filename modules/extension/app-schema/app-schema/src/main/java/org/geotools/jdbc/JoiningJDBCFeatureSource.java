@@ -34,6 +34,10 @@ import java.util.logging.Logger;
 import org.geotools.data.FeatureReader;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
+import org.geotools.data.complex.AttributeMapping;
+import org.geotools.data.complex.FeatureTypeMapping;
+import org.geotools.data.complex.config.JdbcMultipleValue;
+import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor;
 import org.geotools.data.jdbc.FilterToSQL;
 import org.geotools.data.jdbc.FilterToSQLException;
 import org.geotools.data.joining.JoiningQuery;
@@ -391,12 +395,8 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
      * @throws IOException
      * @throws FilterToSQLException
      */
-    protected String selectSQL(
-            SimpleFeatureType featureType,
-            JoiningQuery query,
-            AtomicReference<PreparedFilterToSQL> toSQLref)
-            throws IOException, SQLException, FilterToSQLException {
-
+    public String selectSQL(SimpleFeatureType featureType, JoiningQuery query, AtomicReference<PreparedFilterToSQL> toSQLref) throws IOException, SQLException, FilterToSQLException {
+        
         // first we create from clause, for aliases
 
         StringBuffer joinClause = new StringBuffer();
@@ -667,15 +667,11 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
                     for (int i = 0; i < lastSortBy.length; i++) {
                         if (!ids.contains(lastSortBy[i].getPropertyName().toString())) {
                             // skip if inner join is already done in paging
-                            getDataStore()
-                                    .dialect
-                                    .encodeColumnName(
-                                            null,
-                                            lastSortBy[i].getPropertyName().getPropertyName(),
-                                            sortBySQL);
+                            getDataStore().dialect.encodeColumnName(lastTableName, lastSortBy[i].getPropertyName().getPropertyName(), sortBySQL);
                             sortBySQL.append(" FROM ");
-                            getDataStore()
-                                    .encodeTableName(lastTableName, sortBySQL, query.getHints());
+                            getDataStore().encodeTableName(lastTableName, sortBySQL, query.getHints());
+                            // perform a left join with multi values tables of the root feature type
+                            encodeMultipleValueJoin(query.getRootMapping(), lastTableName, getDataStore(), sortBySQL);
                             if (NestedFilterToSQL.isNestedFilter(filter)) {
                                 sortBySQL
                                         .append(" WHERE ")
@@ -803,6 +799,32 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
         return sql.toString();
     }
 
+    private void encodeMultipleValueJoin(FeatureTypeMapping rootMapping, String rootTableName, JDBCDataStore store, StringBuffer sql) {
+        List<JdbcMultipleValue> multipleValues = new ArrayList<>();
+        for (AttributeMapping attributeMapping : rootMapping.getAttributeMappings()) {
+            if (!(attributeMapping.getMultipleValue() instanceof JdbcMultipleValue)) {
+                continue;
+            }
+            JdbcMultipleValue multipleValue = (JdbcMultipleValue) attributeMapping.getMultipleValue();
+            sql.append(" LEFT JOIN ");
+            String alias = String.valueOf(multipleValue.getId());
+            try {
+                store.encodeAliasedTableName(multipleValue.getTargetTable(), sql, null, alias);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            sql.append(" ON ");
+            store.dialect.encodeColumnName(rootTableName, sql);
+            sql.append(".");
+            store.dialect.encodeColumnName(multipleValue.getSourceColumn(), sql);
+            sql.append(" = ");
+            store.dialect.encodeTableName(alias, sql);
+            sql.append(".");
+            store.dialect.encodeColumnName(multipleValue.getTargetColumn(), sql);
+            sql.append(" ");
+        }
+    }
+
     private Object createNestedFilter(Filter filter, JoiningQuery query, FilterToSQL filterToSQL)
             throws FilterToSQLException {
         NestedFilterToSQL nested = new NestedFilterToSQL(query.getRootMapping(), filterToSQL);
@@ -877,6 +899,8 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
                     }
                     topIds.append(" FROM ");
                     getDataStore().encodeTableName(typeName, topIds, query.getHints());
+                    // perform a left join with multi values tables of the root feature type
+                    encodeMultipleValueJoin(query.getRootMapping(), typeName, getDataStore(), topIds);
                     // apply filter
                     if (filter != null) {
                         filterToSQL.setFieldEncoder(
@@ -1075,8 +1099,8 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
                 // build up a statement for the content
                 String sql = selectSQL(querySchema, preQuery, null);
                 getDataStore().getLogger().fine(sql);
-
-                reader = new JDBCFeatureReader(sql, cx, this, fullSchema, query);
+                featuresSql = sql;
+                reader = new JDBCFeatureReader( sql, cx, this, fullSchema, query );
             }
         } catch (Exception e) {
             // close the connection
@@ -1088,8 +1112,98 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
         return reader;
     }
 
-    protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query)
-            throws IOException {
+    public   FeatureReader<SimpleFeatureType, SimpleFeature> getJoiningReaderInternal(JdbcMultipleValue mv, JoiningQuery query) throws IOException {
+        // split the filter
+        Filter[] split = splitFilter(query.getFilter());
+        Filter preFilter = split[0];
+        Filter postFilter = split[1];
+
+        if (postFilter != null && postFilter != Filter.INCLUDE) {
+            throw new IllegalArgumentException ("Postfilters not allowed in Joining Queries");
+        }
+
+        // rebuild a new query with the same params, but just the pre-filter
+        JoiningQuery preQuery = new JoiningQuery(query);
+        preQuery.setFilter(preFilter);
+        preQuery.setRootMapping(query.getRootMapping());
+
+        // Build the feature type returned by this query. Also build an eventual extra feature type
+        // containing the attributes we might need in order to evaluate the post filter
+        SimpleFeatureType querySchema;
+        if(query.getPropertyNames() == Query.ALL_NAMES) {
+            querySchema = getSchema();
+        } else {
+            querySchema = SimpleFeatureTypeBuilder.retype(getSchema(), query.getPropertyNames());
+        }
+        // rebuild and add primary key column if there's no idExpression pointing to a database column
+        // this is so we can retrieve the PK later to use for feature chaining grouping
+        SimpleFeatureType fullSchema = (query.hasIdColumn() && query.getQueryJoins() == null) ? querySchema
+                : getFeatureType(querySchema, query);
+
+        //grab connection
+        Connection cx = getDataStore().getConnection(getState());
+
+        //create the reader
+        FeatureReader<SimpleFeatureType, SimpleFeature> reader;
+
+        try {
+            // this allows PostGIS to page the results and respect the fetch size
+            if(getState().getTransaction() == Transaction.AUTO_COMMIT) {
+                cx.setAutoCommit(false);
+            }
+
+            //build up a statement for the content
+            String sql = selectSQL(querySchema, preQuery, null);
+            getDataStore().getLogger().fine(sql);
+            featuresSql = sql;
+
+            StringBuffer finalSql = new StringBuffer();
+            finalSql.append("SELECT ");
+            getDataStore().dialect.encodeColumnName("mv", finalSql);
+            finalSql.append(".");
+            getDataStore().dialect.encodeColumnName(null, mv.getSourceColumn(), finalSql);
+            finalSql.append(", ");
+            // encode value expression
+            FilterToSQL cfToSql = createFilterToSQL(getDataStore().getSchema(mv.getTargetTable()));
+            cfToSql.setFieldEncoder(field -> {
+                StringBuffer fieldSql = new StringBuffer();
+                getDataStore().dialect.encodeTableName(mv.getTargetTable(), fieldSql);
+                fieldSql.append(".");
+                fieldSql.append(field);
+                return fieldSql.toString();
+            });
+            finalSql.append(" ").append(cfToSql.encodeToString(mv.getTargetValue()));
+            //
+            finalSql.append(" FROM ");
+            getDataStore().encodeTableName(mv.getTargetTable(), finalSql, null);
+            finalSql.append(" INNER JOIN (").append(sql).append(") AS ");
+            getDataStore().dialect.encodeTableName("mv", finalSql);
+            finalSql.append(" ON ");
+            getDataStore().dialect.encodeTableName("mv", finalSql);
+            finalSql.append(".");
+            getDataStore().dialect.encodeColumnName(null, mv.getSourceColumn(), finalSql);
+            finalSql.append(" = ");
+            getDataStore().encodeTableName(mv.getTargetTable(), finalSql, null);
+            finalSql.append(".");
+            getDataStore().dialect.encodeColumnName(null, mv.getTargetColumn(), finalSql);
+            SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
+            b.setName(new NameImpl(null, mv.getTargetTable()));
+            b.add("id", Object.class);
+            b.add("value", Object.class);
+            reader = new JDBCFeatureReader( finalSql.toString(), cx, this, b.buildFeatureType(), query );
+        } catch (Exception e) {
+            // close the connection
+            getDataStore().closeSafe(cx);
+            // safely rethrow
+            throw (IOException) new IOException().initCause(e);
+        }
+
+        return reader;
+    }
+
+    public String featuresSql;
+    
+    protected  FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
         if (query instanceof JoiningQuery) {
             return getJoiningReaderInternal((JoiningQuery) query);
         } else {
