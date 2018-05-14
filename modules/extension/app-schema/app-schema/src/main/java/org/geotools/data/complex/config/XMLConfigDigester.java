@@ -279,6 +279,22 @@ public class XMLConfigDigester {
         digester.addCallParam(attMap + "/ClientProperty/name", 0);
         digester.addCallParam(attMap + "/ClientProperty/value", 1);
 
+        // parse JDBC multi value element
+        String jdbcMultipleValue = attMap + "/jdbcMultipleValue";
+        digester.addObjectCreate(jdbcMultipleValue, XMLConfigDigester.CONFIG_NS_URI, JdbcMultipleValue.class);
+        digester.addCallMethod(jdbcMultipleValue + "/sourceColumn", "setSourceColumn", 1);
+        digester.addCallParam(jdbcMultipleValue + "/sourceColumn", 0);
+        digester.addCallMethod(jdbcMultipleValue + "/targetTable", "setTargetTable", 1);
+        digester.addCallParam(jdbcMultipleValue + "/targetTable", 0);
+        digester.addCallMethod(jdbcMultipleValue + "/targetColumn", "setTargetColumn", 1);
+        digester.addCallParam(jdbcMultipleValue + "/targetColumn", 0);
+        digester.addCallMethod(jdbcMultipleValue + "/targetValue", "setTargetValue", 1);
+        digester.addCallParam(jdbcMultipleValue + "/targetValue", 0);
+
+        digester.addSetNext(jdbcMultipleValue, "setMultipleValue");
+
+        CustomSourceDataStore.applyAttributesMappings(extensions, digester);
+
         // add the AttributeMapping to the list
         digester.addSetNext(attMap, "add");
 
@@ -315,7 +331,7 @@ public class XMLConfigDigester {
 
         setCommonSourceDataStoreRules(SourceDataStore.class, "DataStore", digester);
 
-        CustomSourceDataStore.apply(extensions, digester);
+        CustomSourceDataStore.applyDataStores(extensions, digester);
 
         // set the list of SourceDataStores for ComlexDataStoreDTO
         digester.addSetNext(dataStores, "setSourceDataStores");

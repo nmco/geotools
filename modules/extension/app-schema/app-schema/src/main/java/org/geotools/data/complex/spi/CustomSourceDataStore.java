@@ -27,7 +27,6 @@ import org.geotools.data.complex.config.AppSchemaDataAccessDTO;
 import org.geotools.data.complex.config.SourceDataStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.filter.Filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,9 @@ public interface CustomSourceDataStore {
     DataAccess<? extends FeatureType, ? extends Feature> buildDataStore(
             SourceDataStore dataStoreConfig, AppSchemaDataAccessDTO appSchemaConfig);
 
-    void configXmlDigester(Digester digester);
+    void configXmlDigesterDataStore(Digester digester);
+
+    void configXmlDigesterAttributesMappings(Digester digester);
 
     DataAccessMappingFeatureIterator buildIterator(AppSchemaDataAccess store, FeatureTypeMapping featureTypeMapping,
                                                    Query query, Transaction transaction);
@@ -53,8 +54,12 @@ public interface CustomSourceDataStore {
         return extensions;
     }
 
-    static void apply(List<CustomSourceDataStore> extensions, Digester digester) {
-        extensions.forEach(extension -> extension.configXmlDigester(digester));
+    static void applyDataStores(List<CustomSourceDataStore> extensions, Digester digester) {
+        extensions.forEach(extension -> extension.configXmlDigesterDataStore(digester));
+    }
+
+    static void applyAttributesMappings(List<CustomSourceDataStore> extensions, Digester digester) {
+        extensions.forEach(extension -> extension.configXmlDigesterAttributesMappings(digester));
     }
 
     @SuppressWarnings("unchecked")
