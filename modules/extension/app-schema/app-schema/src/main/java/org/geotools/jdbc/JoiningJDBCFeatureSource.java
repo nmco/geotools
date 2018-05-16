@@ -47,6 +47,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.visitor.PostPreProcessFilterSplittingVisitor;
 import org.geotools.filter.visitor.SimplifyingFilterVisitor;
+import org.geotools.jdbc.JoinInfo.JoinQualifier;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -690,7 +691,14 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
                                         .append(" WHERE ")
                                         .append(createNestedFilter(filter, query, toSQL));
                             } else {
-                                sortBySQL.append(" ").append(toSQL.encodeToString(filter));
+                                sortBySQL
+                                        .append(" ")
+                                        .append(
+                                                toSQL.encodeToString(
+                                                        aliasFilter(
+                                                                filter,
+                                                                featureType,
+                                                                lastTableAlias)));
                             }
                             sortBySQL.append(" ) ");
                             getDataStore().dialect.encodeTableName(TEMP_FILTER_ALIAS, sortBySQL);
@@ -1279,5 +1287,11 @@ public class JoiningJDBCFeatureSource extends JDBCFeatureSource {
         } else {
             return super.joinQuery(query);
         }
+    }
+
+    protected Filter aliasFilter(Filter filter, SimpleFeatureType featureType, String alias) {
+        JoinQualifier jq = new JoinQualifier(featureType, alias);
+        Filter resultFilter = (Filter) filter.accept(jq, null);
+        return resultFilter;
     }
 }

@@ -66,6 +66,8 @@ public class AttributeMapping {
 
     private final MultipleValue multipleValue;
 
+    private String indexField;
+
     /**
      * Creates a new AttributeMapping object.
      *
@@ -106,6 +108,29 @@ public class AttributeMapping {
             Map<Name, Expression> clientProperties,
             MultipleValue multipleValue) {
 
+        this(
+                idExpression,
+                sourceExpression,
+                sourceIndex,
+                targetXPath,
+                targetNodeInstance,
+                isMultiValued,
+                clientProperties,
+                multipleValue,
+                null);
+    }
+
+    public AttributeMapping(
+            Expression idExpression,
+            Expression sourceExpression,
+            String sourceIndex,
+            StepList targetXPath,
+            AttributeType targetNodeInstance,
+            boolean isMultiValued,
+            Map<Name, Expression> clientProperties,
+            MultipleValue multipleValue,
+            String indexField) {
+
         this.identifierExpression = idExpression == null ? Expression.NIL : idExpression;
         this.sourceExpression = sourceExpression == null ? Expression.NIL : sourceExpression;
         this.isMultiValued = isMultiValued;
@@ -124,6 +149,7 @@ public class AttributeMapping {
             this.isMultiValued = true;
             this.sourceExpression = multipleValue;
         }
+        this.indexField = indexField;
     }
 
     public boolean isMultiValued() {
@@ -259,5 +285,13 @@ public class AttributeMapping {
 
     public MultipleValue getMultipleValue() {
         return multipleValue;
+    }
+
+    public String getIndexField() {
+        return indexField;
+    }
+
+    public void setIndexField(String indexField) {
+        this.indexField = indexField;
     }
 }
