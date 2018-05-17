@@ -35,6 +35,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+/**
+ * This class contains the integration tests (online tests) for the integration between App-Schema and Apache Solr
+ * Create appschema.properties file in {{user-dir}}/.geotools folder
+ * Set solr_url property
+ * URL config example:
+ * solr_url=http://localhost:8983/solr
+ * @author Fernando Miño
+ */
 public final class AppSchemaIntegrationTest extends OnlineTestCase {
 
     private static final String SOLR_URL_KEY = "solr_url";
