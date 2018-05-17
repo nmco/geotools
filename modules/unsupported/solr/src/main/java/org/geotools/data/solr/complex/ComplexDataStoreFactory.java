@@ -87,9 +87,9 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
             return null;
         }
         SortBy[] sorting = featureTypeMapping.getAttributeMappings().stream()
-                .filter(mapping -> mapping.getIdentifierExpression() != null)
-                .flatMap(mapping -> extractAttributesNames(mapping.getIdentifierExpression()).stream())
-                .map(attributeName -> filterFactory.sort(attributeName, SortOrder.ASCENDING))
+                .filter(mapping -> mapping.getIdentifierExpression() != null 
+                    && !mapping.getIdentifierExpression().equals(Expression.NIL))
+                .map(mapping -> filterFactory.sort(mapping.getTargetXPath().toString(), SortOrder.ASCENDING))
                 .toArray(SortBy[]::new);
         query.setSortBy(sorting);
         try {
