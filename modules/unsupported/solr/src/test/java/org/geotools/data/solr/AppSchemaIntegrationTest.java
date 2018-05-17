@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -174,104 +177,17 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
     }
 
     protected void indexSetup() throws Exception {
-        StationData d1 =
-                new StationData(
-                        "temperature",
-                        "2016-12-19T11:26:40",
-                        "C",
-                        20,
-                        "ALS",
-                        13,
-                        "POINT(8.63 44.92)",
-                        "Alessandria",
-                        Arrays.asList(new String[] {"ALS_TAG_1", "ALS_TAG_2"}),
-                        Arrays.asList(new String[] {"ALS_COMMENT_1", "ALS_COMMENT_2"}));
-        client.add(d1.toSolrDoc());
-
-        StationData d2 =
-                new StationData(
-                        "temperature",
-                        "2016-12-19T11:27:13",
-                        "Km/h",
-                        155,
-                        "ALS",
-                        13,
-                        "POINT(8.63 44.92)",
-                        "Alessandria",
-                        Arrays.asList(new String[] {"ALS_TAG_1", "ALS_TAG_2"}),
-                        Arrays.asList(new String[] {"ALS_COMMENT_1", "ALS_COMMENT_2"}));
-        client.add(d2.toSolrDoc());
-
-        StationData d3 =
-                new StationData(
-                        "temperature",
-                        "2016-12-19T11:28:31",
-                        "C",
-                        35,
-                        "BOL",
-                        7,
-                        "POINT(11.34 44.5)",
-                        "Bologna",
-                        null,
-                        null);
-        client.add(d3.toSolrDoc());
-
-        StationData d4 =
-                new StationData(
-                        "temperature",
-                        "2016-12-19T11:28:55",
-                        "C",
-                        25,
-                        "BOL",
-                        7,
-                        "POINT(11.34 44.5)",
-                        "Bologna",
-                        null,
-                        null);
-        client.add(d4.toSolrDoc());
-
-        StationData d5 =
-                new StationData(
-                        "wind speed",
-                        "2016-12-19T11:29:24",
-                        "C",
-                        80,
-                        "BOL",
-                        7,
-                        "POINT(11.34 44.5)",
-                        "Bologna",
-                        null,
-                        null);
-        client.add(d5.toSolrDoc());
-
-        StationData d6 =
-                new StationData(
-                        "pressure",
-                        "2016-12-19T11:30:26",
-                        "hPa",
-                        1019,
-                        "BOL",
-                        7,
-                        "POINT(11.34 44.5)",
-                        "Bologna",
-                        null,
-                        null);
-        client.add(d6.toSolrDoc());
-
-        StationData d7 =
-                new StationData(
-                        "pressure",
-                        "2016-12-19T11:30:51",
-                        "hPa",
-                        1015,
-                        "BOL",
-                        7,
-                        "POINT(11.34 44.5)",
-                        "Bologna",
-                        null,
-                        null);
-        client.add(d7.toSolrDoc());
-
+        File inFile =
+                new File(
+                        AppSchemaIntegrationTest.class
+                                .getResource(testData + "stationsData.xml")
+                                .toURI());
+        JAXBContext jcontext = JAXBContext.newInstance(Stations.class);
+        Unmarshaller um = jcontext.createUnmarshaller();
+        Stations stations = (Stations) um.unmarshal(inFile);
+        for (StationData adata : stations.getStations()) {
+            client.add(adata.toSolrDoc());
+        }
         client.commit();
     }
 
@@ -282,6 +198,8 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
     protected void prepareFiles() throws Exception {
         // copy meteo.xsd
         copyTestData("meteo.xsd", testDir);
+        // stationsData.xml
+        copyTestData("stationsData.xml", testDir);
 
         // Modify datasource and copy xml
         File xmlFile =
@@ -323,7 +241,8 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
     }
 
     /** Station data model class */
-    protected static class StationData implements Serializable {
+    @XmlRootElement
+    public static class StationData implements Serializable {
         private String measurementName;
         private String measurementTime;
         private String measurementUnit;
@@ -334,6 +253,8 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
         private String stationName;
         private List<String> stationTag = new ArrayList<>();
         private List<String> stationComment = new ArrayList<>();
+
+        public StationData() {}
 
         public StationData(
                 String measurementName,
@@ -381,6 +302,101 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
             }
 
             return result;
+        }
+
+        public String getMeasurementName() {
+            return measurementName;
+        }
+
+        public void setMeasurementName(String measurementName) {
+            this.measurementName = measurementName;
+        }
+
+        public String getMeasurementTime() {
+            return measurementTime;
+        }
+
+        public void setMeasurementTime(String measurementTime) {
+            this.measurementTime = measurementTime;
+        }
+
+        public String getMeasurementUnit() {
+            return measurementUnit;
+        }
+
+        public void setMeasurementUnit(String measurementUnit) {
+            this.measurementUnit = measurementUnit;
+        }
+
+        public Integer getMeasurementValue() {
+            return measurementValue;
+        }
+
+        public void setMeasurementValue(Integer measurementValue) {
+            this.measurementValue = measurementValue;
+        }
+
+        public String getStationCode() {
+            return stationCode;
+        }
+
+        public void setStationCode(String stationCode) {
+            this.stationCode = stationCode;
+        }
+
+        public Integer getStationId() {
+            return stationId;
+        }
+
+        public void setStationId(Integer stationId) {
+            this.stationId = stationId;
+        }
+
+        public String getStationLocation() {
+            return stationLocation;
+        }
+
+        public void setStationLocation(String stationLocation) {
+            this.stationLocation = stationLocation;
+        }
+
+        public String getStationName() {
+            return stationName;
+        }
+
+        public void setStationName(String stationName) {
+            this.stationName = stationName;
+        }
+
+        public List<String> getStationTag() {
+            return stationTag;
+        }
+
+        public void setStationTag(List<String> stationTag) {
+            this.stationTag = stationTag;
+        }
+
+        public List<String> getStationComment() {
+            return stationComment;
+        }
+
+        public void setStationComment(List<String> stationComment) {
+            this.stationComment = stationComment;
+        }
+    }
+
+    @XmlRootElement
+    public static class Stations implements Serializable {
+        private List<StationData> stations = new ArrayList<>();
+
+        public Stations() {}
+
+        public List<StationData> getStations() {
+            return stations;
+        }
+
+        public void setStations(List<StationData> stations) {
+            this.stations = stations;
         }
     }
 }
