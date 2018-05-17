@@ -1,5 +1,8 @@
 package org.geotools.data.solr;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +27,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.complex.config.Types;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.NameImpl;
 import org.geotools.test.OnlineTestCase;
 import org.geotools.util.URLs;
 import org.junit.Test;
@@ -36,11 +40,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * This class contains the integration tests (online tests) for the integration between App-Schema and Apache Solr
- * Create appschema.properties file in {{user-dir}}/.geotools folder
- * Set solr_url property
- * URL config example:
- * solr_url=http://localhost:8983/solr
+ * This class contains the integration tests (online tests) for the integration between App-Schema
+ * and Apache Solr Create appschema.properties file in {{user-dir}}/.geotools folder Set solr_url
+ * property URL config example: solr_url=http://localhost:8983/solr
+ *
  * @author Fernando Miño
  */
 public final class AppSchemaIntegrationTest extends OnlineTestCase {
@@ -49,6 +52,7 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
     private static final String CORE_NAME = "stations";
     private static final String testData = "/test-data/appschema/";
     private static final String xmlFileName = "mappings_solr.xml";
+    private static final String ST_NAMESPACE = "http://www.stations.org/1.0";
     private static final Name mappedTypeName = Types.typeName("multi_stations_solr");
     private static final String testDirStr =
             "target/test/" + AppSchemaIntegrationTest.class.getSimpleName();
@@ -60,15 +64,56 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
                             + AppSchemaIntegrationTest.class.getSimpleName()
                             + "/app-schema-cache");
 
-    protected HttpSolrClient client;
+    private HttpSolrClient client;
     private static DataAccess<FeatureType, Feature> mappingDataStore;
 
     @Test
-    public void testFeaturesCount() throws Exception {
+    public void testFeaturesData() throws Exception {
         FeatureSource<FeatureType, Feature> fSource =
                 (FeatureSource<FeatureType, Feature>)
                         mappingDataStore.getFeatureSource(mappedTypeName);
-        assertEquals(2, size(fSource.getFeatures()));
+        List<Feature> features = toFeaturesList(fSource.getFeatures());
+        // check features count
+        assertEquals(2, features.size());
+        // check features data
+        Name stationName = new NameImpl(ST_NAMESPACE, "stationName");
+        for (Feature afeature : features) {
+            String id = afeature.getIdentifier().getID();
+            assertTrue(id.equals("13") || id.equals("7"));
+            // check geom type
+            assertTrue(afeature.getDefaultGeometryProperty().getValue() instanceof Point);
+            Point theGeom = (Point) afeature.getDefaultGeometryProperty().getValue();
+            GeometryFactory gf = new GeometryFactory();
+            Point point1;
+            switch (id) {
+                case "7":
+                    assertEquals("Bologna", (String) afeature.getProperty(stationName).getValue());
+                    // check geom
+                    point1 = gf.createPoint(new Coordinate(11.34, 44.5));
+                    assertEquals(point1, theGeom);
+                    break;
+                case "13":
+                    assertEquals(
+                            "Alessandria", (String) afeature.getProperty(stationName).getValue());
+                    // check geom
+                    point1 = gf.createPoint(new Coordinate(8.63, 44.92));
+                    assertEquals(point1, theGeom);
+                    break;
+            }
+        }
+    }
+
+    private List<Feature> toFeaturesList(FeatureCollection<FeatureType, Feature> features) {
+        List<Feature> result = new ArrayList<>();
+        FeatureIterator<Feature> i = features.features();
+        try {
+            while (i.hasNext()) {
+                result.add(i.next());
+            }
+        } finally {
+            i.close();
+        }
+        return result;
     }
 
     private int size(FeatureCollection<FeatureType, Feature> features) {
