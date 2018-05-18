@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -163,17 +162,18 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
         TestsSolrUtils.createGeometryFieldType(client);
     }
 
-    protected void fieldsSetup() {
-        createField("station_id", "tlongs", false);
-        createField("station_name", "strings", false);
-        createField("station_code", "strings", false);
-        createField("station_location", "geometry", false);
-        createField("measurement_name", "strings", false);
-        createField("measurement_time", "tdates", false);
-        createField("measurement_unit", "strings", false);
-        createField("measurement_value", "tlongs", false);
-        createField("station_tag", "strings", true);
-        createField("station_comment", "strings", true);
+    protected void fieldsSetup() throws Exception {
+        File inFile =
+                new File(
+                        AppSchemaIntegrationTest.class
+                                .getResource(testData + "solr_types.xml")
+                                .toURI());
+        JAXBContext jcontext = JAXBContext.newInstance(SolrTypes.class);
+        Unmarshaller um = jcontext.createUnmarshaller();
+        SolrTypes types = (SolrTypes) um.unmarshal(inFile);
+        for (SolrTypeData adata : types.getTypes()) {
+            createField(adata.getName(), adata.getType(), adata.getMulti());
+        }
     }
 
     protected void indexSetup() throws Exception {
@@ -397,6 +397,54 @@ public final class AppSchemaIntegrationTest extends OnlineTestCase {
 
         public void setStations(List<StationData> stations) {
             this.stations = stations;
+        }
+    }
+
+    @XmlRootElement
+    public static class SolrTypes implements Serializable {
+        private List<SolrTypeData> types;
+
+        public SolrTypes() {}
+
+        public List<SolrTypeData> getTypes() {
+            return types;
+        }
+
+        public void setTypes(List<SolrTypeData> types) {
+            this.types = types;
+        }
+    }
+
+    @XmlRootElement
+    public static class SolrTypeData implements Serializable {
+        private String name;
+        private String type;
+        private Boolean multi;
+
+        public SolrTypeData() {}
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Boolean getMulti() {
+            return multi;
+        }
+
+        public void setMulti(Boolean multi) {
+            this.multi = multi;
         }
     }
 }
