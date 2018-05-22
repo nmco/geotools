@@ -269,6 +269,7 @@ public class MappingFeatureIteratorFactory {
             } else {
                 // non database sources e.g. property data store
                 Filter filter = query.getFilter();
+                query.setProperties(Query.ALL_PROPERTIES);
                 iterator =
                         new DataAccessMappingFeatureIterator(
                                 store, mapping, query, !Filter.INCLUDE.equals(filter), true);

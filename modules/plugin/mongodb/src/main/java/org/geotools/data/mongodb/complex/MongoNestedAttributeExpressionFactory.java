@@ -72,7 +72,11 @@ public class MongoNestedAttributeExpressionFactory implements CustomAttributeExp
         Expression sourceExpression = attributeMapping.getSourceExpression();
         if (sourceExpression instanceof JsonSelectFunction) {
             JsonSelectAllFunction jsonSelect = new JsonSelectAllFunction();
-            jsonPath = addPath(jsonPath, ((JsonSelectFunction) sourceExpression).getJsonPath());
+            if (!MongoComplexUtilities.useLegacyPaths()) {
+                jsonPath = addPath(jsonPath, ((JsonSelectFunction) sourceExpression).getJsonPath());
+            } else {
+                jsonPath = ((JsonSelectFunction) sourceExpression).getJsonPath();
+            }
             List<Expression> parameters =
                     Collections.singletonList(ConstantExpression.constant(jsonPath));
             jsonSelect.setParameters(parameters);

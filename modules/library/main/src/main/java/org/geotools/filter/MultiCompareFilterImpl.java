@@ -57,6 +57,7 @@ public abstract class MultiCompareFilterImpl extends CompareFilterImpl {
 
     public final boolean evaluate(Object feature) {
         final Object object1 = eval(expression1, feature);
+
         final Object object2 = eval(expression2, feature);
 
         if (!(object1 instanceof Collection) && !(object2 instanceof Collection)) {

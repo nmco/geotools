@@ -16,6 +16,7 @@
  */
 package org.geotools.filter;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +27,8 @@ import org.geotools.filter.expression.PropertyAccessor;
 import org.geotools.filter.expression.PropertyAccessorFactory;
 import org.geotools.filter.expression.PropertyAccessors;
 import org.geotools.util.Converters;
+import org.opengis.feature.Attribute;
+import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.expression.ExpressionVisitor;
@@ -217,6 +220,19 @@ public class AttributeExpressionImpl extends DefaultExpression implements Proper
             }
 
             if (!success) {
+                // we may be handling complex features let's vouch for it
+                String[] paths = attPath.split("/");
+                Object result = findValue(obj, paths, 0);
+                if (result != null) {
+                    if (target == null) {
+                        return (T) result;
+                    } else {
+                        return Converters.convert(result, target);
+                    }
+                }
+            }
+
+            if (!success) {
                 if (lenient) return null;
                 else
                     throw new IllegalArgumentException(
@@ -252,6 +268,30 @@ public class AttributeExpressionImpl extends DefaultExpression implements Proper
             ex.set(e);
             return false;
         }
+    }
+
+    private Object findValue(Object currentValue, String[] steps, int stepIndex) {
+        if (stepIndex >= steps.length) {
+            return currentValue;
+        }
+        if (currentValue instanceof Feature) {
+            return findValue(((Feature) currentValue).getValue(), steps, stepIndex);
+        } else if (currentValue instanceof Collection) {
+            for (Object value : (Collection) currentValue) {
+                Object result = findValue(value, steps, stepIndex);
+                if (result != null) {
+                    return findValue(result, steps, stepIndex + 1);
+                }
+            }
+        } else if (currentValue instanceof Attribute) {
+            Attribute attribute = (Attribute) currentValue;
+            String name = attribute.getDescriptor().getLocalName();
+            String step = steps[stepIndex];
+            if (name.equals(step.split(":")[1])) {
+                return attribute.getValue();
+            }
+        }
+        return null;
     }
 
     // accessor caching, scanning the registry every time is really very expensive

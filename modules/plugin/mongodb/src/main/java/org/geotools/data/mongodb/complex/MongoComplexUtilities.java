@@ -57,7 +57,7 @@ public final class MongoComplexUtilities {
 
     /** If TRUE no recursive paths will be used, this onyl exists for backwards compatibility. */
     public static boolean useLegacyPaths() {
-        return USE_LEGACY_PATHS;
+        return true;
     }
 
     /**

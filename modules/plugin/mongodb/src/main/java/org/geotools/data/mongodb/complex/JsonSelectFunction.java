@@ -46,7 +46,7 @@ public final class JsonSelectFunction extends FunctionExpressionImpl implements 
      * attribute expression will be returned.
      */
     public Object evaluate(Object object) {
-        // get the JSOn object
+        // get the JSON object
         String path = (String) this.params.get(0).evaluate(object);
         if (object instanceof MongoCollectionFeature) {
             // in the case of a mongo collection we need to append the parent path
