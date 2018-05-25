@@ -44,9 +44,8 @@ import org.xml.sax.InputSource;
 /**
  * This class contains the integration tests (online tests) for the integration between App-Schema
  * and Apache Solr Create appschema.properties file in {{user-dir}}/.geotools folder Set solr_url
- * property URL config example: solr_url=http://localhost:8983/solr
- *
- * @author Fernando Miño
+ * property URL config example: solr_url=http://localhost:8983/solr, and create "stations" core in
+ * Solr
  */
 public final class AppSchemaIntegrationTest extends OnlineTestCase {
 
