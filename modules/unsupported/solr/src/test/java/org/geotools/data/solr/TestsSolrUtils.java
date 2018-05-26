@@ -168,7 +168,7 @@ public final class TestsSolrUtils {
      * @param client Sorl client to use, should already point to the desired core
      * @param attributes attributes of the field type to create
      */
-    private static void createFieldType(HttpSolrClient client, Map<String, Object> attributes) {
+    public static void createFieldType(HttpSolrClient client, Map<String, Object> attributes) {
         FieldTypeDefinition typeDefinition = new FieldTypeDefinition();
         typeDefinition.setAttributes(attributes);
         // try to create the field type
@@ -196,7 +196,7 @@ public final class TestsSolrUtils {
      * @param name name of the field
      * @param type field type name
      */
-    private static void createField(HttpSolrClient client, String name, String type) {
+    public static void createField(HttpSolrClient client, String name, String type) {
         Map<String, Object> field = new HashMap<>();
         field.put("name", name);
         field.put("type", type);
@@ -298,8 +298,42 @@ public final class TestsSolrUtils {
         }
     }
 
+    public static void createGeometryFieldType(HttpSolrClient client) {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("name", "geometry");
+        attributes.put("class", "solr.SpatialRecursivePrefixTreeFieldType");
+        attributes.put("geo", "true");
+        attributes.put("maxDistErr", "0.001");
+        attributes.put("distErrPct", "0.025");
+        attributes.put("distanceUnits", "kilometers");
+        attributes.put("spatialContextFactory", "JTS");
+        // create or replace the field type definition
+        createFieldType(client, attributes);
+    }
+
+    public static void createField(
+            HttpSolrClient client, String name, String type, boolean multiValued) {
+        Map<String, Object> field = new HashMap<>();
+        field.put("name", name);
+        field.put("type", type);
+        field.put("multiValued", multiValued ? "true" : "false");
+        // try to create the field
+        Response addResponse = runSolrRequest(client, new SchemaRequest.AddField(field));
+        if (!addResponse.hasErrors()) {
+            // no errors, which means that the field was correctly created
+            return;
+        }
+        // something bad happen, let's assume that a field with the same name already exists
+        Response replaceResponse = runSolrRequest(client, new SchemaRequest.ReplaceField(field));
+        if (replaceResponse.hasErrors()) {
+            // trying to replace the field definition failed, let's throw an exception with all the
+            // messages errors
+            Response.throwIfNeeded(addResponse, replaceResponse);
+        }
+    }
+
     /** Helper container class for Solr responses errors messages. */
-    private static final class Response {
+    public static final class Response {
 
         private final boolean errors;
         private final String message;
