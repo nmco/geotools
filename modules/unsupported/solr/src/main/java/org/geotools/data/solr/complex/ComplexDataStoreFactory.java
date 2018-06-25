@@ -16,7 +16,12 @@
  */
 package org.geotools.data.solr.complex;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.digester.Digester;
+import org.apache.commons.lang.StringUtils;
 import org.geotools.data.DataAccess;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
@@ -45,18 +50,14 @@ import org.opengis.filter.expression.PropertyName;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class ComplexDataStoreFactory implements CustomSourceDataStore {
 
     private final FilterFactory filterFactory = new FilterFactoryImplReportInvalidProperty();
 
     @Override
     public void configXmlDigesterDataStore(Digester digester) {
-        XMLConfigDigester.setCommonSourceDataStoreRules(ComplexDataStoreConfigWithContext.class, "SolrDataStore", digester);
+        XMLConfigDigester.setCommonSourceDataStoreRules(
+                ComplexDataStoreConfigWithContext.class, "SolrDataStore", digester);
         String dataStores = "AppSchemaDataAccess/sourceDataStores/";
         // set a rule for passing the URL
         digester.addCallMethod(dataStores + "SolrDataStore/url", "setUrl", 1);
@@ -72,32 +73,50 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
 
     @Override
     public void configXmlDigesterAttributesMappings(Digester digester) {
-        String rootPath = "AppSchemaDataAccess/typeMappings/FeatureTypeMapping/attributeMappings/AttributeMapping";
+        String rootPath =
+                "AppSchemaDataAccess/typeMappings/FeatureTypeMapping/attributeMappings/AttributeMapping";
         String multipleValuePath = rootPath + "/solrMultipleValue";
-        digester.addObjectCreate(multipleValuePath, XMLConfigDigester.CONFIG_NS_URI, SolrMultipleValue.class);
+        digester.addObjectCreate(
+                multipleValuePath, XMLConfigDigester.CONFIG_NS_URI, SolrMultipleValue.class);
         digester.addCallMethod(multipleValuePath, "setExpression", 1);
         digester.addCallParam(multipleValuePath, 0);
         digester.addSetNext(multipleValuePath, "setMultipleValue");
     }
 
     @Override
-    public DataAccessMappingFeatureIterator buildIterator(AppSchemaDataAccess store, FeatureTypeMapping featureTypeMapping,
-                                                          Query query, Transaction transaction) {
+    public DataAccessMappingFeatureIterator buildIterator(
+            AppSchemaDataAccess store,
+            FeatureTypeMapping featureTypeMapping,
+            Query query,
+            Transaction transaction) {
         if (!(featureTypeMapping.getSource() instanceof SolrFeatureSource)) {
             return null;
         }
-        SortBy[] sorting = featureTypeMapping.getAttributeMappings().stream()
-                .filter(mapping -> mapping.getIdentifierExpression() != null 
-                    && !mapping.getIdentifierExpression().equals(Expression.NIL))
-                .map(mapping -> filterFactory.sort(mapping.getTargetXPath().toString(), SortOrder.ASCENDING))
-                .toArray(SortBy[]::new);
+        SortBy[] sorting =
+                featureTypeMapping
+                        .getAttributeMappings()
+                        .stream()
+                        .filter(
+                                mapping ->
+                                        mapping.getIdentifierExpression() != null
+                                                && !mapping.getIdentifierExpression()
+                                                        .equals(Expression.NIL))
+                        .map(
+                                mapping ->
+                                        filterFactory.sort(
+                                                mapping.getTargetXPath().toString(),
+                                                SortOrder.ASCENDING))
+                        .toArray(SortBy[]::new);
         query.setSortBy(sorting);
         try {
-            return new DataAccessMappingFeatureIterator(store, featureTypeMapping, query, false, true);
+            return new DataAccessMappingFeatureIterator(
+                    store, featureTypeMapping, query, false, true);
         } catch (Exception exception) {
-            throw new RuntimeException(String.format(
-                    "Error creating iterator for feature type mapping '%s'.",
-                    featureTypeMapping.getMappingName()), exception);
+            throw new RuntimeException(
+                    String.format(
+                            "Error creating iterator for feature type mapping '%s'.",
+                            featureTypeMapping.getMappingName()),
+                    exception);
         }
     }
 
@@ -110,28 +129,14 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
         }
         IndexesConfig indexesConfig = ((ComplexDataStoreConfig) dataStoreConfig).getIndexesConfig();
         for (TypeMapping mapping : (Set<TypeMapping>) appSchemaConfig.getTypeMappings()) {
-            Set<String> attributes = new HashSet<>();
-            ((List<AttributeMapping>) mapping.getAttributeMappings()).forEach(attributeMapping -> {
-                // mapped attributes
-                Expression expression = parseExpression(attributeMapping.getSourceExpression());
-                attributes.addAll(extractAttributesNames(expression));
-                if (attributeMapping.getMultipleValue() instanceof SolrMultipleValue) {
-                    expression = ((SolrMultipleValue)
-                            attributeMapping.getMultipleValue()).getExpression();
-                    attributes.addAll(extractAttributesNames(expression));
-
-                }
-                // mapped identifiers
-                expression = parseExpression(attributeMapping.getIdentifierExpression());
-                attributes.addAll(extractAttributesNames(expression));
-                // mapped client properties
-                attributes.addAll((Set<String>) attributeMapping.getClientProperties().values().stream()
-                        .flatMap(value -> extractAttributesNames(parseExpression(value)).stream())
-                        .collect(Collectors.toSet()));
-            });
-            indexesConfig.addAttributes(mapping.getSourceTypeName(), attributes);
+            indexesConfig.addAttributes(
+                    getTypeName(mapping, dataStoreConfig),
+                    parseAttributeNames(mapping, dataStoreConfig));
         }
-        return new SolrDataStore(((ComplexDataStoreConfig) dataStoreConfig).getUrl(), new SingleLayerMapper(), indexesConfig);
+        return new SolrDataStore(
+                ((ComplexDataStoreConfig) dataStoreConfig).getUrl(),
+                new SingleLayerMapper(),
+                indexesConfig);
     }
 
     private Set<String> extractAttributesNames(Expression expression) {
@@ -178,10 +183,77 @@ public class ComplexDataStoreFactory implements CustomSourceDataStore {
 
     private Expression parseExpression(String expressionText) {
         try {
-            return AppSchemaDataAccessConfigurator.parseOgcCqlExpression(expressionText, filterFactory);
+            return AppSchemaDataAccessConfigurator.parseOgcCqlExpression(
+                    expressionText, filterFactory);
         } catch (Exception exception) {
-            throw new RuntimeException(String.format(
-                    "Error parsing expression '%s'.", expressionText), exception);
+            throw new RuntimeException(
+                    String.format("Error parsing expression '%s'.", expressionText), exception);
         }
+    }
+
+    private Set<String> parseIndexModeAttributes(TypeMapping mapping) {
+        Set<String> attributes = new HashSet<>();
+        ((List<AttributeMapping>) mapping.getAttributeMappings())
+                .stream()
+                .filter(
+                        attributeMapping ->
+                                StringUtils.isNotEmpty(attributeMapping.getIndexField()))
+                .forEach(
+                        attributeMapping -> {
+                            attributes.add(attributeMapping.getIndexField());
+                        });
+        return attributes;
+    }
+
+    private Set<String> parseSourceModeAttributes(TypeMapping mapping) {
+        Set<String> attributes = new HashSet<>();
+        ((List<AttributeMapping>) mapping.getAttributeMappings())
+                .forEach(
+                        attributeMapping -> {
+                            // mapped attributes
+                            Expression expression =
+                                    parseExpression(attributeMapping.getSourceExpression());
+                            attributes.addAll(extractAttributesNames(expression));
+                            if (attributeMapping.getMultipleValue() instanceof SolrMultipleValue) {
+                                expression =
+                                        ((SolrMultipleValue) attributeMapping.getMultipleValue())
+                                                .getExpression();
+                                attributes.addAll(extractAttributesNames(expression));
+                            }
+                            // mapped identifiers
+                            expression =
+                                    parseExpression(attributeMapping.getIdentifierExpression());
+                            attributes.addAll(extractAttributesNames(expression));
+                            // mapped client properties
+                            attributes.addAll(
+                                    (Set<String>)
+                                            attributeMapping
+                                                    .getClientProperties()
+                                                    .values()
+                                                    .stream()
+                                                    .flatMap(
+                                                            value ->
+                                                                    extractAttributesNames(
+                                                                                    parseExpression(
+                                                                                            value))
+                                                                            .stream())
+                                                    .collect(Collectors.toSet()));
+                        });
+        return attributes;
+    }
+
+    private Set<String> parseAttributeNames(TypeMapping mapping, SourceDataStore dataStoreConfig) {
+        // if mapping index points to dataStore: is index use case
+        if (dataStoreConfig.getId().equals(mapping.getIndexDataStore())) {
+            return parseIndexModeAttributes(mapping);
+        }
+        return parseSourceModeAttributes(mapping);
+    }
+
+    private String getTypeName(TypeMapping mapping, SourceDataStore dataStoreConfig) {
+        if (dataStoreConfig.getId().equals(mapping.getIndexDataStore())) {
+            return mapping.getIndexTypeName();
+        }
+        return mapping.getSourceTypeName();
     }
 }

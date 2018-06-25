@@ -29,24 +29,41 @@ import org.xml.sax.helpers.NamespaceSupport;
  */
 public class FeatureTypeMappingFactory {
 
-   public static  FeatureTypeMapping getInstance(FeatureSource source, AttributeDescriptor target,
-           String defaultGeometryXPath, List<AttributeMapping> mappings, NamespaceSupport namespaces,
-           String itemXpath, boolean isXmlDataStore, boolean isDenormalised) {
-       FeatureTypeMapping featureTypeMapping;
-       if(isXmlDataStore) {
-           featureTypeMapping = new XmlFeatureTypeMapping(source, target,
-                   mappings, namespaces, itemXpath);           
-       } else {
-           featureTypeMapping = new FeatureTypeMapping(source, target, defaultGeometryXPath,
-                   mappings, namespaces, isDenormalised);
-       }
-       featureTypeMapping.getAttributeMappings().forEach(attributeMapping -> {
-           MultipleValue multipleValue = attributeMapping.getMultipleValue();
-           if (multipleValue != null) {
-               multipleValue.setFeatureTypeMapping(featureTypeMapping);
-               multipleValue.setAttributeMapping(attributeMapping);
-           }
-       });
-       return featureTypeMapping;
-   }
+    public static FeatureTypeMapping getInstance(
+            FeatureSource source,
+            FeatureSource indexSource,
+            AttributeDescriptor target,
+            String defaultGeometryXPath,
+            List<AttributeMapping> mappings,
+            NamespaceSupport namespaces,
+            String itemXpath,
+            boolean isXmlDataStore,
+            boolean isDenormalised) {
+        FeatureTypeMapping featureTypeMapping;
+        if (isXmlDataStore) {
+            featureTypeMapping =
+                    new XmlFeatureTypeMapping(source, target, mappings, namespaces, itemXpath);
+        } else {
+            featureTypeMapping =
+                    new FeatureTypeMapping(
+                            source,
+                            indexSource,
+                            target,
+                            defaultGeometryXPath,
+                            mappings,
+                            namespaces,
+                            isDenormalised);
+        }
+        featureTypeMapping
+                .getAttributeMappings()
+                .forEach(
+                        attributeMapping -> {
+                            MultipleValue multipleValue = attributeMapping.getMultipleValue();
+                            if (multipleValue != null) {
+                                multipleValue.setFeatureTypeMapping(featureTypeMapping);
+                                multipleValue.setAttributeMapping(attributeMapping);
+                            }
+                        });
+        return featureTypeMapping;
+    }
 }

@@ -16,6 +16,9 @@
  */
 package org.geotools.data.complex.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 import org.apache.commons.digester.Digester;
 import org.geotools.data.DataAccess;
 import org.geotools.data.Query;
@@ -28,10 +31,6 @@ import org.geotools.data.complex.config.SourceDataStore;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceLoader;
-
 public interface CustomSourceDataStore {
 
     DataAccess<? extends FeatureType, ? extends Feature> buildDataStore(
@@ -41,11 +40,15 @@ public interface CustomSourceDataStore {
 
     void configXmlDigesterAttributesMappings(Digester digester);
 
-    DataAccessMappingFeatureIterator buildIterator(AppSchemaDataAccess store, FeatureTypeMapping featureTypeMapping,
-                                                   Query query, Transaction transaction);
+    DataAccessMappingFeatureIterator buildIterator(
+            AppSchemaDataAccess store,
+            FeatureTypeMapping featureTypeMapping,
+            Query query,
+            Transaction transaction);
 
     static List<CustomSourceDataStore> loadExtensions() {
-        ServiceLoader<CustomSourceDataStore> loader = ServiceLoader.load(CustomSourceDataStore.class);
+        ServiceLoader<CustomSourceDataStore> loader =
+                ServiceLoader.load(CustomSourceDataStore.class);
         loader.reload();
         List<CustomSourceDataStore> extensions = new ArrayList<>();
         for (CustomSourceDataStore extension : loader) {
@@ -63,10 +66,13 @@ public interface CustomSourceDataStore {
     }
 
     @SuppressWarnings("unchecked")
-    static DataAccess<FeatureType, Feature> apply(List<CustomSourceDataStore> extensions,
-                                                  SourceDataStore dataStoreConfig, AppSchemaDataAccessDTO appSchemaConfig) {
+    static DataAccess<FeatureType, Feature> apply(
+            List<CustomSourceDataStore> extensions,
+            SourceDataStore dataStoreConfig,
+            AppSchemaDataAccessDTO appSchemaConfig) {
         for (CustomSourceDataStore extension : extensions) {
-            DataAccess<? extends FeatureType, ? extends Feature> dataStore = extension.buildDataStore(dataStoreConfig, appSchemaConfig);
+            DataAccess<? extends FeatureType, ? extends Feature> dataStore =
+                    extension.buildDataStore(dataStoreConfig, appSchemaConfig);
             if (dataStore != null) {
                 return (DataAccess<FeatureType, Feature>) dataStore;
             }

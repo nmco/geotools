@@ -49,8 +49,6 @@ import org.opengis.filter.FilterFactory;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 /**
  * Datastore implementation for SOLR document <br>
  * The types provided from the datastore are obtained querying with distinct a specific SOLR field
@@ -83,11 +81,15 @@ public class SolrDataStore extends ContentDataStore {
 
     public SolrDataStore(URL url, SolrLayerMapper layerMapper, IndexesConfig indexesConfig) {
         this(url, layerMapper);
-        indexesConfig.getIndexesNames().forEach(indexName -> {
-            List<SolrAttribute> solrAttributes = getSolrAttributes(indexName);
-            SimpleFeatureType defaultFeatureType = indexesConfig.buildFeatureType(indexName, solrAttributes);
-            defaultFeatureTypes.put(indexName, defaultFeatureType);
-        });
+        indexesConfig
+                .getIndexesNames()
+                .forEach(
+                        indexName -> {
+                            List<SolrAttribute> solrAttributes = getSolrAttributes(indexName);
+                            SimpleFeatureType defaultFeatureType =
+                                    indexesConfig.buildFeatureType(indexName, solrAttributes);
+                            defaultFeatureTypes.put(indexName, defaultFeatureType);
+                        });
     }
 
     /**

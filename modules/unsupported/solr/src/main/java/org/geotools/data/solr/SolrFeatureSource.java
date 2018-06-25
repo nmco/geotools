@@ -20,11 +20,11 @@ package org.geotools.data.solr;
 import com.vividsolutions.jts.geom.Geometry;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.*;
 import java.util.logging.Level;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -53,17 +53,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.Filter;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import java.text.SimpleDateFormat;
-
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.visitor.MaxVisitor;
-import org.geotools.feature.visitor.MinVisitor;
-import org.geotools.feature.visitor.NearestVisitor;
-import org.geotools.filter.SortByImpl;
-import org.opengis.feature.FeatureVisitor;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
@@ -74,9 +63,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /** Feature source for SOLR datastore */
 public class SolrFeatureSource extends ContentFeatureSource {
 
-    /**
-     * Used to store native solr type for geometry attributes
-     */
+    /** Used to store native solr type for geometry attributes */
     public static final String KEY_SOLR_TYPE = "solr_type";
 
     protected SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -92,7 +79,8 @@ public class SolrFeatureSource extends ContentFeatureSource {
         this(entry, Collections.emptyMap());
     }
 
-    public SolrFeatureSource(ContentEntry entry, Map<String, SimpleFeatureType> defaultFeatureTypes) {
+    public SolrFeatureSource(
+            ContentEntry entry, Map<String, SimpleFeatureType> defaultFeatureTypes) {
         super(entry, Query.ALL);
         this.defaultFeatureTypes = defaultFeatureTypes;
     }

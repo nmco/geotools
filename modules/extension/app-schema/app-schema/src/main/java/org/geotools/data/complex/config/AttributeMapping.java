@@ -128,6 +128,9 @@ public class AttributeMapping implements Serializable {
 
     private MultipleValue multipleValue;
 
+    /** Field name in external index layer */
+    private String indexField;
+
     /**
      * Returns the expression whose evaluation result against a Feature of the source FeatureType is
      * going to be the value of the target attribute in output FeatureType.
@@ -461,5 +464,13 @@ public class AttributeMapping implements Serializable {
 
     public void setMultipleValue(MultipleValue multipleValue) {
         this.multipleValue = multipleValue;
+    }
+
+    public String getIndexField() {
+        return indexField;
+    }
+
+    public void setIndexField(String indexField) {
+        this.indexField = indexField;
     }
 }

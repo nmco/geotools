@@ -16,6 +16,13 @@
  */
 package org.geotools.data.solr.complex;
 
+import static org.geotools.data.complex.config.AppSchemaDataAccessConfigurator.parseOgcCqlExpression;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import org.geotools.data.complex.AttributeMapping;
 import org.geotools.data.complex.FeatureTypeMapping;
 import org.geotools.data.complex.config.MultipleValue;
@@ -24,14 +31,6 @@ import org.opengis.feature.Feature;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.ExpressionVisitor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static org.geotools.data.complex.config.AppSchemaDataAccessConfigurator.parseOgcCqlExpression;
 
 public class SolrMultipleValue implements MultipleValue {
 
@@ -43,8 +42,9 @@ public class SolrMultipleValue implements MultipleValue {
         try {
             this.expression = parseOgcCqlExpression(expression, filterFactory);
         } catch (Exception exception) {
-            throw new RuntimeException(String.format(
-                    "Error parsing target value expression '%s'.", expression), exception);
+            throw new RuntimeException(
+                    String.format("Error parsing target value expression '%s'.", expression),
+                    exception);
         }
     }
 
@@ -58,14 +58,10 @@ public class SolrMultipleValue implements MultipleValue {
     }
 
     @Override
-    public void setFeatureTypeMapping(FeatureTypeMapping featureTypeMapping) {
-
-    }
+    public void setFeatureTypeMapping(FeatureTypeMapping featureTypeMapping) {}
 
     @Override
-    public void setAttributeMapping(AttributeMapping attributeMapping) {
-
-    }
+    public void setAttributeMapping(AttributeMapping attributeMapping) {}
 
     @Override
     public List<Object> getValues(Feature feature, AttributeMapping attributeMapping) {

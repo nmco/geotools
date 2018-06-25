@@ -16,6 +16,11 @@
  */
 package org.geotools.data.complex.config;
 
+import static org.geotools.data.complex.config.AppSchemaDataAccessConfigurator.parseOgcCqlExpression;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.complex.AttributeMapping;
 import org.geotools.data.complex.FeatureTypeMapping;
@@ -29,12 +34,6 @@ import org.opengis.feature.Feature;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.ExpressionVisitor;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.geotools.data.complex.config.AppSchemaDataAccessConfigurator.parseOgcCqlExpression;
 
 public final class JdbcMultipleValue extends AttributeExpressionImpl implements MultipleValue {
 
@@ -89,8 +88,9 @@ public final class JdbcMultipleValue extends AttributeExpressionImpl implements 
         try {
             this.targetValue = parseOgcCqlExpression(targetValue, filterFactory);
         } catch (Exception exception) {
-            throw new RuntimeException(String.format(
-                    "Error parsing target value expression '%s'.", targetValue), exception);
+            throw new RuntimeException(
+                    String.format("Error parsing target value expression '%s'.", targetValue),
+                    exception);
         }
     }
 
@@ -127,7 +127,8 @@ public final class JdbcMultipleValue extends AttributeExpressionImpl implements 
         FeatureSource dataSource = featureTypeMapping.getSource();
         checkNotNull(dataSource, "No data source available.");
         if (!(dataSource instanceof JDBCFeatureSource)) {
-            throw new RuntimeException("JDBC multiple values can only be used with JDBC data sources.");
+            throw new RuntimeException(
+                    "JDBC multiple values can only be used with JDBC data sources.");
         }
     }
 
@@ -172,14 +173,19 @@ public final class JdbcMultipleValue extends AttributeExpressionImpl implements 
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         JdbcMultipleValue that = (JdbcMultipleValue) o;
-        return Objects.equals(sourceColumn, that.sourceColumn) &&
-                Objects.equals(targetTable, that.targetTable) &&
-                Objects.equals(targetColumn, that.targetColumn) &&
-                Objects.equals(targetValue, that.targetValue);
+        return Objects.equals(sourceColumn, that.sourceColumn)
+                && Objects.equals(targetTable, that.targetTable)
+                && Objects.equals(targetColumn, that.targetColumn)
+                && Objects.equals(targetValue, that.targetValue);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), sourceColumn, targetTable, targetColumn, targetValue);
+    }
+
+    @Override
+    public String toString() {
+        return targetValue.toString();
     }
 }

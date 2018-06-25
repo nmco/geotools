@@ -18,16 +18,13 @@
 package org.geotools.jdbc;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
-
 import org.geotools.data.complex.AttributeMapping;
 import org.geotools.data.complex.FeatureTypeMapping;
 import org.geotools.data.complex.NestedAttributeMapping;
 import org.geotools.data.complex.config.JdbcMultipleValue;
-import org.geotools.data.complex.config.MultipleValue;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor.FeatureChainLink;
 import org.geotools.data.complex.filter.FeatureChainedAttributeVisitor.FeatureChainedAttributeDescriptor;
@@ -43,7 +40,6 @@ import org.geotools.filter.NestedAttributeExpression;
 import org.geotools.jdbc.JoiningJDBCFeatureSource.JoiningFieldEncoder;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.filter.BinaryComparisonOperator;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.opengis.filter.PropertyIsBetween;
@@ -128,10 +124,15 @@ public class NestedFilterToSQL extends FilterToSQL {
         }
     }
 
-    private void encodeMultipleValueJoin(FeatureChainedAttributeDescriptor nestedAttribute, JDBCDataStore store, StringBuffer sql) {
+    private void encodeMultipleValueJoin(
+            FeatureChainedAttributeDescriptor nestedAttribute,
+            JDBCDataStore store,
+            StringBuffer sql) {
         FeatureTypeMapping featureMapping = nestedAttribute.getFeatureTypeOwningAttribute();
-        AttributeMapping mapping = featureMapping.getAttributeMapping(nestedAttribute.getAttributePath());
-        if (!mapping.isMultiValued() || !(mapping.getMultipleValue() instanceof JdbcMultipleValue)) {
+        AttributeMapping mapping =
+                featureMapping.getAttributeMapping(nestedAttribute.getAttributePath());
+        if (!mapping.isMultiValued()
+                || !(mapping.getMultipleValue() instanceof JdbcMultipleValue)) {
             return;
         }
         JdbcMultipleValue multipleValue = (JdbcMultipleValue) mapping.getMultipleValue();
@@ -153,7 +154,7 @@ public class NestedFilterToSQL extends FilterToSQL {
         sql.append(" ");
     }
 
-    protected Object visitBinaryComparison(Filter  filter, Object extraData, String xpath) {
+    protected Object visitBinaryComparison(Filter filter, Object extraData, String xpath) {
         try {
 
             FeatureChainedAttributeVisitor nestedMappingsExtractor =
@@ -171,17 +172,21 @@ public class NestedFilterToSQL extends FilterToSQL {
 
                     FeatureChainLink lastMappingStep = nestedAttrDescr.getLastLink();
                     StringBuffer sql = encodeSelectKeyFrom(lastMappingStep);
-                    JDBCDataStore store = (JDBCDataStore) lastMappingStep.getFeatureTypeMapping().getSource().getDataStore();
+                    JDBCDataStore store =
+                            (JDBCDataStore)
+                                    lastMappingStep
+                                            .getFeatureTypeMapping()
+                                            .getSource()
+                                            .getDataStore();
                     encodeMultipleValueJoin(nestedAttrDescr, store, sql);
 
                     for (int i = numMappings - 2; i > 0; i--) {
                         FeatureChainLink mappingStep = nestedAttrDescr.getLink(i);
                         if (mappingStep.hasNestedFeature()) {
                             FeatureTypeMapping parentFeature = mappingStep.getFeatureTypeMapping();
-                            store = (JDBCDataStore) parentFeature.getSource()
-                                    .getDataStore();
-                            String parentTableName = parentFeature.getSource().getSchema().getName()
-                                    .getLocalPart();
+                            store = (JDBCDataStore) parentFeature.getSource().getDataStore();
+                            String parentTableName =
+                                    parentFeature.getSource().getSchema().getName().getLocalPart();
 
                             sql.append(" INNER JOIN ");
                             store.encodeTableName(parentTableName, sql, null);

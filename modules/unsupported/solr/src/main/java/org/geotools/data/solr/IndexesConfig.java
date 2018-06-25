@@ -17,14 +17,6 @@
 package org.geotools.data.solr;
 
 import com.vividsolutions.jts.geom.*;
-import org.geotools.feature.AttributeTypeBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.referencing.CRS;
-import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.geotools.feature.AttributeTypeBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.CRS;
+import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class IndexesConfig {
 
@@ -40,7 +39,8 @@ public class IndexesConfig {
 
     private final List<String> indexesNames = new ArrayList<>();
 
-    public void addGeometry(String indexName, String attributeName, String srid, String type, String isDefault) {
+    public void addGeometry(
+            String indexName, String attributeName, String srid, String type, String isDefault) {
         GeometryConfig geometry = GeometryConfig.create(attributeName, srid, type, isDefault);
         getIndexConfig(indexName).addGeometry(geometry);
     }
@@ -64,7 +64,8 @@ public class IndexesConfig {
         return indexConfig;
     }
 
-    public SimpleFeatureType buildFeatureType(String indexName, List<SolrAttribute> solrAttributes) {
+    public SimpleFeatureType buildFeatureType(
+            String indexName, List<SolrAttribute> solrAttributes) {
         return getIndexConfig(indexName).buildFeatureType(solrAttributes);
     }
 
@@ -97,7 +98,8 @@ public class IndexesConfig {
         }
 
         public GeometryConfig searchGeometry(String attributeName) {
-            return search(geometries,
+            return search(
+                    geometries,
                     geometry -> Objects.equals(geometry.getAttributeName(), attributeName));
         }
 
@@ -109,7 +111,8 @@ public class IndexesConfig {
             SimpleFeatureTypeBuilder featureTypeBuilder = new SimpleFeatureTypeBuilder();
             featureTypeBuilder.setName(indexName);
             for (String attributeName : attributes) {
-                AttributeDescriptor attribute = buildAttributeDescriptor(attributeName, solrAttributes);
+                AttributeDescriptor attribute =
+                        buildAttributeDescriptor(attributeName, solrAttributes);
                 if (attribute == null) {
                     continue;
                 }
@@ -122,33 +125,45 @@ public class IndexesConfig {
             return featureTypeBuilder.buildFeatureType();
         }
 
-        private AttributeDescriptor buildAttributeDescriptor(String attributeName, List<SolrAttribute> solrAttributes) {
+        private AttributeDescriptor buildAttributeDescriptor(
+                String attributeName, List<SolrAttribute> solrAttributes) {
             SolrAttribute solrAttribute = searchAttribute(attributeName, solrAttributes);
             if (solrAttribute == null) {
-                LOGGER.log(Level.WARNING, String.format(
-                        "Could not find attribute '%s' in Solar index '%s' schema.", attributeName, indexName));
+                LOGGER.log(
+                        Level.WARNING,
+                        String.format(
+                                "Could not find attribute '%s' in Solar index '%s' schema.",
+                                attributeName, indexName));
                 return null;
             }
-            AttributeDescriptor attribute = buildAttributeDescriptor(solrAttribute, searchGeometry(attributeName));
-            attribute.getUserData().put(SolrFeatureSource.KEY_SOLR_TYPE, solrAttribute.getSolrType());
+            AttributeDescriptor attribute =
+                    buildAttributeDescriptor(solrAttribute, searchGeometry(attributeName));
+            attribute
+                    .getUserData()
+                    .put(SolrFeatureSource.KEY_SOLR_TYPE, solrAttribute.getSolrType());
             return attribute;
         }
 
-        private AttributeDescriptor buildAttributeDescriptor(SolrAttribute solrAttribute, GeometryConfig geometry) {
+        private AttributeDescriptor buildAttributeDescriptor(
+                SolrAttribute solrAttribute, GeometryConfig geometry) {
             AttributeTypeBuilder attributeBuilder = new AttributeTypeBuilder();
             if (geometry == null) {
                 attributeBuilder.setName(solrAttribute.getName());
                 attributeBuilder.setBinding(solrAttribute.getType());
-                return attributeBuilder.buildDescriptor(solrAttribute.getName(), attributeBuilder.buildType());
+                return attributeBuilder.buildDescriptor(
+                        solrAttribute.getName(), attributeBuilder.buildType());
             }
             attributeBuilder.setCRS(geometry.getCrs());
             attributeBuilder.setName(geometry.getAttributeName());
             attributeBuilder.setBinding(geometry.getType());
-            return attributeBuilder.buildDescriptor(geometry.getAttributeName(), attributeBuilder.buildGeometryType());
+            return attributeBuilder.buildDescriptor(
+                    geometry.getAttributeName(), attributeBuilder.buildGeometryType());
         }
 
-        private static SolrAttribute searchAttribute(String attributeName, List<SolrAttribute> solrAttributes) {
-            return search(solrAttributes,
+        private static SolrAttribute searchAttribute(
+                String attributeName, List<SolrAttribute> solrAttributes) {
+            return search(
+                    solrAttributes,
                     solrAttribute -> Objects.equals(solrAttribute.getName(), attributeName));
         }
 
@@ -169,8 +184,11 @@ public class IndexesConfig {
         private final Class<? extends Geometry> type;
         private final boolean isDefault;
 
-        public GeometryConfig(String attributeName, CoordinateReferenceSystem crs,
-                              Class<? extends Geometry> type, boolean isDefault) {
+        public GeometryConfig(
+                String attributeName,
+                CoordinateReferenceSystem crs,
+                Class<? extends Geometry> type,
+                boolean isDefault) {
             this.attributeName = attributeName;
             this.crs = crs;
             this.type = type;
@@ -193,7 +211,8 @@ public class IndexesConfig {
             return isDefault;
         }
 
-        public static GeometryConfig create(String attributeName, String srid, String type, String isDefault) {
+        public static GeometryConfig create(
+                String attributeName, String srid, String type, String isDefault) {
             CoordinateReferenceSystem crs;
             try {
                 crs = CRS.decode("EPSG:" + srid);
@@ -203,7 +222,6 @@ public class IndexesConfig {
             }
             return new GeometryConfig(
                     attributeName, crs, matchGeometryType(type), Boolean.parseBoolean(isDefault));
-
         }
 
         private static Class<? extends Geometry> matchGeometryType(String geometryTypeName) {

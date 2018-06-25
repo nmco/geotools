@@ -16,11 +16,10 @@
  */
 package org.geotools.data.solr.complex;
 
-import org.geotools.data.complex.config.SourceDataStore;
-import org.geotools.data.solr.IndexesConfig;
-
 import java.net.URL;
 import java.util.List;
+import org.geotools.data.complex.config.SourceDataStore;
+import org.geotools.data.solr.IndexesConfig;
 
 public class ComplexDataStoreConfig extends SourceDataStore {
 
@@ -28,7 +27,8 @@ public class ComplexDataStoreConfig extends SourceDataStore {
 
     private URL url;
 
-    public void addGeometry(String indexName, String attributeName, String srid, String type, String isDefault) {
+    public void addGeometry(
+            String indexName, String attributeName, String srid, String type, String isDefault) {
         indexesConfig.addGeometry(indexName, attributeName, srid, type, isDefault);
     }
 
@@ -48,8 +48,7 @@ public class ComplexDataStoreConfig extends SourceDataStore {
         try {
             this.url = new URL(url);
         } catch (Exception exception) {
-            throw new RuntimeException(String.format(
-                    "Error parsing URL '%s'.", url), exception);
+            throw new RuntimeException(String.format("Error parsing URL '%s'.", url), exception);
         }
     }
 }

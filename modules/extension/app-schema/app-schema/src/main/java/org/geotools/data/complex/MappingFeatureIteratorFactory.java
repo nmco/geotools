@@ -120,6 +120,31 @@ public class MappingFeatureIteratorFactory {
             Filter unrolledFilter,
             Transaction transaction)
             throws IOException {
+        return MappingFeatureIteratorFactory.getInstance(
+                store, mapping, query, unrolledFilter, transaction, true);
+    }
+
+    public static IMappingFeatureIterator getInstance(
+            AppSchemaDataAccess store,
+            FeatureTypeMapping mapping,
+            Query query,
+            Filter unrolledFilter,
+            Transaction transaction,
+            boolean indexEnable)
+            throws IOException {
+
+        /**
+         * If is an indexed type mapping & indexEnable call @TODO return new IndexedFeatureIterator
+         * instance
+         */
+        if (indexEnable && mapping.getIndexSource() != null) {
+            IndexedMappingFeatureIteratorFactory factory =
+                    new IndexedMappingFeatureIteratorFactory(
+                            store, mapping, query, unrolledFilter, transaction);
+            if (factory.getIndexModeProcessor().isIndexDrivenIteratorCase()) {
+                return factory.buildInstance();
+            }
+        }
 
         if (mapping instanceof XmlFeatureTypeMapping) {
             return new XmlMappingFeatureIterator(store, mapping, query);
@@ -270,12 +295,15 @@ public class MappingFeatureIteratorFactory {
             } else {
                 // non database sources e.g. property data store
                 Filter filter = query.getFilter();
-                for(CustomSourceDataStore customSourceDataStore : CustomSourceDataStore.loadExtensions()) {
-                    iterator = customSourceDataStore.buildIterator(store, mapping, query, transaction);
+                for (CustomSourceDataStore customSourceDataStore :
+                        CustomSourceDataStore.loadExtensions()) {
+                    iterator =
+                            customSourceDataStore.buildIterator(store, mapping, query, transaction);
                 }
                 if (iterator == null) {
-                    iterator = new DataAccessMappingFeatureIterator(store, mapping, query,
-                            !Filter.INCLUDE.equals(filter), true);
+                    iterator =
+                            new DataAccessMappingFeatureIterator(
+                                    store, mapping, query, !Filter.INCLUDE.equals(filter), true);
                 }
                 // HACK HACK HACK
                 // experimental/temporary solution for isList subsetting by filtering

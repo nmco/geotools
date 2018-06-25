@@ -16,12 +16,11 @@
  */
 package org.geotools.data.complex.config;
 
+import java.util.List;
 import org.geotools.data.complex.AttributeMapping;
 import org.geotools.data.complex.FeatureTypeMapping;
 import org.opengis.feature.Feature;
 import org.opengis.filter.expression.Expression;
-
-import java.util.List;
 
 public interface MultipleValue extends Expression {
 

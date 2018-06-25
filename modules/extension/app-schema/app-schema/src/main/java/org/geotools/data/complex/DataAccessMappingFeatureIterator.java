@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -644,13 +643,16 @@ public class DataAccessMappingFeatureIterator extends AbstractMappingFeatureIter
                 return null;
             }
         }
-        if (source instanceof Feature && attMapping.isMultiValued() && attMapping.getMultipleValue() != null) {
+        if (source instanceof Feature
+                && attMapping.isMultiValued()
+                && attMapping.getMultipleValue() != null) {
             if (attMapping.getMultipleValue() instanceof JdbcMultipleValue) {
                 // JDBC data stores are explicitly handled in App-Schema
                 JdbcMultipleValue mv = (JdbcMultipleValue) attMapping.getMultipleValue();
                 if (jdbcMvMap.get(mv) == null) {
                     JoiningJDBCFeatureSource s = (JoiningJDBCFeatureSource) mappedSource;
-                    FeatureReader<SimpleFeatureType, SimpleFeature> r = s.getJoiningReaderInternal(mv, (JoiningQuery) this.query);
+                    FeatureReader<SimpleFeatureType, SimpleFeature> r =
+                            s.getJoiningReaderInternal(mv, (JoiningQuery) this.query);
                     Map<Object, List<Object>> map = new HashMap<>();
                     while (r.hasNext()) {
                         SimpleFeature f = r.next();

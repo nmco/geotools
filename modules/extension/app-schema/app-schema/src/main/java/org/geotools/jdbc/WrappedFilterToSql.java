@@ -17,15 +17,13 @@
 
 package org.geotools.jdbc;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import org.geotools.data.complex.FeatureTypeMapping;
-import org.geotools.data.complex.config.JdbcMultipleValue;
 import org.geotools.data.jdbc.FilterToSQL;
 import org.geotools.data.jdbc.FilterToSQLException;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
-
-import java.io.StringWriter;
-import java.io.Writer;
 
 public final class WrappedFilterToSql {
 
