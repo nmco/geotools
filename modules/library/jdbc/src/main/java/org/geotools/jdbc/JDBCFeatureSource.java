@@ -354,8 +354,7 @@ public class JDBCFeatureSource extends ContentFeatureSource {
             }
 
             // call dialect callback
-            dialect.postCreateFeatureType(ft, metaData, databaseSchema, cx);
-            return ft;
+            return dialect.postCreateFeatureTypeCallback(ft, metaData, databaseSchema, cx);
         } catch (SQLException e) {
             String msg = "Error occurred building feature type";
             throw (IOException) new IOException(msg).initCause(e);
@@ -663,10 +662,20 @@ public class JDBCFeatureSource extends ContentFeatureSource {
 
         SimpleFeatureType[] types = null;
         if (propertyNames == Query.ALL_NAMES) {
+            // this needs to be handled with user data
             return new SimpleFeatureType[] {featureType, featureType};
         } else {
+            List<String> pf = new ArrayList<>(); 
+            for (String p : propertyNames) {
+                if (p.equals("geometry")) {
+                    pf.add("latitude");
+                    pf.add("longitude");
+                } else {
+                    pf.add(p);
+                }
+            }
             SimpleFeatureType returnedSchema =
-                    SimpleFeatureTypeBuilder.retype(featureType, propertyNames);
+                    SimpleFeatureTypeBuilder.retype(featureType, pf.toArray(new String[0]));
             SimpleFeatureType querySchema = returnedSchema;
 
             if (filter != null && !filter.equals(Filter.INCLUDE)) {
@@ -683,7 +692,7 @@ public class JDBCFeatureSource extends ContentFeatureSource {
                     }
                     String[] allAttributeArray =
                             allAttributes.toArray(new String[allAttributes.size()]);
-                    querySchema = SimpleFeatureTypeBuilder.retype(getSchema(), allAttributeArray);
+                    querySchema = SimpleFeatureTypeBuilder.retype(getSchema(), pf.toArray(new String[0]));
                 }
             }
             types = new SimpleFeatureType[] {querySchema, returnedSchema};

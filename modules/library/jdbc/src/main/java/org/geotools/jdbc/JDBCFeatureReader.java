@@ -40,17 +40,21 @@ import org.geotools.data.util.ScreenMap;
 import org.geotools.feature.GeometryAttributeImpl;
 import org.geotools.feature.IllegalAttributeException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.geotools.feature.type.Types;
 import org.geotools.filter.identity.FeatureIdImpl;
 import org.geotools.geometry.jts.CurvedGeometryFactory;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.Converters;
 import org.geotools.util.factory.Hints;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.FeatureFactory;
 import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.Property;
@@ -425,7 +429,22 @@ public class JDBCFeatureReader implements FeatureReader<SimpleFeatureType, Simpl
 
         // create the feature
         try {
-            return builder.buildFeature(fid);
+            SimpleFeature f = builder.buildFeature(fid);
+            builder.reset();
+            SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
+            b.init(featureType);
+            b.add("geometry", Point.class, DefaultGeographicCRS.WGS84);
+            b.setDefaultGeometry("geometry");
+            SimpleFeatureType t = b.buildFeatureType();
+            SimpleFeatureBuilder fb = new SimpleFeatureBuilder(t);
+            fb.init(f); // TODO: handle screen optimizations
+            fb.set(
+                    "geometry",
+                    geometryFactory.createPoint(
+                            new Coordinate(
+                                    (double) f.getAttribute("longitude"),
+                                    (double) f.getAttribute("latitude"))));
+            return fb.buildFeature(fid);
         } catch (IllegalAttributeException e) {
             builder.reset();
             throw new RuntimeException(e);
