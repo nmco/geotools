@@ -983,6 +983,16 @@ public abstract class SQLDialect {
             Connection cx)
             throws SQLException {}
 
+    public SimpleFeatureType postCreateFeatureTypeCallback(
+            SimpleFeatureType featureType,
+            DatabaseMetaData metadata,
+            String schemaName,
+            Connection cx)
+            throws SQLException {
+        postCreateFeatureType(featureType, metadata, schemaName, cx);
+        return featureType;
+    }
+
     /**
      * Callback which executes before a table is about to be dropped.
      *
