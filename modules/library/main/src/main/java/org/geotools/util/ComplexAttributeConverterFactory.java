@@ -81,6 +81,68 @@ public class ComplexAttributeConverterFactory implements ConverterFactory {
                 }
             };
         }
+
+        // gets the value of an attribute and tries to convert it to a string
+        if (Attribute.class.isAssignableFrom(source)) {
+            return new Converter() {
+                public Object convert(Object source, Class target) {
+                    if (source instanceof Attribute) {
+                        // get the attribute value
+                        Attribute attribute = (Attribute) source;
+                        Object value = attribute.getValue();
+                        // let's try to avoid an infinite loop
+                        if (value instanceof Attribute) {
+                            // looks like we are done
+                            return null;
+                        }
+                        // let the available converters do their job
+                        return Converters.convert(value, target);
+                    }
+                    // this should not happen, anyway we can only handle attributes
+                    return null;
+                }
+            };
+        }
+
+        // handles a list of attributes conversion to string
+        if (Collection.class.isAssignableFrom(source) && target == String.class) {
+            return new Converter() {
+                public Object convert(Object source, Class target) {
+                    if (!isCollectionOf(source, Attribute.class)) {
+                        return null;
+                    }
+                    StringBuilder builder = new StringBuilder();
+                    Collection<?> collection = (Collection<?>) source;
+                    for (Object element : collection) {
+                        if (element == null) {
+                            builder.append("NULL, ");
+                        } else {
+                            builder.append(Converters.convert(element, String.class));
+                            builder.append(", ");
+                        }
+                    }
+                    if (builder.length() == 0) {
+                        return "";
+                    }
+                    builder.delete(builder.length() - 2, builder.length());
+                    return builder.toString();
+                }
+            };
+        }
+
         return null;
+    }
+
+    private boolean isCollectionOf(Object source, Class<?> expected) {
+        if (!(source instanceof Collection<?>)) {
+            return false;
+        }
+        Collection<?> collection = (Collection<?>) source;
+        for (Object element : collection) {
+            if (!(element != null && expected.isAssignableFrom(element.getClass()))) {
+                return false;
+            }
+        }
+        return true;
     }
 }
